@@ -1,0 +1,11 @@
+{
+  "name": "The Game",
+  "short_name": "The Game",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14110f",
+  "theme_color": "#3b2412"
+}
