@@ -1,10 +1,10 @@
-import { zahl, btc, dauer } from "./format.js";
-import * as speicher from "./speicher.js";
-import { kampfSystem } from "./kampf.js";
-import { waffenSystem } from "./waffen.js";
-import { tierSystem } from "./tiere.js";
-import { dungeonSystem } from "./dungeons.js";
-import { faehigkeitenSystem } from "./faehigkeiten.js";
+import { zahl, btc, dauer } from "./format.js?v=8";
+import * as speicher from "./speicher.js?v=8";
+import { kampfSystem } from "./kampf.js?v=8";
+import { waffenSystem } from "./waffen.js?v=8";
+import { tierSystem } from "./tiere.js?v=8";
+import { dungeonSystem } from "./dungeons.js?v=8";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=8";
 
 const $ = (id) => document.getElementById(id);
 
@@ -595,7 +595,7 @@ function faehigkeitenZeichnen() {
   const f = seite().faehigkeiten;
   $("punkte-text").textContent = "Fähigkeitspunkte: " + f.punkte + " (gibt es in den Dungeons)";
   $("ziehen-knopf").textContent = "Fähigkeit ziehen (" + faehigkeiten.ziehenKosten() + " Punkte)";
-  $("ziehen-knopf").disabled = f.punkte < faehigkeiten.ziehenKosten();
+  $("ziehen-knopf").classList.toggle("matt", f.punkte < faehigkeiten.ziehenKosten());
 
   const plaetze = $("faehigkeit-plaetze");
   plaetze.replaceChildren();
@@ -804,6 +804,10 @@ function knoepfeVerbinden() {
     fensterZeigen("faehigkeiten-fenster");
   });
   $("ziehen-knopf").addEventListener("click", () => {
+    if (seite().faehigkeiten.punkte < faehigkeiten.ziehenKosten()) {
+      kurzMeldung("Zu wenig Punkte. Punkte gibt es in den Dungeons (Menü → Dungeons).");
+      return;
+    }
     const r = faehigkeiten.ziehen();
     if (r) {
       const e = $("faehigkeit-ergebnis");

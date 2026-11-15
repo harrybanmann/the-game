@@ -350,3 +350,4 @@ textarea {
 
 /* ---------- Fähigkeiten ---------- */
 #faehigkeit-liste { display: flex; flex-direction: column; gap: 10px; }
+.knopf.matt { background: #5d6680; border-color: #8089a3; box-shadow: 0 5px 0 #3a4159; opacity: 0.9; }
