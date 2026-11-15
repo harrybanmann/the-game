@@ -13,7 +13,7 @@
     "waehrung": {
       "id": "feuerstein",
       "name": "Feuerstein",
-      "btcProStueck": 0.000001
+      "btcProStueck": 1e-06
     },
     "verdienKnopf": "Feuerstein sammeln",
     "klickGrundwert": 1
@@ -36,6 +36,26 @@
     },
     "umtauschVonVorher": 0.01,
     "verdienKnopf": "Muscheln sammeln",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "bronzezeit",
+    "nummer": 3,
+    "staerke": 9,
+    "name": "Bronzezeit und Mesopotamien",
+    "farben": {
+      "haupt": "#C26A2E",
+      "zweit": "#E8C9A0",
+      "akzent": "#2F4FA0",
+      "symbol": "#C6CDD4"
+    },
+    "waehrung": {
+      "id": "schekel",
+      "name": "Schekel",
+      "btcProStueck": 0.01
+    },
+    "umtauschVonVorher": 0.01,
+    "verdienKnopf": "Schekel verdienen",
     "klickGrundwert": 1
   }
 ]

@@ -1,13 +1,49 @@
 {
   "_hinweis": "Zahlen und Namen sind Startwerte (Vorschlag). Werte sind für Gut und Böse gleich, nur die Namen dürfen sich unterscheiden.",
   "seltenheiten": [
-    { "id": "gewoehnlich", "name": "Gewöhnlich", "farbe": "#9aa3ad", "faktor": 1 },
-    { "id": "ungewoehnlich", "name": "Ungewöhnlich", "farbe": "#4fc46a", "faktor": 1.5 },
-    { "id": "selten", "name": "Selten", "farbe": "#4a9cf0", "faktor": 2.25 },
-    { "id": "episch", "name": "Episch", "farbe": "#a565e8", "faktor": 3.5 },
-    { "id": "legendaer", "name": "Legendär", "farbe": "#f39a2b", "faktor": 5 },
-    { "id": "mythisch", "name": "Mythisch", "farbe": "#e0483f", "faktor": 7.5 },
-    { "id": "goettlich", "name": "Göttlich", "farbe": "#ffd54a", "faktor": 11, "glanz": true }
+    {
+      "id": "gewoehnlich",
+      "name": "Gewöhnlich",
+      "farbe": "#9aa3ad",
+      "faktor": 1
+    },
+    {
+      "id": "ungewoehnlich",
+      "name": "Ungewöhnlich",
+      "farbe": "#4fc46a",
+      "faktor": 1.5
+    },
+    {
+      "id": "selten",
+      "name": "Selten",
+      "farbe": "#4a9cf0",
+      "faktor": 2.25
+    },
+    {
+      "id": "episch",
+      "name": "Episch",
+      "farbe": "#a565e8",
+      "faktor": 3.5
+    },
+    {
+      "id": "legendaer",
+      "name": "Legendär",
+      "farbe": "#f39a2b",
+      "faktor": 5
+    },
+    {
+      "id": "mythisch",
+      "name": "Mythisch",
+      "farbe": "#e0483f",
+      "faktor": 7.5
+    },
+    {
+      "id": "goettlich",
+      "name": "Göttlich",
+      "farbe": "#ffd54a",
+      "faktor": 11,
+      "glanz": true
+    }
   ],
   "schmiede": {
     "kosten": 20,
@@ -18,25 +54,276 @@
     "ratioEnde": 2
   },
   "setBonusSchaden": 0.1,
-  "ruestungSet": { "2": 0.05, "4": 0.15 },
+  "ruestungSet": {
+    "2": 0.05,
+    "4": 0.15
+  },
   "sternBonus": 0.25,
   "maxSterne": 5,
   "waffen": [
-    { "id": "keule", "zeitalter": "steinzeit", "art": "nah", "name": { "gut": "Keule", "boese": "Keule" }, "schaden": 2, "leben": 15 },
-    { "id": "steinaxt", "zeitalter": "steinzeit", "art": "nah", "name": { "gut": "Steinaxt", "boese": "Steinaxt" }, "schaden": 3, "leben": 10 },
-    { "id": "steinschleuder", "zeitalter": "steinzeit", "art": "fern", "name": { "gut": "Steinschleuder", "boese": "Steinschleuder" }, "schaden": 4, "leben": 5 },
-    { "id": "wurfspeer", "zeitalter": "steinzeit", "art": "fern", "name": { "gut": "Wurfspeer", "boese": "Wurfspeer" }, "schaden": 5, "leben": 0 },
-    { "id": "sichel", "zeitalter": "muscheln", "art": "nah", "name": { "gut": "Sichel", "boese": "Sichel" }, "schaden": 2, "leben": 15 },
-    { "id": "dreschflegel", "zeitalter": "muscheln", "art": "nah", "name": { "gut": "Dreschflegel", "boese": "Dreschflegel" }, "schaden": 3, "leben": 10 },
-    { "id": "jagdbogen", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Jagdbogen", "boese": "Jagdbogen" }, "schaden": 4, "leben": 5 },
-    { "id": "harpune", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Harpune", "boese": "Harpune" }, "schaden": 5, "leben": 0 },
-    { "id": "fellkappe", "zeitalter": "steinzeit", "art": "helm", "name": { "gut": "Fellkappe", "boese": "Fellkappe" }, "schaden": 0, "leben": 10 },
-    { "id": "fellhandschuhe", "zeitalter": "steinzeit", "art": "handschuhe", "name": { "gut": "Fellhandschuhe", "boese": "Fellhandschuhe" }, "schaden": 1, "leben": 4 },
-    { "id": "fellweste", "zeitalter": "steinzeit", "art": "ruestung", "name": { "gut": "Fellweste", "boese": "Fellweste" }, "schaden": 0, "leben": 16 },
-    { "id": "fellstiefel", "zeitalter": "steinzeit", "art": "stiefel", "name": { "gut": "Fellstiefel", "boese": "Fellstiefel" }, "schaden": 0, "leben": 8 },
-    { "id": "strohhut", "zeitalter": "muscheln", "art": "helm", "name": { "gut": "Strohhut", "boese": "Strohhut" }, "schaden": 0, "leben": 10 },
-    { "id": "lederhandschuhe", "zeitalter": "muscheln", "art": "handschuhe", "name": { "gut": "Lederhandschuhe", "boese": "Lederhandschuhe" }, "schaden": 1, "leben": 4 },
-    { "id": "lederschurz", "zeitalter": "muscheln", "art": "ruestung", "name": { "gut": "Lederschurz", "boese": "Lederschurz" }, "schaden": 0, "leben": 16 },
-    { "id": "sandalen", "zeitalter": "muscheln", "art": "stiefel", "name": { "gut": "Sandalen", "boese": "Sandalen" }, "schaden": 0, "leben": 8 }
+    {
+      "id": "keule",
+      "zeitalter": "steinzeit",
+      "art": "nah",
+      "name": {
+        "gut": "Keule",
+        "boese": "Keule"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "steinaxt",
+      "zeitalter": "steinzeit",
+      "art": "nah",
+      "name": {
+        "gut": "Steinaxt",
+        "boese": "Steinaxt"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "steinschleuder",
+      "zeitalter": "steinzeit",
+      "art": "fern",
+      "name": {
+        "gut": "Steinschleuder",
+        "boese": "Steinschleuder"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "wurfspeer",
+      "zeitalter": "steinzeit",
+      "art": "fern",
+      "name": {
+        "gut": "Wurfspeer",
+        "boese": "Wurfspeer"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "sichel",
+      "zeitalter": "muscheln",
+      "art": "nah",
+      "name": {
+        "gut": "Sichel",
+        "boese": "Sichel"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "dreschflegel",
+      "zeitalter": "muscheln",
+      "art": "nah",
+      "name": {
+        "gut": "Dreschflegel",
+        "boese": "Dreschflegel"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "jagdbogen",
+      "zeitalter": "muscheln",
+      "art": "fern",
+      "name": {
+        "gut": "Jagdbogen",
+        "boese": "Jagdbogen"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "harpune",
+      "zeitalter": "muscheln",
+      "art": "fern",
+      "name": {
+        "gut": "Harpune",
+        "boese": "Harpune"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "fellkappe",
+      "zeitalter": "steinzeit",
+      "art": "helm",
+      "name": {
+        "gut": "Fellkappe",
+        "boese": "Fellkappe"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "fellhandschuhe",
+      "zeitalter": "steinzeit",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Fellhandschuhe",
+        "boese": "Fellhandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "fellweste",
+      "zeitalter": "steinzeit",
+      "art": "ruestung",
+      "name": {
+        "gut": "Fellweste",
+        "boese": "Fellweste"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "fellstiefel",
+      "zeitalter": "steinzeit",
+      "art": "stiefel",
+      "name": {
+        "gut": "Fellstiefel",
+        "boese": "Fellstiefel"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "strohhut",
+      "zeitalter": "muscheln",
+      "art": "helm",
+      "name": {
+        "gut": "Strohhut",
+        "boese": "Strohhut"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "lederhandschuhe",
+      "zeitalter": "muscheln",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Lederhandschuhe",
+        "boese": "Lederhandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "lederschurz",
+      "zeitalter": "muscheln",
+      "art": "ruestung",
+      "name": {
+        "gut": "Lederschurz",
+        "boese": "Lederschurz"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "sandalen",
+      "zeitalter": "muscheln",
+      "art": "stiefel",
+      "name": {
+        "gut": "Sandalen",
+        "boese": "Sandalen"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "bronzeschwert",
+      "zeitalter": "bronzezeit",
+      "art": "nah",
+      "name": {
+        "gut": "Bronzeschwert",
+        "boese": "Bronzeschwert"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "streitaxt",
+      "zeitalter": "bronzezeit",
+      "art": "nah",
+      "name": {
+        "gut": "Streitaxt",
+        "boese": "Streitaxt"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "kompositbogen",
+      "zeitalter": "bronzezeit",
+      "art": "fern",
+      "name": {
+        "gut": "Kompositbogen",
+        "boese": "Kompositbogen"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "bronzespeer",
+      "zeitalter": "bronzezeit",
+      "art": "fern",
+      "name": {
+        "gut": "Bronzespeer",
+        "boese": "Bronzespeer"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "bronzehelm",
+      "zeitalter": "bronzezeit",
+      "art": "helm",
+      "name": {
+        "gut": "Bronzehelm",
+        "boese": "Bronzehelm"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "armschienen",
+      "zeitalter": "bronzezeit",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Armschienen",
+        "boese": "Armschienen"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "schuppenpanzer",
+      "zeitalter": "bronzezeit",
+      "art": "ruestung",
+      "name": {
+        "gut": "Schuppenpanzer",
+        "boese": "Schuppenpanzer"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "beinschienen",
+      "zeitalter": "bronzezeit",
+      "art": "stiefel",
+      "name": {
+        "gut": "Beinschienen",
+        "boese": "Beinschienen"
+      },
+      "schaden": 0,
+      "leben": 8
+    }
   ]
 }

@@ -2,7 +2,11 @@
   {
     "id": "faustkeil",
     "name": "Besseres Werkzeug",
-    "namen": { "steinzeit": "Besserer Faustkeil", "muscheln": "Besseres Netz" },
+    "namen": {
+      "steinzeit": "Besserer Faustkeil",
+      "muscheln": "Besseres Netz",
+      "bronzezeit": "Bessere Gussform"
+    },
     "text": "+1 {w} pro Tippen",
     "wirkung": "klick",
     "wertProStufe": 1,
@@ -23,7 +27,11 @@
   {
     "id": "keule",
     "name": "Stärkere Waffe",
-    "namen": { "steinzeit": "Stärkere Keule", "muscheln": "Stärkerer Speer" },
+    "namen": {
+      "steinzeit": "Stärkere Keule",
+      "muscheln": "Stärkerer Speer",
+      "bronzezeit": "Schärfere Klinge"
+    },
     "text": "+1 Schaden im Kampf",
     "wirkung": "schaden",
     "wertProStufe": 1,
@@ -34,7 +42,11 @@
   {
     "id": "fell",
     "name": "Mehr Ausdauer",
-    "namen": { "steinzeit": "Dickeres Fell", "muscheln": "Lederweste" },
+    "namen": {
+      "steinzeit": "Dickeres Fell",
+      "muscheln": "Lederweste",
+      "bronzezeit": "Bronzeschild"
+    },
     "text": "+5 Leben im Kampf",
     "wirkung": "leben",
     "wertProStufe": 5,
