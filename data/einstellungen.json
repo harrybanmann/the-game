@@ -1,0 +1,20 @@
+{
+  "_hinweis": "Alle Zahlen sind Startwerte (Vorschlag), beim Testen anpassbar.",
+  "spielName": "The Game",
+  "startZeitalter": "steinzeit",
+  "offline": {
+    "maxStunden": 8,
+    "anteil": 0.5,
+    "abSekunden": 10
+  },
+  "speichern": {
+    "alleSekunden": 10
+  },
+  "leiste": [
+    { "id": "kaempfen", "name": "Kämpfen", "symbol": "⚔", "offen": false },
+    { "id": "waffen", "name": "Waffen", "symbol": "🛡", "offen": false },
+    { "id": "tiere", "name": "Tiere", "symbol": "🥚", "offen": false },
+    { "id": "farm", "name": "Farm", "symbol": "📈", "offen": false },
+    { "id": "menue", "name": "Menü", "symbol": "☰", "offen": true }
+  ]
+}

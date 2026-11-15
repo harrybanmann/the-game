@@ -1,0 +1,240 @@
+:root {
+  --haupt: #8B5A2B;
+  --zweit: #E8D5A8;
+  --akzent: #E8781E;
+  --umriss: #3b2412;
+  --panel: #24304f;
+  --panel-hell: #33426b;
+  --knopf: #3c8fe0;
+  --knopf-rand: #7cc0ff;
+  --knopf-schatten: #1f5796;
+  --btc: #F7931A;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #14110f;
+  font-family: "Lilita One", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+  color: #fff;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+button, textarea, input { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* Weiße Schrift mit dunkler Kontur */
+#kopf, .rund-name, #verdienen-text, h2 {
+  text-shadow: -2px 0 var(--umriss), 2px 0 var(--umriss), 0 -2px var(--umriss), 0 3px var(--umriss),
+    -2px -2px var(--umriss), 2px -2px var(--umriss), -2px 2px var(--umriss), 2px 2px var(--umriss);
+}
+
+#spiel {
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+/* ---------- Kopf: großer Geld-Zähler ---------- */
+#kopf {
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
+  text-align: center;
+  background: var(--haupt);
+  border-bottom: 4px solid var(--umriss);
+}
+#zeitalter-name { font-size: 14px; opacity: 0.95; }
+#zaehler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  line-height: 1.05;
+}
+#zaehler-zahl { font-size: 46px; }
+#zaehler-name { font-size: 20px; }
+#zaehler-btc { font-size: 22px; color: var(--btc); }
+#pro-sekunde { font-size: 14px; margin-top: 2px; }
+
+/* ---------- Platzhalter-Symbol: Feuerstein ---------- */
+.stein {
+  display: inline-block;
+  background: #6f7780;
+  border: 4px solid var(--umriss);
+  border-radius: 46% 54% 38% 62% / 58% 40% 60% 42%;
+  box-shadow: inset -6px -6px 0 rgba(0, 0, 0, 0.22), inset 5px 5px 0 rgba(255, 255, 255, 0.28);
+}
+.stein.klein { width: 34px; height: 30px; border-width: 3px; }
+.stein.gross { width: 110px; height: 96px; }
+
+/* ---------- Szene ---------- */
+#szene {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 170px;
+  background: var(--zweit);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sonne {
+  position: absolute; top: 14px; right: 22px;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: var(--akzent); border: 4px solid var(--umriss);
+}
+.berg {
+  position: absolute; bottom: 12%;
+  background: var(--haupt); border: 4px solid var(--umriss);
+  border-radius: 50% 50% 0 0;
+}
+.berg-1 { left: -12%; width: 62%; height: 46%; }
+.berg-2 { right: -16%; width: 70%; height: 34%; filter: brightness(0.85); }
+.boden {
+  position: absolute; left: -4px; right: -4px; bottom: -4px; height: 26%;
+  background: var(--haupt); filter: brightness(0.7);
+  border-top: 4px solid var(--umriss);
+}
+
+#verdienen {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 14px 22px 12px;
+  background: var(--akzent);
+  border: 4px solid var(--umriss);
+  border-radius: 26px;
+  box-shadow: 0 7px 0 var(--umriss);
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.05s;
+}
+#verdienen:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--umriss); }
+
+.flug {
+  position: absolute;
+  pointer-events: none;
+  font-size: 26px;
+  color: #fff;
+  text-shadow: 0 2px 0 var(--umriss), 2px 0 var(--umriss), -2px 0 var(--umriss), 0 -2px var(--umriss);
+  transform: translate(-50%, -50%);
+  animation: hoch 0.8s ease-out forwards;
+}
+@keyframes hoch {
+  to { transform: translate(-50%, -160%); opacity: 0; }
+}
+
+/* ---------- Upgrades ---------- */
+#upgrades {
+  flex: 0 0 auto;
+  max-height: 34%;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  border-top: 4px solid var(--umriss);
+}
+.upgrade {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  background: var(--knopf);
+  border: 3px solid var(--knopf-rand);
+  border-radius: 16px;
+  box-shadow: 0 5px 0 var(--knopf-schatten);
+  cursor: pointer;
+}
+.upgrade:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 var(--knopf-schatten); }
+.upgrade:disabled { background: #5d6680; border-color: #8089a3; box-shadow: 0 5px 0 #3a4159; opacity: 0.85; cursor: default; }
+.upgrade-links, .upgrade-rechts { display: flex; flex-direction: column; gap: 2px; }
+.upgrade-rechts { text-align: right; flex-shrink: 0; }
+.upgrade-name { font-size: 18px; }
+.upgrade-text, .upgrade-stufe { font-size: 13px; opacity: 0.9; }
+.upgrade-kosten { font-size: 15px; background: rgba(0, 0, 0, 0.35); padding: 2px 10px; border-radius: 999px; }
+
+/* ---------- Leiste: 5 runde Knöpfe ---------- */
+#leiste {
+  flex: 0 0 auto;
+  display: flex; justify-content: space-around; align-items: flex-start;
+  padding: 10px 6px calc(env(safe-area-inset-bottom) + 10px);
+  background: #18203a;
+  border-top: 4px solid var(--umriss);
+}
+.rund {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  width: 64px;
+}
+.rund-symbol {
+  width: 54px; height: 54px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  background: var(--akzent);
+  border: 4px solid var(--umriss);
+  box-shadow: 0 4px 0 var(--umriss);
+}
+.rund:nth-child(2) .rund-symbol { background: var(--haupt); }
+.rund:nth-child(3) .rund-symbol { background: var(--zweit); }
+.rund:nth-child(4) .rund-symbol { background: #4FA7B5; }
+.rund:nth-child(5) .rund-symbol { background: var(--knopf); }
+.rund.gesperrt .rund-symbol { filter: grayscale(0.85) brightness(0.75); }
+.rund-name { font-size: 12px; }
+
+/* ---------- Fenster ---------- */
+.fenster {
+  position: fixed; inset: 0; z-index: 10;
+  background: rgba(8, 10, 20, 0.72);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.karte {
+  width: 100%; max-width: 420px; max-height: 92dvh; overflow-y: auto;
+  background: var(--panel);
+  border: 4px solid var(--umriss);
+  border-radius: 22px;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.karte.mitte { text-align: center; }
+h2 { margin: 0; font-size: 28px; font-weight: 400; text-align: center; }
+h3 { margin: 6px 0 0; font-size: 18px; font-weight: 400; color: var(--zweit); }
+.hinweis { margin: 0; font-size: 15px; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; opacity: 0.9; }
+.gross-zahl { margin: 0; font-size: 34px; color: var(--zweit); }
+.knopf {
+  display: block; width: 100%; text-align: center;
+  padding: 12px; font-size: 18px;
+  background: var(--knopf);
+  border: 3px solid var(--knopf-rand);
+  border-radius: 14px;
+  box-shadow: 0 5px 0 var(--knopf-schatten);
+  cursor: pointer;
+}
+.knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--knopf-schatten); }
+.knopf.rot { background: #d6483f; border-color: #ff8a80; box-shadow: 0 5px 0 #8c2620; }
+.datei-knopf input { display: none; }
+textarea {
+  width: 100%; resize: vertical;
+  font-family: ui-monospace, Menlo, monospace; font-size: 16px;
+  background: #121829; border: 3px solid var(--panel-hell); border-radius: 12px; padding: 8px;
+  -webkit-user-select: text; user-select: text;
+}
+
+#kurzmeldung {
+  position: fixed; left: 50%; bottom: 130px; transform: translateX(-50%); z-index: 20;
+  max-width: 90%;
+  background: #121829; border: 3px solid var(--umriss); border-radius: 999px;
+  padding: 8px 18px; font-size: 16px; text-align: center;
+}
+#lade-fehler {
+  position: fixed; inset: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center;
+  background: #14110f; font-size: 18px;
+}

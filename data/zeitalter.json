@@ -1,0 +1,19 @@
+[
+  {
+    "id": "steinzeit",
+    "nummer": 1,
+    "name": "Steinzeit-Tausch",
+    "farben": {
+      "haupt": "#8B5A2B",
+      "zweit": "#E8D5A8",
+      "akzent": "#E8781E"
+    },
+    "waehrung": {
+      "id": "feuerstein",
+      "name": "Feuerstein",
+      "btcProStueck": 0.000001
+    },
+    "verdienKnopf": "Feuerstein sammeln",
+    "klickGrundwert": 1
+  }
+]
