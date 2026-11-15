@@ -2,6 +2,7 @@ import { zahl, btc, dauer } from "./format.js";
 import * as speicher from "./speicher.js";
 import { kampfSystem } from "./kampf.js";
 import { waffenSystem } from "./waffen.js";
+import { tierSystem } from "./tiere.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -9,6 +10,8 @@ let daten; // { einstellungen, zeitalter[], upgrades[], gegner{} }
 let stand; // Spielstand
 let kampf; // Kampf-System
 let waffen; // Schmiede und Waffen
+let tiere; // Tiere und Eier
+let gewaehltesTier = null;
 let ansicht = "sammeln"; // oder "kampf"
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
@@ -22,14 +25,15 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
     json("data/gegner.json"),
     json("data/waffen.json"),
+    json("data/tiere.json"),
   ]);
-  return { einstellungen, zeitalter, upgrades, gegner, waffen: waffenDaten };
+  return { einstellungen, zeitalter, upgrades, gegner, waffen: waffenDaten, tiere: tierDaten };
 }
 
 // ---------- Rechnen ----------
@@ -54,9 +58,15 @@ const klickWert = () => zeitalter().klickGrundwert + summe("klick");
 const proSekunde = () => summe("proSekunde");
 function schaden() {
   const b = waffen.bonus();
-  return (daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden) * (1 + b.set);
+  const tb = tiere.bonus();
+  const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
+  return grund * (1 + b.set) * (1 + tb.schadenProzent);
 }
-const maxLeben = () => daten.einstellungen.kampf.grundLeben + summe("leben") + waffen.bonus().leben;
+function maxLeben() {
+  const tb = tiere.bonus();
+  const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + waffen.bonus().leben + tb.leben;
+  return grund * (1 + tb.lebenProzent);
+}
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
   Math.round(daten.einstellungen.level.grundXp * Math.pow(daten.einstellungen.level.faktor, level - 1));
@@ -96,11 +106,17 @@ function tick() {
     const gezaehlt = Math.min(sekunden, off.maxStunden * 3600);
     const menge = (proSekunde() + seite().kampf.rate) * gezaehlt * off.anteil;
     gutschreiben(menge);
-    if (menge >= 1) offlineMeldung(sekunden, gezaehlt, menge);
+    if (menge >= 1 && sekunden >= off.meldungAbSekunden) offlineMeldung(sekunden, gezaehlt, menge);
     sichern();
   } else {
     gutschreiben(proSekunde() * sekunden);
     kampf.schritt(sekunden);
+  }
+
+  for (const tier of tiere.schritt(jetzt)) {
+    kurzMeldung("Geschlüpft: " + tier.seltenheit.name + " – " + tier.name);
+    if (!$("tiere-fenster").hidden) tiereZeichnen();
+    sichern();
   }
 
   if (jetzt - letztesSpeichern >= daten.einstellungen.speichern.alleSekunden * 1000) sichern();
@@ -147,6 +163,7 @@ function anzeigeAktualisieren() {
   }
   if (ansicht === "kampf") kampfZeichnen();
   if (!$("waffen-fenster").hidden) waffenKnoepfe();
+  if (!$("tiere-fenster").hidden) brutZeichnen();
 }
 
 function kampfZeichnen() {
@@ -155,7 +172,7 @@ function kampfZeichnen() {
   $("spieler-level").textContent = "Level " + s.level + " · XP " + zahl(s.xp) + "/" + zahl(xpBedarf(s.level));
   $("spieler-werte").textContent = zahl(schaden()) + " Schaden";
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
-  $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(z.maxLeben);
+  $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
   $("gegner-name").textContent = z.gegner.name;
   $("gegner-werte").textContent = zahl(z.gegner.schaden) + " Schaden";
   $("gegner-figur").classList.toggle("boss", z.gegner.boss);
@@ -222,7 +239,7 @@ function leisteZeichnen() {
       if (k.id === "menue") fensterZeigen("menue");
       else if (k.id === "kaempfen") ansichtSetzen(ansicht === "kampf" ? "sammeln" : "kampf");
       else if (k.fenster) {
-        waffenZeichnen();
+        (k.id === "tiere" ? tiereZeichnen : waffenZeichnen)();
         fensterZeigen(k.fenster);
       } else kurzMeldung(k.name + " kommt in einer späteren Version.");
     });
@@ -339,9 +356,112 @@ function schmiedeVerbessern() {
   sichern();
 }
 
+// ---------- Tiere und Eier ----------
+
+function tierKachel(w, marke) {
+  const kachel = el("button", "tier");
+  kachel.type = "button";
+  if (!w) {
+    kachel.classList.add("leer");
+    kachel.append(el("span", "tier-marke", marke));
+    kachel.disabled = true;
+    return kachel;
+  }
+  kachel.style.borderColor = w.seltenheit.farbe;
+  if (w.seltenheit.glanz) kachel.classList.add("glanz");
+  if (w.nr === gewaehltesTier) kachel.classList.add("gewaehlt");
+  if (marke) kachel.append(el("span", "tier-marke", marke));
+  const selten = el("span", "tier-selten", w.seltenheit.name);
+  selten.style.color = w.seltenheit.farbe;
+  kachel.append(el("span", "tier-name", w.name), selten);
+  kachel.addEventListener("click", () => {
+    gewaehltesTier = gewaehltesTier === w.nr ? null : w.nr;
+    tiereZeichnen();
+  });
+  return kachel;
+}
+
+function brutZeichnen() {
+  const brut = tiere.brutInfo(Date.now());
+  const text = $("brut-text");
+  if (brut) {
+    text.textContent = "Ei (" + brut.seltenheit.name + ") schlüpft in " + dauer(Math.ceil(brut.restSekunden));
+    text.style.color = brut.seltenheit.farbe;
+  } else {
+    text.textContent = "Der Brutkasten ist leer.";
+    text.style.color = "";
+  }
+  const wartend = seite().tiere.eier.length;
+  $("eier-text").textContent =
+    wartend > 0
+      ? "Eier im Lager: " + wartend + " (höchstens " + daten.tiere.eierLagerMax + "). Sie schlüpfen der Reihe nach."
+      : "Eier fallen im Kampf, vom Boss sicher. Je seltener das Ei, desto länger dauert es.";
+}
+
+function tierTeamAendern(aktion) {
+  aktion(gewaehltesTier);
+  kampf.neuStarten();
+  tiereZeichnen();
+  anzeigeAktualisieren();
+  sichern();
+}
+
+function tiereZeichnen() {
+  brutZeichnen();
+  const t = seite().tiere;
+  const team = $("tier-team");
+  team.replaceChildren(tierKachel(tiere.werte(tiere.finde(t.kaempfer)), "Kämpfer"));
+  const ab = tiere.plaetzeAbLevel();
+  for (let i = 0; i < ab.length - 1; i++) {
+    const frei = i < tiere.plaetze();
+    const w = frei ? tiere.werte(tiere.finde(t.supporter[i])) : null;
+    team.append(tierKachel(w, frei ? "Supporter" : "ab Level " + ab[i + 1]));
+  }
+
+  const alle = t.sammlung.map((x) => tiere.werte(x)).filter(Boolean);
+  alle.sort((a, b) => b.staerke - a.staerke);
+  $("sammlung-titel").textContent = "Sammlung (" + alle.length + ")";
+  const sammlung = $("tier-sammlung");
+  sammlung.replaceChildren(...alle.map((w) => tierKachel(w, "")));
+  if (!alle.length) sammlung.append(el("p", "hinweis", "Noch kein Tier. Besiege Gegner, um Eier zu finden."));
+
+  const aktionen = $("tier-aktionen");
+  aktionen.replaceChildren();
+  const w = tiere.werte(tiere.finde(gewaehltesTier));
+  if (!w) return;
+  const art = w.supporterArt === "schaden" ? "Schaden" : "Leben";
+  aktionen.append(
+    el(
+      "p",
+      "hinweis",
+      w.name + ": als Kämpfer +" + zahl(w.schaden) + " Schaden und +" + zahl(w.leben) + " Leben. Als Supporter +" +
+        prozent(w.supporterProzent) + " " + art + "."
+    )
+  );
+  const knopf = (text, aktion, aus) => {
+    const k = el("button", "knopf klein", text);
+    k.type = "button";
+    k.disabled = aus;
+    k.addEventListener("click", () => tierTeamAendern(aktion));
+    aktionen.append(k);
+  };
+  const imTeam = t.kaempfer === w.nr || t.supporter.includes(w.nr);
+  knopf("Als Kämpfer", tiere.alsKaempfer, t.kaempfer === w.nr);
+  knopf("Als Supporter", tiere.alsSupporter, tiere.plaetze() === 0 || t.supporter.includes(w.nr));
+  knopf("Aus dem Team nehmen", tiere.herausnehmen, !imTeam);
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
+  if (name === "sieg") {
+    const ei = tiere.eiWurf(gegner.typ);
+    if (ei) {
+      kurzMeldung("Ei gefunden: " + ei.seltenheit.name);
+      if (!$("tiere-fenster").hidden) tiereZeichnen();
+    }
+    return;
+  }
   if (name === "bossNiederlage") {
     kurzMeldung(gegner.name + " war zu stark. Rüste auf und versuch es noch mal.");
   } else if (name === "bossSieg") {
@@ -524,6 +644,14 @@ async function start() {
     zeitalterId: () => zeitalter().id,
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     bezahlen,
+  });
+  tiere = tierSystem({
+    daten: () => daten.tiere,
+    seltenheiten: () => daten.waffen.seltenheiten,
+    seite,
+    zeitalterId: () => zeitalter().id,
+    zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
+    level: () => seite().level,
   });
   knoepfeVerbinden();
   allesZeichnen();

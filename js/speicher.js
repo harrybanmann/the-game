@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 3;
+export const VERSION = 4;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -16,6 +16,7 @@ export function neueSeite(startZeitalter) {
     kampf: { index: 0, rate: 0 },
     schmiede: { stufe: 0, geschmiedet: 0 },
     waffen: { nah: null, fern: null, aktiv: "nah" },
+    tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
   };
 }
 
@@ -65,6 +66,7 @@ export function pruefen(stand) {
     const waffe = (x) =>
       x && typeof x.id === "string" ? { id: x.id, seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0) } : null;
     seite.waffen = { nah: waffe(w.nah), fern: waffe(w.fern), aktiv: w.aktiv === "fern" ? "fern" : "nah" };
+    seite.tiere = tierePruefen(seite.tiere);
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
       seite.waehrungen[k] = Number.isFinite(n) && n > 0 ? n : 0;
@@ -77,6 +79,25 @@ export function pruefen(stand) {
   if (!Number.isFinite(stand.zuletztGespeichert)) stand.zuletztGespeichert = Date.now();
   stand.version = VERSION; // ältere Spielstände sind jetzt ergänzt
   return null;
+}
+
+function tierePruefen(roh) {
+  const t = roh || {};
+  const stufe = (x) => Math.max(0, Math.floor(Number(x)) || 0);
+  const ei = (x) => (x && typeof x.zeitalter === "string" ? { zeitalter: x.zeitalter, seltenheit: stufe(x.seltenheit) } : null);
+  const sammlung = (Array.isArray(t.sammlung) ? t.sammlung : [])
+    .filter((x) => x && typeof x.id === "string" && Number.isFinite(x.nr))
+    .map((x) => ({ nr: x.nr, id: x.id, seltenheit: stufe(x.seltenheit) }));
+  const nummern = new Set(sammlung.map((x) => x.nr));
+  const brutEi = t.brut ? ei(t.brut.ei) : null;
+  return {
+    eier: (Array.isArray(t.eier) ? t.eier : []).map(ei).filter(Boolean),
+    brut: brutEi && Number.isFinite(t.brut.fertigUm) ? { ei: brutEi, fertigUm: t.brut.fertigUm } : null,
+    sammlung,
+    naechsteNr: Math.max(1, stufe(t.naechsteNr), ...sammlung.map((x) => x.nr + 1)),
+    kaempfer: nummern.has(t.kaempfer) ? t.kaempfer : null,
+    supporter: (Array.isArray(t.supporter) ? t.supporter : []).filter((nr) => nummern.has(nr)),
+  };
 }
 
 export function laden() {

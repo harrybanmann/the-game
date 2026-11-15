@@ -301,3 +301,23 @@ textarea {
 .ergebnis { margin: 0; min-height: 22px; font-size: 17px; text-align: center; }
 #schmiede-chancen { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px; font-size: 14px; }
 .chance { display: flex; justify-content: space-between; }
+
+/* ---------- Tiere und Eier ---------- */
+.tier-reihe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tier-reihe .hinweis { grid-column: 1 / -1; }
+.tier {
+  min-width: 0; min-height: 66px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 5px 2px; text-align: center;
+  background: #121829;
+  border: 3px solid var(--panel-hell);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.tier.leer { opacity: 0.6; cursor: default; }
+.tier.glanz { box-shadow: 0 0 12px 2px #ffd54a; }
+.tier.gewaehlt { background: var(--panel-hell); outline: 3px solid #fff; }
+.tier-marke { font-size: 10px; opacity: 0.8; }
+.tier-name { font-size: 12px; overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto; line-height: 1.1; }
+.tier-selten { font-size: 10px; }
+#tier-aktionen { display: flex; flex-direction: column; gap: 6px; }

@@ -5,7 +5,8 @@
   "offline": {
     "maxStunden": 8,
     "anteil": 0.5,
-    "abSekunden": 10
+    "abSekunden": 10,
+    "meldungAbSekunden": 60
   },
   "speichern": {
     "alleSekunden": 10
@@ -22,7 +23,7 @@
   "leiste": [
     { "id": "kaempfen", "name": "Kämpfen", "symbol": "⚔", "nameZurueck": "Sammeln", "symbolZurueck": "⛏", "offen": true },
     { "id": "waffen", "name": "Waffen", "symbol": "🛡", "fenster": "waffen-fenster", "offen": true },
-    { "id": "tiere", "name": "Tiere", "symbol": "🥚", "offen": false },
+    { "id": "tiere", "name": "Tiere", "symbol": "🥚", "fenster": "tiere-fenster", "offen": true },
     { "id": "farm", "name": "Farm", "symbol": "📈", "offen": false },
     { "id": "menue", "name": "Menü", "symbol": "☰", "offen": true }
   ]

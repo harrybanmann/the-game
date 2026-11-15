@@ -1,0 +1,18 @@
+{
+  "_hinweis": "Zahlen sind Startwerte (Vorschlag). Tiere und Werte sind für Gut und Böse gleich. Seltenheiten stehen in waffen.json.",
+  "eiChance": { "schwach": 0.02, "normal": 0.04, "elite": 0.1, "boss": 1 },
+  "eiRatio": { "normal": 5, "boss": 2.5 },
+  "eierLagerMax": 20,
+  "schluepfSekunden": [60, 300, 900, 3600, 14400, 43200, 86400],
+  "plaetzeAbLevel": [1, 10, 20, 30],
+  "tiere": [
+    { "id": "mammut", "zeitalter": "steinzeit", "name": "Mammut", "schaden": 2, "leben": 30, "supporter": { "art": "leben", "prozent": 0.05 } },
+    { "id": "saebelzahntiger", "zeitalter": "steinzeit", "name": "Säbelzahntiger", "schaden": 5, "leben": 10, "supporter": { "art": "schaden", "prozent": 0.05 } },
+    { "id": "wolf", "zeitalter": "steinzeit", "name": "Wolf", "schaden": 3, "leben": 15, "supporter": { "art": "schaden", "prozent": 0.06 } },
+    { "id": "hoehlenbaer", "zeitalter": "steinzeit", "name": "Höhlenbär", "schaden": 2, "leben": 25, "supporter": { "art": "leben", "prozent": 0.06 } },
+    { "id": "rind", "zeitalter": "muscheln", "name": "Rind", "schaden": 2, "leben": 30, "supporter": { "art": "leben", "prozent": 0.05 } },
+    { "id": "wildschwein", "zeitalter": "muscheln", "name": "Wildschwein", "schaden": 5, "leben": 10, "supporter": { "art": "schaden", "prozent": 0.05 } },
+    { "id": "krabbe", "zeitalter": "muscheln", "name": "Krabbe", "schaden": 3, "leben": 15, "supporter": { "art": "schaden", "prozent": 0.06 } },
+    { "id": "ziege", "zeitalter": "muscheln", "name": "Ziege", "schaden": 2, "leben": 25, "supporter": { "art": "leben", "prozent": 0.06 } }
+  ]
+}

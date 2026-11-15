@@ -7,9 +7,10 @@ export function kampfSystem(api) {
   let takt = 0;
   let seitLetztemSieg = 0;
 
-  function stellen(vorlage, istBoss) {
+  function stellen(vorlage, istBoss, typ) {
     gegner = {
       boss: istBoss,
+      typ,
       name: vorlage.name[api.seitenName()] || vorlage.name.gut,
       leben: vorlage.leben,
       maxLeben: vorlage.leben,
@@ -25,13 +26,14 @@ export function kampfSystem(api) {
     const liste = api.gegnerDaten();
     const reihe = liste.reihenfolge;
     const typ = reihe[api.seite().kampf.index % reihe.length];
-    stellen(liste.typen[typ], false);
+    stellen(liste.typen[typ], false, typ);
   }
 
   function sieg() {
     const besiegt = gegner;
     api.gutschreiben(besiegt.beute);
     api.xpGeben(besiegt.xp);
+    api.ereignis("sieg", besiegt);
     if (besiegt.boss) {
       api.ereignis("bossSieg", besiegt);
     } else {
@@ -75,7 +77,7 @@ export function kampfSystem(api) {
       const boss = api.gegnerDaten().boss;
       if (!boss || (gegner && gegner.boss)) return;
       takt = 0;
-      stellen(boss, true);
+      stellen(boss, true, "boss");
     },
     neuStarten() {
       takt = 0;
