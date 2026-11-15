@@ -4,6 +4,7 @@ import { kampfSystem } from "./kampf.js";
 import { waffenSystem } from "./waffen.js";
 import { tierSystem } from "./tiere.js";
 import { dungeonSystem } from "./dungeons.js";
+import { faehigkeitenSystem } from "./faehigkeiten.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -13,6 +14,7 @@ let kampf; // Kampf-System
 let waffen; // Schmiede und Waffen
 let tiere; // Tiere und Eier
 let dungeons; // Dungeons und Tickets
+let faehigkeiten; // Fähigkeiten
 let gewaehltesTier = null;
 let ansicht = "sammeln"; // oder "kampf"
 let letzterTick = Date.now();
@@ -27,7 +29,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -35,8 +37,18 @@ async function datenLaden() {
     json("data/waffen.json"),
     json("data/tiere.json"),
     json("data/dungeons.json"),
+    json("data/faehigkeiten.json"),
   ]);
-  return { einstellungen, zeitalter, upgrades, gegner, waffen: waffenDaten, tiere: tierDaten, dungeons: dungeonDaten };
+  return {
+    einstellungen,
+    zeitalter,
+    upgrades,
+    gegner,
+    waffen: waffenDaten,
+    tiere: tierDaten,
+    dungeons: dungeonDaten,
+    faehigkeiten: faehigkeitDaten,
+  };
 }
 
 // ---------- Rechnen ----------
@@ -571,6 +583,71 @@ function dungeonsZeichnen() {
   }
 }
 
+// ---------- Fähigkeiten ----------
+
+function faehigkeitGeaendert() {
+  faehigkeitenZeichnen();
+  anzeigeAktualisieren();
+  sichern();
+}
+
+function faehigkeitenZeichnen() {
+  const f = seite().faehigkeiten;
+  $("punkte-text").textContent = "Fähigkeitspunkte: " + f.punkte + " (gibt es in den Dungeons)";
+  $("ziehen-knopf").textContent = "Fähigkeit ziehen (" + faehigkeiten.ziehenKosten() + " Punkte)";
+  $("ziehen-knopf").disabled = f.punkte < faehigkeiten.ziehenKosten();
+
+  const plaetze = $("faehigkeit-plaetze");
+  plaetze.replaceChildren();
+  const ab = faehigkeiten.plaetzeAbLevel();
+  for (let i = 0; i < ab.length; i++) {
+    const frei = i < faehigkeiten.plaetze();
+    const w = frei ? faehigkeiten.werte(f.sammlung.find((x) => x.id === f.ausgeruestet[i])) : null;
+    const kachel = el("div", "tier" + (w ? "" : " leer"));
+    if (w) {
+      kachel.style.borderColor = w.seltenheit.farbe;
+      kachel.append(el("span", "tier-name", w.name), el("span", "sterne", sterne(w.sterne)));
+    } else {
+      kachel.append(el("span", "tier-marke", frei ? "frei" : "ab Level " + ab[i]));
+    }
+    plaetze.append(kachel);
+  }
+
+  const liste = $("faehigkeit-liste");
+  liste.replaceChildren();
+  const alle = faehigkeiten.liste();
+  if (!alle.length) liste.append(el("p", "hinweis", "Noch keine Fähigkeit. Hol dir Punkte in den Dungeons und ziehe."));
+  for (const w of alle) {
+    const karte = el("div", "dungeon");
+    const name = el("div", "dungeon-name", w.name);
+    name.style.color = w.seltenheit.farbe;
+    karte.append(
+      name,
+      el("div", "sterne", sterne(w.sterne)),
+      el("div", "hinweis", w.seltenheit.name + " · Level " + w.level + " · Kopien " + w.kopien + " · Stärke ×" + zahl(w.faktor)),
+      el("div", "hinweis", w.text)
+    );
+    const knopf = (text, aus, aktion) => {
+      const k = el("button", "knopf klein", text);
+      k.type = "button";
+      k.disabled = aus;
+      k.addEventListener("click", () => {
+        aktion();
+        faehigkeitGeaendert();
+      });
+      karte.append(k);
+    };
+    if (w.ausgeruestet) knopf("Ablegen", false, () => faehigkeiten.ablegen(w.id));
+    else knopf("Ausrüsten", false, () => faehigkeiten.ausruesten(w.id));
+    const e = f.sammlung.find((x) => x.id === w.id);
+    knopf("Level +1 (" + faehigkeiten.levelKosten(e) + " Punkte)", f.punkte < faehigkeiten.levelKosten(e), () =>
+      faehigkeiten.levelKaufen(w.id)
+    );
+    knopf("Mergen: 3 gleiche werden +1 Stern", !faehigkeiten.mergbar(w.id), () => faehigkeiten.mergen(w.id));
+    liste.append(karte);
+  }
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
@@ -720,6 +797,21 @@ function knoepfeVerbinden() {
     dungeonsZeichnen();
     fensterZeigen("dungeon-fenster");
   });
+  $("faehigkeiten-knopf").addEventListener("click", () => {
+    fensterSchliessen("menue");
+    $("faehigkeit-ergebnis").textContent = "";
+    faehigkeitenZeichnen();
+    fensterZeigen("faehigkeiten-fenster");
+  });
+  $("ziehen-knopf").addEventListener("click", () => {
+    const r = faehigkeiten.ziehen();
+    if (r) {
+      const e = $("faehigkeit-ergebnis");
+      e.textContent = r.seltenheit.name + ": " + r.name + (r.neu ? " – neu!" : " – Kopie für Sterne.");
+      e.style.color = r.seltenheit.farbe;
+    }
+    faehigkeitGeaendert();
+  });
   $("schmieden-knopf").addEventListener("click", schmieden);
   $("alles-mergen").addEventListener("click", allesMergen);
   $("schmiede-knopf").addEventListener("click", schmiedeVerbessern);
@@ -764,6 +856,7 @@ async function start() {
     xpGeben,
     ereignis: kampfEreignis,
     trank: () => daten.dungeons.heiltrank,
+    faehigkeiten: () => faehigkeiten,
   });
   waffen = waffenSystem({
     daten: () => daten.waffen,
@@ -781,6 +874,14 @@ async function start() {
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     level: () => seite().level,
   });
+  faehigkeiten = faehigkeitenSystem({
+    daten: () => daten.faehigkeiten,
+    seltenheiten: () => daten.waffen.seltenheiten,
+    seite,
+    seitenName: () => stand.aktiveSeite,
+    level: () => seite().level,
+    grundSchaden: schaden,
+  });
   dungeons = dungeonSystem({
     daten: () => daten.dungeons,
     seite,
@@ -792,6 +893,7 @@ async function start() {
     eiGeben: (ratio, plus) => tiere.eiGeben(ratio, plus),
     schmiedenGratis: () => waffen.schmiedenGratis(),
     gutschreiben,
+    punkteGeben: (stufe, meilenstein) => faehigkeiten.punkteGeben(stufe, meilenstein),
     mengeText: (menge) => zahl(menge) + " " + waehrung().name,
   });
   knoepfeVerbinden();

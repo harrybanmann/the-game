@@ -21,6 +21,7 @@ export function kampfSystem(api) {
       naechstesZeitalter: vorlage.naechstesZeitalter,
     };
     spielerLeben = api.maxLeben();
+    api.faehigkeiten().kampfStart();
   }
 
   function naechster() {
@@ -55,9 +56,20 @@ export function kampfSystem(api) {
   }
 
   function runde() {
-    gegner.leben -= api.schaden();
+    const fae = api.faehigkeiten();
+    fae.schritt(api.schlagZeit(), {
+      treffen: (menge) => {
+        gegner.leben -= menge;
+      },
+      heilen: (anteil) => {
+        const max = api.maxLeben();
+        spielerLeben = Math.min(max, spielerLeben + max * anteil);
+      },
+    });
     if (gegner.leben <= 0) return sieg();
-    spielerLeben -= gegner.schaden;
+    gegner.leben -= api.schaden() * fae.schadenFaktor();
+    if (gegner.leben <= 0) return sieg();
+    spielerLeben -= gegner.schaden * fae.schutzFaktor();
     if (spielerLeben <= 0) return niederlage();
     // Heiltrank: nur im Boss-Kampf, automatisch unter der Schwelle.
     const regel = api.trank();

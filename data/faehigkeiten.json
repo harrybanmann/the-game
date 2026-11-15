@@ -1,0 +1,21 @@
+{
+  "_hinweis": "Regeln von Harry (Tech-Baum-Chat, Entscheidungen 3, 4, 5, 16): Punkte aus Dungeons, Punkte ausgeben = zufällige Fähigkeit, gute Seltenheiten seltener, 3 gleiche = +1 Stern (max 5), Level mit Punkten, Plätze ab Level 1/5/15/30, löst im Kampf automatisch aus. Seltenheit macht NICHT stärker. Namen, Wirkungen und Zahlen sind Vorschläge.",
+  "plaetzeAbLevel": [1, 5, 15, 30],
+  "ziehenKosten": 5,
+  "ziehenRatio": 3,
+  "maxLevel": 50,
+  "levelKosten": { "grund": 2, "faktor": 1.15 },
+  "levelBonus": 0.04,
+  "sternBonus": 0.25,
+  "maxSterne": 5,
+  "punkte": { "proDurchlauf": 2, "proStufen": 5, "meilenstein": 5 },
+  "liste": [
+    { "id": "steinwurf", "seltenheit": 0, "name": { "gut": "Steinwurf", "boese": "Steinwurf" }, "art": "schaden", "wert": 3, "abklingen": 4, "text": "Wirft alle 4 Sek. einen Stein: 3-facher Schaden." },
+    { "id": "kraeuter", "seltenheit": 1, "name": { "gut": "Heilkräuter", "boese": "Gestohlene Kräuter" }, "art": "heilung", "wert": 0.12, "abklingen": 6, "text": "Heilt alle 6 Sek. 12 % Leben." },
+    { "id": "kriegsschrei", "seltenheit": 2, "name": { "gut": "Kriegsschrei", "boese": "Drohruf" }, "art": "staerke", "wert": 0.3, "dauer": 3, "abklingen": 8, "text": "Alle 8 Sek. für 3 Sek. +30 % Schaden." },
+    { "id": "doppelschlag", "seltenheit": 3, "name": { "gut": "Doppelschlag", "boese": "Hinterhalt" }, "art": "schaden", "wert": 2.5, "abklingen": 3, "text": "Schlägt alle 3 Sek. zusätzlich zu: 2,5-facher Schaden." },
+    { "id": "steinhaut", "seltenheit": 4, "name": { "gut": "Steinhaut", "boese": "Schattenmantel" }, "art": "schutz", "wert": 0.5, "dauer": 3, "abklingen": 9, "text": "Alle 9 Sek. für 3 Sek. nur halber Schaden." },
+    { "id": "feuerball", "seltenheit": 5, "name": { "gut": "Feuerball", "boese": "Brandsatz" }, "art": "schaden", "wert": 6, "abklingen": 7, "text": "Alle 7 Sek. ein Feuerball: 6-facher Schaden." },
+    { "id": "lebensquelle", "seltenheit": 6, "name": { "gut": "Lebensquelle", "boese": "Blutpakt" }, "art": "heilung", "wert": 0.25, "abklingen": 10, "text": "Heilt alle 10 Sek. 25 % Leben." }
+  ]
+}

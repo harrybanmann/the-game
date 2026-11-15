@@ -40,6 +40,7 @@ export function dungeonSystem(api) {
   function belohnen(art, stufe) {
     const meilenstein = stufe % d().meilensteinAlle === 0;
     const teile = [];
+    teile.push(api.punkteGeben(stufe, meilenstein) + " Fähigkeitspunkte");
     if (art === "eier") {
       const ratio = Math.max(d().ei.ratioEnde, d().ei.ratioStart - d().ei.ratioProStufe * (stufe - 1));
       teile.push("Ei (" + api.eiGeben(ratio, 0).name + ")");

@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 6;
+export const VERSION = 7;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -19,6 +19,7 @@ export function neueSeite(startZeitalter) {
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
     lager: [],
     traenke: 0,
+    faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { letzterTag: "", tickets: {}, stufe: {} },
     tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
   };
@@ -87,6 +88,17 @@ export function pruefen(stand) {
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
     seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    const fa = seite.faehigkeiten || {};
+    const ganz = (x, min) => Math.max(min, Math.floor(Number(x)) || 0);
+    const sammlung = (Array.isArray(fa.sammlung) ? fa.sammlung : [])
+      .filter((x) => x && typeof x.id === "string")
+      .map((x) => ({ id: x.id, level: ganz(x.level, 1), sterne: ganz(x.sterne, 0), kopien: ganz(x.kopien, 0) }));
+    const ids = new Set(sammlung.map((x) => x.id));
+    seite.faehigkeiten = {
+      punkte: ganz(fa.punkte, 0),
+      sammlung,
+      ausgeruestet: (Array.isArray(fa.ausgeruestet) ? fa.ausgeruestet : []).filter((id) => ids.has(id)),
+    };
     const du = seite.dungeons || {};
     const zahlen = (roh, standard, mindestens) => {
       const aus = {};

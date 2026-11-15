@@ -347,3 +347,6 @@ textarea {
 .dungeon-name { font-size: 20px; color: var(--zweit); }
 .dungeon-stand { font-size: 15px; }
 #dungeon-ergebnis { color: var(--zweit); font-size: 16px; }
+
+/* ---------- Fähigkeiten ---------- */
+#faehigkeit-liste { display: flex; flex-direction: column; gap: 10px; }
