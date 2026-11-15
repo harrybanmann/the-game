@@ -321,3 +321,18 @@ textarea {
 .tier-name { font-size: 12px; overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto; line-height: 1.1; }
 .tier-selten { font-size: 10px; }
 #tier-aktionen { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---------- Rüstung, Lager, Sterne ---------- */
+.sterne { color: #ffd54a; font-size: 11px; letter-spacing: 1px; }
+#ruestung-plaetze { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.waffe.klein { padding: 5px 2px; border-width: 3px; border-radius: 12px; gap: 1px; }
+.waffe.klein .waffe-art { font-size: 10px; }
+.waffe.klein .waffe-name { font-size: 12px; overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto; line-height: 1.1; }
+.waffe.klein .waffe-werte { font-size: 10px; }
+.waffe.klein .waffe-leer { padding: 12px 0; }
+#lager { display: flex; flex-direction: column; gap: 5px; max-height: 190px; overflow-y: auto; }
+.lager-zeile { display: flex; align-items: center; gap: 6px; }
+.lager-info { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+.lager-name { font-size: 14px; }
+.lager-zeile .knopf.klein { width: auto; margin: 0; padding: 6px 10px; }
+.karte > * { flex-shrink: 0; }

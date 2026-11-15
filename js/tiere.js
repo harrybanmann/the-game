@@ -21,16 +21,19 @@ export function tierSystem(api) {
     const vorlage = d().tiere.find((x) => x.id === tier.id);
     if (!vorlage) return null;
     const selten = api.seltenheiten()[tier.seltenheit] || api.seltenheiten()[0];
-    const faktor = selten.faktor * api.zeitalterStaerke(vorlage.zeitalter);
+    const sterne = tier.sterne || 0;
+    const stern = 1 + sterne * d().sternBonus;
+    const faktor = selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * stern;
     return {
       nr: tier.nr,
+      sterne,
       id: vorlage.id,
       name: vorlage.name,
       seltenheit: selten,
       schaden: vorlage.schaden * faktor,
       leben: vorlage.leben * faktor,
       supporterArt: vorlage.supporter.art,
-      supporterProzent: vorlage.supporter.prozent * selten.faktor,
+      supporterProzent: vorlage.supporter.prozent * selten.faktor * stern,
       staerke: (vorlage.schaden * 5 + vorlage.leben) * faktor,
     };
   }
@@ -54,11 +57,19 @@ export function tierSystem(api) {
     let auswahl = d().tiere.filter((x) => x.zeitalter === ei.zeitalter);
     if (!auswahl.length) auswahl = d().tiere;
     const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];
-    const tier = { nr: t().naechsteNr, id: vorlage.id, seltenheit: ei.seltenheit };
+    const tier = { nr: t().naechsteNr, id: vorlage.id, seltenheit: ei.seltenheit, sterne: 0 };
     t().naechsteNr += 1;
     t().sammlung.push(tier);
     if (t().kaempfer === null) t().kaempfer = tier.nr;
     return werte(tier);
+  }
+
+  function gleiche(nr) {
+    const tier = finde(nr);
+    if (!tier) return [];
+    return t().sammlung.filter(
+      (x) => x !== tier && x.id === tier.id && x.seltenheit === tier.seltenheit && (x.sterne || 0) === (tier.sterne || 0)
+    );
   }
 
   function ausTeam(nr) {
@@ -130,5 +141,20 @@ export function tierSystem(api) {
       return true;
     },
     herausnehmen: ausTeam,
+    mergbar(nr) {
+      return gleiche(nr).length >= 2 && (finde(nr).sterne || 0) < d().maxSterne;
+    },
+    // 3 gleiche Tiere (Art, Seltenheit, Sternzahl) werden zu 1 Tier mit +1 Stern.
+    mergen(nr) {
+      const tier = finde(nr);
+      const andere = gleiche(nr);
+      if (!tier || andere.length < 2 || (tier.sterne || 0) >= d().maxSterne) return false;
+      const imTeam = (x) => (t().kaempfer === x.nr || t().supporter.includes(x.nr) ? 1 : 0);
+      const weg = andere.sort((a, b) => imTeam(a) - imTeam(b)).slice(0, 2);
+      for (const x of weg) ausTeam(x.nr);
+      t().sammlung = t().sammlung.filter((x) => !weg.includes(x));
+      tier.sterne = (tier.sterne || 0) + 1;
+      return true;
+    },
   };
 }

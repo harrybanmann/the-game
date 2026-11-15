@@ -64,8 +64,9 @@ function schaden() {
 }
 function maxLeben() {
   const tb = tiere.bonus();
-  const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + waffen.bonus().leben + tb.leben;
-  return grund * (1 + tb.lebenProzent);
+  const b = waffen.bonus();
+  const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + b.leben + tb.leben;
+  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent);
 }
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
@@ -271,6 +272,7 @@ function verdienen(ereignis) {
 
 // ---------- Schmiede und Waffen ----------
 
+const sterne = (n) => "★".repeat(n) + "☆".repeat(Math.max(0, 5 - n));
 const prozent = (anteil) => (anteil * 100).toLocaleString("de-DE", { maximumSignificantDigits: 2 }) + " %";
 
 function waffenKarte(art, titel) {
@@ -298,11 +300,79 @@ function waffenKarte(art, titel) {
   karte.append(
     el("div", "waffe-name", w.name),
     selten,
+    el("div", "sterne", sterne(w.sterne)),
     el("div", "waffe-werte", "+" + zahl(w.schaden) + " Schaden"),
     el("div", "waffe-werte", "+" + zahl(w.leben) + " Leben"),
     knopf
   );
   return karte;
+}
+
+function ruestungKarte(art, titel) {
+  const w = waffen.werte(waffen.hole(art));
+  const karte = el("div", "waffe klein");
+  karte.append(el("div", "waffe-art", titel));
+  if (!w) {
+    karte.append(el("div", "waffe-leer", "–"));
+    return karte;
+  }
+  karte.style.borderColor = w.seltenheit.farbe;
+  if (w.seltenheit.glanz) karte.classList.add("glanz");
+  karte.append(
+    el("div", "waffe-name", w.name),
+    el("div", "sterne", sterne(w.sterne)),
+    el("div", "waffe-werte", "+" + zahl(w.leben) + " Leben")
+  );
+  return karte;
+}
+
+function waffenGeaendert() {
+  waffenZeichnen();
+  anzeigeAktualisieren();
+  sichern();
+}
+
+function lagerZeichnen() {
+  const liste = waffen.lagerListe();
+  $("lager-titel").textContent = "Lager (" + liste.reduce((n, e) => n + e.anzahl, 0) + ")";
+  $("alles-mergen").hidden = !liste.some((e) => e.mergbar);
+  const box = $("lager");
+  box.replaceChildren();
+  if (!liste.length) {
+    box.append(el("p", "hinweis", "Leer. Was nicht besser ist, landet hier. 3 gleiche Stücke werden zu 1 Stück mit +1 Stern."));
+    return;
+  }
+  for (const e of liste.slice(0, 40)) {
+    const zeile = el("div", "lager-zeile");
+    const name = el("span", "lager-name", e.name + " ×" + e.anzahl);
+    name.style.color = e.seltenheit.farbe;
+    const info = el("span", "lager-info");
+    info.append(name, el("span", "sterne", sterne(e.sterne)));
+    const anlegen = el("button", "knopf klein", "Anlegen");
+    anlegen.type = "button";
+    anlegen.addEventListener("click", () => {
+      waffen.anlegenAusLager(e.roh);
+      waffenGeaendert();
+    });
+    const mergen = el("button", "knopf klein", "Mergen");
+    mergen.type = "button";
+    mergen.disabled = !e.mergbar;
+    mergen.addEventListener("click", () => {
+      waffen.mergen(e.roh);
+      waffenGeaendert();
+    });
+    zeile.append(info, anlegen, mergen);
+    box.append(zeile);
+  }
+}
+
+function allesMergen() {
+  for (let i = 0; i < 500; i++) {
+    const naechstes = waffen.lagerListe().find((e) => e.mergbar);
+    if (!naechstes) break;
+    waffen.mergen(naechstes.roh);
+  }
+  waffenGeaendert();
 }
 
 function waffenKnoepfe() {
@@ -317,7 +387,17 @@ function waffenKnoepfe() {
 
 function waffenZeichnen() {
   $("waffen-plaetze").replaceChildren(waffenKarte("nah", "Nahkampf"), waffenKarte("fern", "Fernkampf"));
+  $("ruestung-plaetze").replaceChildren(
+    ruestungKarte("helm", "Helm"),
+    ruestungKarte("handschuhe", "Handschuhe"),
+    ruestungKarte("ruestung", "Rüstung"),
+    ruestungKarte("stiefel", "Stiefel")
+  );
+  lagerZeichnen();
   const b = waffen.bonus();
+  $("ruestung-set").textContent =
+    "Rüstungs-Set: " + b.ruestungTeile + " von 4 Teilen aus einem Zeitalter (2 Teile +5 % Leben, 4 Teile +15 % Leben)" +
+    (b.lebenProzent > 0 ? " – aktiv: +" + prozent(b.lebenProzent) + " Leben." : ".");
   const bonusText = "+" + Math.round(daten.waffen.setBonusSchaden * 100) + " % Schaden";
   $("waffen-set").textContent =
     b.set > 0
@@ -342,7 +422,7 @@ function schmieden() {
   if (!r) return;
   const text = $("schmiede-ergebnis");
   text.textContent =
-    r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – ausgerüstet!" : " – nicht besser, eingeschmolzen.");
+    r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – ausgerüstet!" : " – ins Lager gelegt.");
   text.style.color = r.neu.seltenheit.farbe;
   waffenZeichnen();
   anzeigeAktualisieren();
@@ -373,7 +453,7 @@ function tierKachel(w, marke) {
   if (marke) kachel.append(el("span", "tier-marke", marke));
   const selten = el("span", "tier-selten", w.seltenheit.name);
   selten.style.color = w.seltenheit.farbe;
-  kachel.append(el("span", "tier-name", w.name), selten);
+  kachel.append(el("span", "tier-name", w.name), selten, el("span", "sterne", sterne(w.sterne)));
   kachel.addEventListener("click", () => {
     gewaehltesTier = gewaehltesTier === w.nr ? null : w.nr;
     tiereZeichnen();
@@ -449,6 +529,7 @@ function tiereZeichnen() {
   knopf("Als Kämpfer", tiere.alsKaempfer, t.kaempfer === w.nr);
   knopf("Als Supporter", tiere.alsSupporter, tiere.plaetze() === 0 || t.supporter.includes(w.nr));
   knopf("Aus dem Team nehmen", tiere.herausnehmen, !imTeam);
+  knopf("Mergen: 3 gleiche werden +1 Stern", tiere.mergen, !tiere.mergbar(w.nr));
 }
 
 // ---------- Kampf: Boss und Aufstieg ----------
@@ -595,6 +676,7 @@ function knoepfeVerbinden() {
     kampfZeichnen();
   });
   $("schmieden-knopf").addEventListener("click", schmieden);
+  $("alles-mergen").addEventListener("click", allesMergen);
   $("schmiede-knopf").addEventListener("click", schmiedeVerbessern);
   $("export-datei").addEventListener("click", exportDatei);
   $("export-text").addEventListener("click", exportText);

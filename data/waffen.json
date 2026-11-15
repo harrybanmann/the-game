@@ -18,6 +18,9 @@
     "ratioEnde": 2
   },
   "setBonusSchaden": 0.1,
+  "ruestungSet": { "2": 0.05, "4": 0.15 },
+  "sternBonus": 0.25,
+  "maxSterne": 5,
   "waffen": [
     { "id": "keule", "zeitalter": "steinzeit", "art": "nah", "name": { "gut": "Keule", "boese": "Keule" }, "schaden": 2, "leben": 15 },
     { "id": "steinaxt", "zeitalter": "steinzeit", "art": "nah", "name": { "gut": "Steinaxt", "boese": "Steinaxt" }, "schaden": 3, "leben": 10 },
@@ -26,6 +29,14 @@
     { "id": "sichel", "zeitalter": "muscheln", "art": "nah", "name": { "gut": "Sichel", "boese": "Sichel" }, "schaden": 2, "leben": 15 },
     { "id": "dreschflegel", "zeitalter": "muscheln", "art": "nah", "name": { "gut": "Dreschflegel", "boese": "Dreschflegel" }, "schaden": 3, "leben": 10 },
     { "id": "jagdbogen", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Jagdbogen", "boese": "Jagdbogen" }, "schaden": 4, "leben": 5 },
-    { "id": "harpune", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Harpune", "boese": "Harpune" }, "schaden": 5, "leben": 0 }
+    { "id": "harpune", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Harpune", "boese": "Harpune" }, "schaden": 5, "leben": 0 },
+    { "id": "fellkappe", "zeitalter": "steinzeit", "art": "helm", "name": { "gut": "Fellkappe", "boese": "Fellkappe" }, "schaden": 0, "leben": 10 },
+    { "id": "fellhandschuhe", "zeitalter": "steinzeit", "art": "handschuhe", "name": { "gut": "Fellhandschuhe", "boese": "Fellhandschuhe" }, "schaden": 1, "leben": 4 },
+    { "id": "fellweste", "zeitalter": "steinzeit", "art": "ruestung", "name": { "gut": "Fellweste", "boese": "Fellweste" }, "schaden": 0, "leben": 16 },
+    { "id": "fellstiefel", "zeitalter": "steinzeit", "art": "stiefel", "name": { "gut": "Fellstiefel", "boese": "Fellstiefel" }, "schaden": 0, "leben": 8 },
+    { "id": "strohhut", "zeitalter": "muscheln", "art": "helm", "name": { "gut": "Strohhut", "boese": "Strohhut" }, "schaden": 0, "leben": 10 },
+    { "id": "lederhandschuhe", "zeitalter": "muscheln", "art": "handschuhe", "name": { "gut": "Lederhandschuhe", "boese": "Lederhandschuhe" }, "schaden": 1, "leben": 4 },
+    { "id": "lederschurz", "zeitalter": "muscheln", "art": "ruestung", "name": { "gut": "Lederschurz", "boese": "Lederschurz" }, "schaden": 0, "leben": 16 },
+    { "id": "sandalen", "zeitalter": "muscheln", "art": "stiefel", "name": { "gut": "Sandalen", "boese": "Sandalen" }, "schaden": 0, "leben": 8 }
   ]
 }

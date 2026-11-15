@@ -3,6 +3,8 @@
   "eiChance": { "schwach": 0.02, "normal": 0.04, "elite": 0.1, "boss": 1 },
   "eiRatio": { "normal": 5, "boss": 2.5 },
   "eierLagerMax": 20,
+  "sternBonus": 0.25,
+  "maxSterne": 5,
   "schluepfSekunden": [60, 300, 900, 3600, 14400, 43200, 86400],
   "plaetzeAbLevel": [1, 10, 20, 30],
   "tiere": [

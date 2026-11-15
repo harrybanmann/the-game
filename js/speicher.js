@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 4;
+export const VERSION = 5;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -16,6 +16,8 @@ export function neueSeite(startZeitalter) {
     kampf: { index: 0, rate: 0 },
     schmiede: { stufe: 0, geschmiedet: 0 },
     waffen: { nah: null, fern: null, aktiv: "nah" },
+    ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
+    lager: [],
     tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
   };
 }
@@ -64,8 +66,23 @@ export function pruefen(stand) {
     };
     const w = seite.waffen || {};
     const waffe = (x) =>
-      x && typeof x.id === "string" ? { id: x.id, seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0) } : null;
+      x && typeof x.id === "string"
+        ? {
+            id: x.id,
+            seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0),
+            sterne: Math.max(0, Math.floor(Number(x.sterne)) || 0),
+          }
+        : null;
     seite.waffen = { nah: waffe(w.nah), fern: waffe(w.fern), aktiv: w.aktiv === "fern" ? "fern" : "nah" };
+    const r = seite.ruestung || {};
+    seite.ruestung = { helm: waffe(r.helm), handschuhe: waffe(r.handschuhe), ruestung: waffe(r.ruestung), stiefel: waffe(r.stiefel) };
+    seite.lager = (Array.isArray(seite.lager) ? seite.lager : [])
+      .map((x) => {
+        const stueck = waffe(x);
+        const anzahl = Math.floor(Number(x && x.anzahl)) || 0;
+        return stueck && anzahl > 0 ? { ...stueck, anzahl } : null;
+      })
+      .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
@@ -87,7 +104,7 @@ function tierePruefen(roh) {
   const ei = (x) => (x && typeof x.zeitalter === "string" ? { zeitalter: x.zeitalter, seltenheit: stufe(x.seltenheit) } : null);
   const sammlung = (Array.isArray(t.sammlung) ? t.sammlung : [])
     .filter((x) => x && typeof x.id === "string" && Number.isFinite(x.nr))
-    .map((x) => ({ nr: x.nr, id: x.id, seltenheit: stufe(x.seltenheit) }));
+    .map((x) => ({ nr: x.nr, id: x.id, seltenheit: stufe(x.seltenheit), sterne: stufe(x.sterne) }));
   const nummern = new Set(sammlung.map((x) => x.nr));
   const brutEi = t.brut ? ei(t.brut.ei) : null;
   return {
