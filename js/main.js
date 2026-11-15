@@ -1,10 +1,10 @@
-import { zahl, btc, dauer } from "./format.js?v=8";
-import * as speicher from "./speicher.js?v=8";
-import { kampfSystem } from "./kampf.js?v=8";
-import { waffenSystem } from "./waffen.js?v=8";
-import { tierSystem } from "./tiere.js?v=8";
-import { dungeonSystem } from "./dungeons.js?v=8";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=8";
+import { zahl, btc, dauer } from "./format.js?v=9";
+import * as speicher from "./speicher.js?v=9";
+import { kampfSystem } from "./kampf.js?v=9";
+import { waffenSystem } from "./waffen.js?v=9";
+import { tierSystem } from "./tiere.js?v=9";
+import { dungeonSystem } from "./dungeons.js?v=9";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=9";
 
 const $ = (id) => document.getElementById(id);
 

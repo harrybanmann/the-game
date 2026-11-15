@@ -8,7 +8,7 @@
   "levelBonus": 0.04,
   "sternBonus": 0.25,
   "maxSterne": 5,
-  "punkte": { "proDurchlauf": 2, "proStufen": 5, "meilenstein": 5 },
+  "punkte": { "proDurchlauf": 5, "proStufen": 5, "meilenstein": 5 },
   "liste": [
     { "id": "steinwurf", "seltenheit": 0, "name": { "gut": "Steinwurf", "boese": "Steinwurf" }, "art": "schaden", "wert": 3, "abklingen": 4, "text": "Wirft alle 4 Sek. einen Stein: 3-facher Schaden." },
     { "id": "kraeuter", "seltenheit": 1, "name": { "gut": "Heilkräuter", "boese": "Gestohlene Kräuter" }, "art": "heilung", "wert": 0.12, "abklingen": 6, "text": "Heilt alle 6 Sek. 12 % Leben." },
