@@ -91,6 +91,13 @@ export function tierSystem(api) {
       t().eier.push(ei);
       return { seltenheit: api.seltenheiten()[ei.seltenheit] };
     },
+    // Für Dungeon-Belohnungen: ein sicheres Ei. plus hebt die Seltenheit an.
+    eiGeben(ratio, plus) {
+      const hoechste = api.seltenheiten().length - 1;
+      const ei = { zeitalter: api.zeitalterId(), seltenheit: Math.min(hoechste, wuerfeln(ratio) + plus) };
+      t().eier.push(ei);
+      return api.seltenheiten()[ei.seltenheit];
+    },
     // Brutkasten weiterlaufen lassen; gibt die neu geschlüpften Tiere zurück.
     schritt(jetzt) {
       const neu = [];

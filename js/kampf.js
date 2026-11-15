@@ -6,6 +6,7 @@ export function kampfSystem(api) {
   let spielerLeben = 0;
   let takt = 0;
   let seitLetztemSieg = 0;
+  let traenkeDabei = 0;
 
   function stellen(vorlage, istBoss, typ) {
     gegner = {
@@ -57,7 +58,15 @@ export function kampfSystem(api) {
     gegner.leben -= api.schaden();
     if (gegner.leben <= 0) return sieg();
     spielerLeben -= gegner.schaden;
-    if (spielerLeben <= 0) niederlage();
+    if (spielerLeben <= 0) return niederlage();
+    // Heiltrank: nur im Boss-Kampf, automatisch unter der Schwelle.
+    const regel = api.trank();
+    const max = api.maxLeben();
+    if (gegner.boss && traenkeDabei > 0 && spielerLeben < max * regel.schwelle) {
+      spielerLeben = Math.min(max, spielerLeben + max * regel.heilung);
+      traenkeDabei -= 1;
+      api.seite().traenke = Math.max(0, api.seite().traenke - 1);
+    }
   }
 
   return {
@@ -77,6 +86,7 @@ export function kampfSystem(api) {
       const boss = api.gegnerDaten().boss;
       if (!boss || (gegner && gegner.boss)) return;
       takt = 0;
+      traenkeDabei = Math.min(api.seite().traenke, api.trank().bossMax);
       stellen(boss, true, "boss");
     },
     neuStarten() {
@@ -87,7 +97,12 @@ export function kampfSystem(api) {
     zustand() {
       if (!gegner) naechster();
       const max = api.maxLeben();
-      return { gegner, spielerLeben: Math.min(max, Math.max(0, spielerLeben)), maxLeben: max };
+      return {
+        gegner,
+        spielerLeben: Math.min(max, Math.max(0, spielerLeben)),
+        maxLeben: max,
+        traenkeDabei: gegner.boss ? traenkeDabei : null,
+      };
     },
   };
 }

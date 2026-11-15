@@ -155,6 +155,15 @@ export function waffenSystem(api) {
       s().schmiede.geschmiedet += 1;
       return { neu: werte(neu), besser };
     },
+    // Für Dungeon-Belohnungen: wie Schmieden, aber ohne Kosten.
+    schmiedenGratis() {
+      const auswahl = d().waffen.filter((w) => w.zeitalter === api.zeitalterId());
+      if (!auswahl.length) return null;
+      const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];
+      const neu = { id: vorlage.id, seltenheit: wuerfeln(), sterne: 0 };
+      const besser = einsortieren(neu);
+      return { neu: werte(neu), besser };
+    },
     stufeKaufen() {
       if (stufeVoll() || !api.bezahlen(stufeKosten())) return false;
       s().schmiede.stufe += 1;

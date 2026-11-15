@@ -3,6 +3,7 @@ import * as speicher from "./speicher.js";
 import { kampfSystem } from "./kampf.js";
 import { waffenSystem } from "./waffen.js";
 import { tierSystem } from "./tiere.js";
+import { dungeonSystem } from "./dungeons.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -11,6 +12,7 @@ let stand; // Spielstand
 let kampf; // Kampf-System
 let waffen; // Schmiede und Waffen
 let tiere; // Tiere und Eier
+let dungeons; // Dungeons und Tickets
 let gewaehltesTier = null;
 let ansicht = "sammeln"; // oder "kampf"
 let letzterTick = Date.now();
@@ -25,15 +27,16 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
     json("data/gegner.json"),
     json("data/waffen.json"),
     json("data/tiere.json"),
+    json("data/dungeons.json"),
   ]);
-  return { einstellungen, zeitalter, upgrades, gegner, waffen: waffenDaten, tiere: tierDaten };
+  return { einstellungen, zeitalter, upgrades, gegner, waffen: waffenDaten, tiere: tierDaten, dungeons: dungeonDaten };
 }
 
 // ---------- Rechnen ----------
@@ -114,6 +117,7 @@ function tick() {
     kampf.schritt(sekunden);
   }
 
+  dungeons.schritt();
   for (const tier of tiere.schritt(jetzt)) {
     kurzMeldung("Geschlüpft: " + tier.seltenheit.name + " – " + tier.name);
     if (!$("tiere-fenster").hidden) tiereZeichnen();
@@ -170,7 +174,9 @@ function anzeigeAktualisieren() {
 function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
-  $("spieler-level").textContent = "Level " + s.level + " · XP " + zahl(s.xp) + "/" + zahl(xpBedarf(s.level));
+  const trank = daten.dungeons.heiltrank;
+  $("spieler-level").textContent =
+    "Level " + s.level + " · XP " + zahl(s.xp) + "/" + zahl(xpBedarf(s.level)) + " · Heiltränke " + s.traenke + "/" + trank.max;
   $("spieler-werte").textContent = zahl(schaden()) + " Schaden";
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
   $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
@@ -532,6 +538,39 @@ function tiereZeichnen() {
   knopf("Mergen: 3 gleiche werden +1 Stern", tiere.mergen, !tiere.mergbar(w.nr));
 }
 
+// ---------- Dungeons ----------
+
+function dungeonErgebnis(text) {
+  if (text) $("dungeon-ergebnis").textContent = text;
+  dungeonsZeichnen();
+  anzeigeAktualisieren();
+  sichern();
+}
+
+function dungeonsZeichnen() {
+  const box = $("dungeon-liste");
+  box.replaceChildren();
+  for (const art of daten.dungeons.arten) {
+    const i = dungeons.info(art.id);
+    const karte = el("div", "dungeon");
+    karte.append(
+      el("div", "dungeon-name", art.name),
+      el("div", "hinweis", art.text),
+      el("div", "dungeon-stand", "Tickets " + i.tickets + "/" + daten.dungeons.ticketsMax + " · nächste Stufe " + i.stufe)
+    );
+    const kampfKnopf = el("button", "knopf klein", "Stufe " + i.stufe + " kämpfen");
+    kampfKnopf.type = "button";
+    kampfKnopf.disabled = i.tickets <= 0;
+    kampfKnopf.addEventListener("click", () => dungeonErgebnis(dungeons.kaempfen(art.id)));
+    const autoKnopf = el("button", "knopf klein", i.stufe > 1 ? "Auto-Clear Stufe " + (i.stufe - 1) : "Auto-Clear (noch nichts geschafft)");
+    autoKnopf.type = "button";
+    autoKnopf.disabled = i.stufe <= 1 || i.tickets <= 0;
+    autoKnopf.addEventListener("click", () => dungeonErgebnis(dungeons.autoClear(art.id)));
+    karte.append(kampfKnopf, autoKnopf);
+    box.append(karte);
+  }
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
@@ -675,6 +714,12 @@ function knoepfeVerbinden() {
     kampf.bossStarten();
     kampfZeichnen();
   });
+  $("dungeons-knopf").addEventListener("click", () => {
+    fensterSchliessen("menue");
+    $("dungeon-ergebnis").textContent = "";
+    dungeonsZeichnen();
+    fensterZeigen("dungeon-fenster");
+  });
   $("schmieden-knopf").addEventListener("click", schmieden);
   $("alles-mergen").addEventListener("click", allesMergen);
   $("schmiede-knopf").addEventListener("click", schmiedeVerbessern);
@@ -718,6 +763,7 @@ async function start() {
     gutschreiben,
     xpGeben,
     ereignis: kampfEreignis,
+    trank: () => daten.dungeons.heiltrank,
   });
   waffen = waffenSystem({
     daten: () => daten.waffen,
@@ -734,6 +780,19 @@ async function start() {
     zeitalterId: () => zeitalter().id,
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     level: () => seite().level,
+  });
+  dungeons = dungeonSystem({
+    daten: () => daten.dungeons,
+    seite,
+    spieler: () => ({ schaden: schaden(), leben: maxLeben() }),
+    gegnerBasis: () => {
+      const typen = gegnerDaten().typen;
+      return { leben: typen.elite.leben, schaden: typen.elite.schaden, beute: typen.normal.beute };
+    },
+    eiGeben: (ratio, plus) => tiere.eiGeben(ratio, plus),
+    schmiedenGratis: () => waffen.schmiedenGratis(),
+    gutschreiben,
+    mengeText: (menge) => zahl(menge) + " " + waehrung().name,
   });
   knoepfeVerbinden();
   allesZeichnen();

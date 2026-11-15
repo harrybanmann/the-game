@@ -77,7 +77,8 @@
       <textarea id="import-text" rows="4" placeholder="Spielstand-Text hier einfügen"></textarea>
       <button id="import-knopf" class="knopf" type="button">Text importieren</button>
       <h3>Zentrale</h3>
-      <p class="hinweis">Seitenwechsel Gut/Böse, Haushalt, Tech-Baum und Dungeons kommen später.</p>
+      <button id="dungeons-knopf" class="knopf" type="button">Dungeons</button>
+      <p class="hinweis">Seitenwechsel Gut/Böse, Haushalt und Tech-Baum kommen später.</p>
       <button id="neu-anfangen" class="knopf rot" type="button">Neu anfangen</button>
       <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
     </div>
@@ -114,6 +115,16 @@
       <div id="tier-sammlung" class="tier-reihe"></div>
       <div id="tier-aktionen"></div>
       <button class="knopf rot" type="button" data-schliessen="tiere-fenster">Zurück</button>
+    </div>
+  </div>
+
+  <div id="dungeon-fenster" class="fenster" hidden>
+    <div class="karte">
+      <h2>Dungeons</h2>
+      <p class="hinweis">Jeden Tag gibt es 3 neue Tickets je Dungeon, höchstens 6. Ein Ticket ist ein Durchlauf und bringt immer eine Belohnung.</p>
+      <p id="dungeon-ergebnis" class="ergebnis"></p>
+      <div id="dungeon-liste"></div>
+      <button class="knopf rot" type="button" data-schliessen="dungeon-fenster">Zurück</button>
     </div>
   </div>
 

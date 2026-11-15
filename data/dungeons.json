@@ -1,0 +1,17 @@
+{
+  "_hinweis": "Regeln von Harry (Dungeons-Chat): 3 Arten, je 3 Tickets pro Tag, höchstens 6, jede Stufe ca. +10 %, Auto-Clear für geschaffte Stufen, Meilenstein alle 10 Stufen. Die übrigen Zahlen sind Startwerte (Vorschlag).",
+  "ticketsProTag": 3,
+  "ticketsMax": 6,
+  "stufenFaktor": 1.1,
+  "meilensteinAlle": 10,
+  "gegner": { "lebenFaktor": 2, "schadenFaktor": 1 },
+  "heiltrank": { "max": 5, "bossMax": 3, "schwelle": 0.3, "heilung": 0.3 },
+  "ei": { "ratioStart": 5, "ratioEnde": 2, "ratioProStufe": 0.1 },
+  "ausruestung": { "stuecke": 3, "meilensteinStuecke": 2 },
+  "schatz": { "beuteFaktor": 30, "traenke": 1, "meilensteinTraenke": 2 },
+  "arten": [
+    { "id": "eier", "name": "Eier-Höhle", "text": "Belohnung: ein Ei. Höhere Stufe = seltenere Eier." },
+    { "id": "ausruestung", "name": "Waffenkammer", "text": "Belohnung: 3 geschmiedete Stücke, ohne Kosten." },
+    { "id": "schatz", "name": "Schatzkammer", "text": "Belohnung: Währung und ein Heiltrank." }
+  ]
+}

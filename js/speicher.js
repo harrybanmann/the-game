@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 5;
+export const VERSION = 6;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -18,6 +18,8 @@ export function neueSeite(startZeitalter) {
     waffen: { nah: null, fern: null, aktiv: "nah" },
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
     lager: [],
+    traenke: 0,
+    dungeons: { letzterTag: "", tickets: {}, stufe: {} },
     tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
   };
 }
@@ -84,6 +86,21 @@ export function pruefen(stand) {
       })
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
+    seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    const du = seite.dungeons || {};
+    const zahlen = (roh, standard, mindestens) => {
+      const aus = {};
+      for (const art of ["eier", "ausruestung", "schatz"]) {
+        const n = Math.floor(Number(roh && roh[art]));
+        aus[art] = Number.isFinite(n) && n >= mindestens ? n : standard;
+      }
+      return aus;
+    };
+    seite.dungeons = {
+      letzterTag: typeof du.letzterTag === "string" ? du.letzterTag : "",
+      tickets: zahlen(du.tickets, 3, 0),
+      stufe: zahlen(du.stufe, 1, 1),
+    };
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
       seite.waehrungen[k] = Number.isFinite(n) && n > 0 ? n : 0;

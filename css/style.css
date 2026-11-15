@@ -336,3 +336,14 @@ textarea {
 .lager-name { font-size: 14px; }
 .lager-zeile .knopf.klein { width: auto; margin: 0; padding: 6px 10px; }
 .karte > * { flex-shrink: 0; }
+
+/* ---------- Dungeons ---------- */
+#dungeon-liste { display: flex; flex-direction: column; gap: 10px; }
+.dungeon {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 10px; background: #121829;
+  border: 3px solid var(--panel-hell); border-radius: 16px;
+}
+.dungeon-name { font-size: 20px; color: var(--zweit); }
+.dungeon-stand { font-size: 15px; }
+#dungeon-ergebnis { color: var(--zweit); font-size: 16px; }
