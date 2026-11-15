@@ -280,3 +280,24 @@ textarea {
   display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center;
   background: #14110f; font-size: 18px;
 }
+
+/* ---------- Schmiede und Waffen ---------- */
+#waffen-plaetze { display: flex; gap: 10px; }
+.waffe {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px; text-align: center;
+  background: #121829;
+  border: 4px solid var(--panel-hell);
+  border-radius: 16px;
+}
+.waffe.glanz { box-shadow: 0 0 14px 2px #ffd54a; }
+.waffe-art { font-size: 13px; opacity: 0.8; }
+.waffe-name { font-size: 18px; }
+.waffe-selten { font-size: 14px; }
+.waffe-werte { font-size: 13px; }
+.waffe-leer { font-size: 14px; opacity: 0.7; padding: 22px 0; }
+.knopf.klein { padding: 6px; font-size: 14px; margin-top: 4px; }
+.ergebnis { margin: 0; min-height: 22px; font-size: 17px; text-align: center; }
+#schmiede-chancen { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px; font-size: 14px; }
+.chance { display: flex; justify-content: space-between; }

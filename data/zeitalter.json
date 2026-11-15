@@ -2,6 +2,7 @@
   {
     "id": "steinzeit",
     "nummer": 1,
+    "staerke": 1,
     "name": "Steinzeit-Tausch",
     "farben": {
       "haupt": "#8B5A2B",
@@ -20,6 +21,7 @@
   {
     "id": "muscheln",
     "nummer": 2,
+    "staerke": 3,
     "name": "Muscheln und erste Bauern",
     "farben": {
       "haupt": "#4FA7B5",

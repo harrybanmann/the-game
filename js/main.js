@@ -1,12 +1,14 @@
 import { zahl, btc, dauer } from "./format.js";
 import * as speicher from "./speicher.js";
 import { kampfSystem } from "./kampf.js";
+import { waffenSystem } from "./waffen.js";
 
 const $ = (id) => document.getElementById(id);
 
 let daten; // { einstellungen, zeitalter[], upgrades[], gegner{} }
 let stand; // Spielstand
 let kampf; // Kampf-System
+let waffen; // Schmiede und Waffen
 let ansicht = "sammeln"; // oder "kampf"
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
@@ -20,13 +22,14 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
     json("data/gegner.json"),
+    json("data/waffen.json"),
   ]);
-  return { einstellungen, zeitalter, upgrades, gegner };
+  return { einstellungen, zeitalter, upgrades, gegner, waffen: waffenDaten };
 }
 
 // ---------- Rechnen ----------
@@ -49,8 +52,11 @@ function summe(wirkung) {
 
 const klickWert = () => zeitalter().klickGrundwert + summe("klick");
 const proSekunde = () => summe("proSekunde");
-const schaden = () => daten.einstellungen.kampf.grundSchaden + summe("schaden");
-const maxLeben = () => daten.einstellungen.kampf.grundLeben + summe("leben");
+function schaden() {
+  const b = waffen.bonus();
+  return (daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden) * (1 + b.set);
+}
+const maxLeben = () => daten.einstellungen.kampf.grundLeben + summe("leben") + waffen.bonus().leben;
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
   Math.round(daten.einstellungen.level.grundXp * Math.pow(daten.einstellungen.level.faktor, level - 1));
@@ -60,6 +66,12 @@ function gutschreiben(menge) {
   const s = seite();
   s.waehrungen[waehrung().id] = guthaben() + menge;
   s.gesamtVerdient += menge;
+}
+
+function bezahlen(preis) {
+  if (guthaben() < preis) return false;
+  seite().waehrungen[waehrung().id] = guthaben() - preis;
+  return true;
 }
 
 function xpGeben(menge) {
@@ -134,6 +146,7 @@ function anzeigeAktualisieren() {
     knopf.disabled = voll || guthaben() < kosten(u);
   }
   if (ansicht === "kampf") kampfZeichnen();
+  if (!$("waffen-fenster").hidden) waffenKnoepfe();
 }
 
 function kampfZeichnen() {
@@ -208,7 +221,10 @@ function leisteZeichnen() {
     knopf.addEventListener("click", () => {
       if (k.id === "menue") fensterZeigen("menue");
       else if (k.id === "kaempfen") ansichtSetzen(ansicht === "kampf" ? "sammeln" : "kampf");
-      else kurzMeldung(k.name + " kommt in einer späteren Version.");
+      else if (k.fenster) {
+        waffenZeichnen();
+        fensterZeigen(k.fenster);
+      } else kurzMeldung(k.name + " kommt in einer späteren Version.");
     });
     leiste.append(knopf);
   }
@@ -234,6 +250,93 @@ function verdienen(ereignis) {
   flug.style.top = ereignis.clientY - rahmen.top + "px";
   $("szene").append(flug);
   flug.addEventListener("animationend", () => flug.remove());
+}
+
+// ---------- Schmiede und Waffen ----------
+
+const prozent = (anteil) => (anteil * 100).toLocaleString("de-DE", { maximumSignificantDigits: 2 }) + " %";
+
+function waffenKarte(art, titel) {
+  const w = waffen.werte(seite().waffen[art]);
+  const karte = el("div", "waffe");
+  karte.append(el("div", "waffe-art", titel));
+  if (!w) {
+    karte.append(el("div", "waffe-leer", "Noch keine Waffe"));
+    return karte;
+  }
+  karte.style.borderColor = w.seltenheit.farbe;
+  if (w.seltenheit.glanz) karte.classList.add("glanz");
+  const selten = el("div", "waffe-selten", w.seltenheit.name);
+  selten.style.color = w.seltenheit.farbe;
+  const aktiv = waffen.aktiveArt() === art;
+  const knopf = el("button", "knopf klein", aktiv ? "Schlägt zu" : "Auswählen");
+  knopf.type = "button";
+  knopf.disabled = aktiv;
+  knopf.addEventListener("click", () => {
+    waffen.aktivSetzen(art);
+    waffenZeichnen();
+    anzeigeAktualisieren();
+    sichern();
+  });
+  karte.append(
+    el("div", "waffe-name", w.name),
+    selten,
+    el("div", "waffe-werte", "+" + zahl(w.schaden) + " Schaden"),
+    el("div", "waffe-werte", "+" + zahl(w.leben) + " Leben"),
+    knopf
+  );
+  return karte;
+}
+
+function waffenKnoepfe() {
+  const voll = waffen.stufeVoll();
+  $("schmieden-knopf").textContent = "Schmieden (" + zahl(waffen.schmiedeKosten()) + " " + waehrung().name + ")";
+  $("schmieden-knopf").disabled = guthaben() < waffen.schmiedeKosten();
+  $("schmiede-knopf").textContent = voll
+    ? "Schmiede ist auf Maximum"
+    : "Schmiede verbessern (" + zahl(waffen.stufeKosten()) + " " + waehrung().name + ")";
+  $("schmiede-knopf").disabled = voll || guthaben() < waffen.stufeKosten();
+}
+
+function waffenZeichnen() {
+  $("waffen-plaetze").replaceChildren(waffenKarte("nah", "Nahkampf"), waffenKarte("fern", "Fernkampf"));
+  const b = waffen.bonus();
+  const bonusText = "+" + Math.round(daten.waffen.setBonusSchaden * 100) + " % Schaden";
+  $("waffen-set").textContent =
+    b.set > 0
+      ? "Waffen-Set aktiv: " + bonusText
+      : "Waffen-Set: Nah- und Fernkampf-Waffe aus demselben Zeitalter geben " + bonusText + ".";
+  $("schmiede-stufe").textContent = "Schmiede Stufe " + seite().schmiede.stufe;
+  const liste = $("schmiede-chancen");
+  liste.replaceChildren();
+  waffen.chancen().forEach((chance, i) => {
+    const s = daten.waffen.seltenheiten[i];
+    const zeile = el("div", "chance");
+    const name = el("span", null, s.name);
+    name.style.color = s.farbe;
+    zeile.append(name, el("span", null, prozent(chance)));
+    liste.append(zeile);
+  });
+  waffenKnoepfe();
+}
+
+function schmieden() {
+  const r = waffen.schmieden();
+  if (!r) return;
+  const text = $("schmiede-ergebnis");
+  text.textContent =
+    r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – ausgerüstet!" : " – nicht besser, eingeschmolzen.");
+  text.style.color = r.neu.seltenheit.farbe;
+  waffenZeichnen();
+  anzeigeAktualisieren();
+  sichern();
+}
+
+function schmiedeVerbessern() {
+  if (!waffen.stufeKaufen()) return;
+  waffenZeichnen();
+  anzeigeAktualisieren();
+  sichern();
 }
 
 // ---------- Kampf: Boss und Aufstieg ----------
@@ -371,6 +474,8 @@ function knoepfeVerbinden() {
     kampf.bossStarten();
     kampfZeichnen();
   });
+  $("schmieden-knopf").addEventListener("click", schmieden);
+  $("schmiede-knopf").addEventListener("click", schmiedeVerbessern);
   $("export-datei").addEventListener("click", exportDatei);
   $("export-text").addEventListener("click", exportText);
   $("import-knopf").addEventListener("click", () => importieren($("import-text").value));
@@ -411,6 +516,14 @@ async function start() {
     gutschreiben,
     xpGeben,
     ereignis: kampfEreignis,
+  });
+  waffen = waffenSystem({
+    daten: () => daten.waffen,
+    seite,
+    seitenName: () => stand.aktiveSeite,
+    zeitalterId: () => zeitalter().id,
+    zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
+    bezahlen,
   });
   knoepfeVerbinden();
   allesZeichnen();

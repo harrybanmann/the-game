@@ -1,0 +1,31 @@
+{
+  "_hinweis": "Zahlen und Namen sind Startwerte (Vorschlag). Werte sind für Gut und Böse gleich, nur die Namen dürfen sich unterscheiden.",
+  "seltenheiten": [
+    { "id": "gewoehnlich", "name": "Gewöhnlich", "farbe": "#9aa3ad", "faktor": 1 },
+    { "id": "ungewoehnlich", "name": "Ungewöhnlich", "farbe": "#4fc46a", "faktor": 1.5 },
+    { "id": "selten", "name": "Selten", "farbe": "#4a9cf0", "faktor": 2.25 },
+    { "id": "episch", "name": "Episch", "farbe": "#a565e8", "faktor": 3.5 },
+    { "id": "legendaer", "name": "Legendär", "farbe": "#f39a2b", "faktor": 5 },
+    { "id": "mythisch", "name": "Mythisch", "farbe": "#e0483f", "faktor": 7.5 },
+    { "id": "goettlich", "name": "Göttlich", "farbe": "#ffd54a", "faktor": 11, "glanz": true }
+  ],
+  "schmiede": {
+    "kosten": 20,
+    "stufenKosten": 100,
+    "stufenFaktor": 1.6,
+    "maxStufe": 20,
+    "ratioStart": 5,
+    "ratioEnde": 2
+  },
+  "setBonusSchaden": 0.1,
+  "waffen": [
+    { "id": "keule", "zeitalter": "steinzeit", "art": "nah", "name": { "gut": "Keule", "boese": "Keule" }, "schaden": 2, "leben": 15 },
+    { "id": "steinaxt", "zeitalter": "steinzeit", "art": "nah", "name": { "gut": "Steinaxt", "boese": "Steinaxt" }, "schaden": 3, "leben": 10 },
+    { "id": "steinschleuder", "zeitalter": "steinzeit", "art": "fern", "name": { "gut": "Steinschleuder", "boese": "Steinschleuder" }, "schaden": 4, "leben": 5 },
+    { "id": "wurfspeer", "zeitalter": "steinzeit", "art": "fern", "name": { "gut": "Wurfspeer", "boese": "Wurfspeer" }, "schaden": 5, "leben": 0 },
+    { "id": "sichel", "zeitalter": "muscheln", "art": "nah", "name": { "gut": "Sichel", "boese": "Sichel" }, "schaden": 2, "leben": 15 },
+    { "id": "dreschflegel", "zeitalter": "muscheln", "art": "nah", "name": { "gut": "Dreschflegel", "boese": "Dreschflegel" }, "schaden": 3, "leben": 10 },
+    { "id": "jagdbogen", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Jagdbogen", "boese": "Jagdbogen" }, "schaden": 4, "leben": 5 },
+    { "id": "harpune", "zeitalter": "muscheln", "art": "fern", "name": { "gut": "Harpune", "boese": "Harpune" }, "schaden": 5, "leben": 0 }
+  ]
+}

@@ -21,7 +21,7 @@
   },
   "leiste": [
     { "id": "kaempfen", "name": "Kämpfen", "symbol": "⚔", "nameZurueck": "Sammeln", "symbolZurueck": "⛏", "offen": true },
-    { "id": "waffen", "name": "Waffen", "symbol": "🛡", "offen": false },
+    { "id": "waffen", "name": "Waffen", "symbol": "🛡", "fenster": "waffen-fenster", "offen": true },
     { "id": "tiere", "name": "Tiere", "symbol": "🥚", "offen": false },
     { "id": "farm", "name": "Farm", "symbol": "📈", "offen": false },
     { "id": "menue", "name": "Menü", "symbol": "☰", "offen": true }

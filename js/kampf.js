@@ -84,7 +84,8 @@ export function kampfSystem(api) {
     },
     zustand() {
       if (!gegner) naechster();
-      return { gegner, spielerLeben: Math.max(0, spielerLeben), maxLeben: api.maxLeben() };
+      const max = api.maxLeben();
+      return { gegner, spielerLeben: Math.min(max, Math.max(0, spielerLeben)), maxLeben: max };
     },
   };
 }

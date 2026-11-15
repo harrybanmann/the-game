@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 2;
+export const VERSION = 3;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -14,6 +14,8 @@ export function neueSeite(startZeitalter) {
     level: 1,
     xp: 0,
     kampf: { index: 0, rate: 0 },
+    schmiede: { stufe: 0, geschmiedet: 0 },
+    waffen: { nah: null, fern: null, aktiv: "nah" },
   };
 }
 
@@ -54,6 +56,15 @@ export function pruefen(stand) {
       index: Math.max(0, Math.floor(Number(k.index)) || 0),
       rate: Math.max(0, Number(k.rate) || 0),
     };
+    const sch = seite.schmiede || {};
+    seite.schmiede = {
+      stufe: Math.max(0, Math.floor(Number(sch.stufe)) || 0),
+      geschmiedet: Math.max(0, Math.floor(Number(sch.geschmiedet)) || 0),
+    };
+    const w = seite.waffen || {};
+    const waffe = (x) =>
+      x && typeof x.id === "string" ? { id: x.id, seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0) } : null;
+    seite.waffen = { nah: waffe(w.nah), fern: waffe(w.fern), aktiv: w.aktiv === "fern" ? "fern" : "nah" };
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
       seite.waehrungen[k] = Number.isFinite(n) && n > 0 ? n : 0;
