@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 1;
+export const VERSION = 2;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -11,6 +11,9 @@ export function neueSeite(startZeitalter) {
     waehrungen: {},
     upgrades: {},
     gesamtVerdient: 0,
+    level: 1,
+    xp: 0,
+    kampf: { index: 0, rate: 0 },
   };
 }
 
@@ -44,6 +47,13 @@ export function pruefen(stand) {
     seite.waehrungen = seite.waehrungen || {};
     seite.upgrades = seite.upgrades || {};
     seite.gesamtVerdient = Number(seite.gesamtVerdient) || 0;
+    seite.level = Math.max(1, Math.floor(Number(seite.level)) || 1);
+    seite.xp = Math.max(0, Number(seite.xp) || 0);
+    const k = seite.kampf || {};
+    seite.kampf = {
+      index: Math.max(0, Math.floor(Number(k.index)) || 0),
+      rate: Math.max(0, Number(k.rate) || 0),
+    };
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
       seite.waehrungen[k] = Number.isFinite(n) && n > 0 ? n : 0;
@@ -54,6 +64,7 @@ export function pruefen(stand) {
     }
   }
   if (!Number.isFinite(stand.zuletztGespeichert)) stand.zuletztGespeichert = Date.now();
+  stand.version = VERSION; // ältere Spielstände sind jetzt ergänzt
   return null;
 }
 

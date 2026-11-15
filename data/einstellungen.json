@@ -10,8 +10,17 @@
   "speichern": {
     "alleSekunden": 10
   },
+  "kampf": {
+    "grundSchaden": 2,
+    "grundLeben": 20,
+    "sekundenProSchlag": 1
+  },
+  "level": {
+    "grundXp": 10,
+    "faktor": 1.25
+  },
   "leiste": [
-    { "id": "kaempfen", "name": "Kämpfen", "symbol": "⚔", "offen": false },
+    { "id": "kaempfen", "name": "Kämpfen", "symbol": "⚔", "nameZurueck": "Sammeln", "symbolZurueck": "⛏", "offen": true },
     { "id": "waffen", "name": "Waffen", "symbol": "🛡", "offen": false },
     { "id": "tiere", "name": "Tiere", "symbol": "🥚", "offen": false },
     { "id": "farm", "name": "Farm", "symbol": "📈", "offen": false },

@@ -9,6 +9,7 @@
   --knopf-rand: #7cc0ff;
   --knopf-schatten: #1f5796;
   --btc: #F7931A;
+  --symbol: #6f7780;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,7 +30,7 @@ button, textarea, input { font: inherit; color: inherit; }
 [hidden] { display: none !important; }
 
 /* Weiße Schrift mit dunkler Kontur */
-#kopf, .rund-name, #verdienen-text, h2 {
+#kopf, .rund-name, #verdienen-text, h2, #spieler-level, .kaempfer-name, .balken span {
   text-shadow: -2px 0 var(--umriss), 2px 0 var(--umriss), 0 -2px var(--umriss), 0 3px var(--umriss),
     -2px -2px var(--umriss), 2px -2px var(--umriss), -2px 2px var(--umriss), 2px 2px var(--umriss);
 }
@@ -68,7 +69,7 @@ button, textarea, input { font: inherit; color: inherit; }
 /* ---------- Platzhalter-Symbol: Feuerstein ---------- */
 .stein {
   display: inline-block;
-  background: #6f7780;
+  background: var(--symbol);
   border: 4px solid var(--umriss);
   border-radius: 46% 54% 38% 62% / 58% 40% 60% 42%;
   box-shadow: inset -6px -6px 0 rgba(0, 0, 0, 0.22), inset 5px 5px 0 rgba(255, 255, 255, 0.28);
@@ -131,6 +132,47 @@ button, textarea, input { font: inherit; color: inherit; }
 @keyframes hoch {
   to { transform: translate(-50%, -160%); opacity: 0; }
 }
+
+/* ---------- Kampf ---------- */
+.ansicht { position: relative; z-index: 1; }
+#ansicht-kampf {
+  width: 100%; height: 100%;
+  padding: 10px 14px 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px;
+}
+#spieler-level { font-size: 16px; }
+.arena { width: 100%; display: flex; justify-content: space-around; align-items: flex-end; gap: 12px; }
+.kaempfer { flex: 1 1 0; max-width: 150px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.kaempfer-name { font-size: 17px; text-align: center; min-height: 20px; }
+.kaempfer-werte { font-size: 13px; color: var(--umriss); }
+.figur {
+  position: relative;
+  width: 64px; height: 84px;
+  border: 4px solid var(--umriss);
+  border-radius: 44% 44% 28% 28%;
+}
+.figur.spieler { background: var(--knopf); }
+.figur.spieler::after {
+  content: ""; position: absolute; right: -16px; bottom: 8px;
+  width: 34px; height: 40px;
+  background: var(--zweit); border: 4px solid var(--umriss);
+  border-radius: 20% 20% 50% 50%;
+}
+.figur.gegner { background: #4a3b55; border-radius: 50% 50% 28% 28%; }
+.figur.gegner::after {
+  content: ""; position: absolute; left: 12px; right: 12px; top: 22px; height: 12px;
+  background: #fff; border: 3px solid var(--umriss); border-radius: 8px;
+}
+.figur.gegner.boss { width: 86px; height: 108px; background: #b3342e; }
+.balken {
+  position: relative; width: 100%; height: 22px;
+  background: #121829; border: 3px solid var(--umriss); border-radius: 999px; overflow: hidden;
+}
+.fuellung { height: 100%; width: 100%; background: #4fc46a; transition: width 0.15s; }
+.fuellung.rot { background: #e0564c; }
+.balken span { position: absolute; inset: 0; text-align: center; font-size: 13px; line-height: 16px; }
+#boss-knopf { max-width: 340px; font-size: 16px; padding: 9px; }
+.knopf:disabled { background: #5d6680; border-color: #8089a3; box-shadow: 0 5px 0 #3a4159; opacity: 0.9; cursor: default; }
 
 /* ---------- Upgrades ---------- */
 #upgrades {

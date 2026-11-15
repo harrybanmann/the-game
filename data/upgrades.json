@@ -1,9 +1,9 @@
 [
   {
     "id": "faustkeil",
-    "zeitalter": "steinzeit",
-    "name": "Besserer Faustkeil",
-    "text": "+1 Feuerstein pro Tippen",
+    "name": "Besseres Werkzeug",
+    "namen": { "steinzeit": "Besserer Faustkeil", "muscheln": "Besseres Netz" },
+    "text": "+1 {w} pro Tippen",
     "wirkung": "klick",
     "wertProStufe": 1,
     "grundKosten": 25,
@@ -12,13 +12,34 @@
   },
   {
     "id": "sammler",
-    "zeitalter": "steinzeit",
     "name": "Sammler",
-    "text": "+0,5 Feuerstein pro Sekunde",
+    "text": "+0,5 {w} pro Sekunde",
     "wirkung": "proSekunde",
     "wertProStufe": 0.5,
     "grundKosten": 15,
     "kostenFaktor": 1.15,
+    "maxStufe": 100
+  },
+  {
+    "id": "keule",
+    "name": "Stärkere Waffe",
+    "namen": { "steinzeit": "Stärkere Keule", "muscheln": "Stärkerer Speer" },
+    "text": "+1 Schaden im Kampf",
+    "wirkung": "schaden",
+    "wertProStufe": 1,
+    "grundKosten": 30,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100
+  },
+  {
+    "id": "fell",
+    "name": "Mehr Ausdauer",
+    "namen": { "steinzeit": "Dickeres Fell", "muscheln": "Lederweste" },
+    "text": "+5 Leben im Kampf",
+    "wirkung": "leben",
+    "wertProStufe": 5,
+    "grundKosten": 30,
+    "kostenFaktor": 1.2,
     "maxStufe": 100
   }
 ]

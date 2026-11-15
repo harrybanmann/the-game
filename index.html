@@ -33,10 +33,30 @@
       <div class="berg berg-1" aria-hidden="true"></div>
       <div class="berg berg-2" aria-hidden="true"></div>
       <div class="boden" aria-hidden="true"></div>
-      <button id="verdienen" type="button">
-        <span class="stein gross" aria-hidden="true"></span>
-        <span id="verdienen-text"></span>
-      </button>
+      <div id="ansicht-sammeln" class="ansicht">
+        <button id="verdienen" type="button">
+          <span class="stein gross" aria-hidden="true"></span>
+          <span id="verdienen-text"></span>
+        </button>
+      </div>
+      <div id="ansicht-kampf" class="ansicht" hidden>
+        <div id="spieler-level"></div>
+        <div class="arena">
+          <div class="kaempfer">
+            <div class="kaempfer-name">Du</div>
+            <div class="figur spieler" aria-hidden="true"></div>
+            <div class="balken"><div id="spieler-balken" class="fuellung"></div><span id="spieler-leben"></span></div>
+            <div id="spieler-werte" class="kaempfer-werte"></div>
+          </div>
+          <div class="kaempfer">
+            <div id="gegner-name" class="kaempfer-name"></div>
+            <div id="gegner-figur" class="figur gegner" aria-hidden="true"></div>
+            <div class="balken"><div id="gegner-balken" class="fuellung rot"></div><span id="gegner-leben"></span></div>
+            <div id="gegner-werte" class="kaempfer-werte"></div>
+          </div>
+        </div>
+        <button id="boss-knopf" class="knopf rot" type="button"></button>
+      </div>
     </main>
 
     <section id="upgrades" aria-label="Verbesserungen"></section>
@@ -63,12 +83,12 @@
     </div>
   </div>
 
-  <div id="offline" class="fenster" hidden>
+  <div id="hinweis" class="fenster" hidden>
     <div class="karte mitte">
-      <h2>Willkommen zurück!</h2>
-      <p id="offline-text" class="hinweis"></p>
-      <p id="offline-menge" class="gross-zahl"></p>
-      <button class="knopf" type="button" data-schliessen="offline">Einsammeln</button>
+      <h2 id="hinweis-titel"></h2>
+      <p id="hinweis-text" class="hinweis"></p>
+      <p id="hinweis-menge" class="gross-zahl"></p>
+      <button class="knopf" type="button" data-schliessen="hinweis">Weiter</button>
     </div>
   </div>
 

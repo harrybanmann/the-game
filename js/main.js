@@ -1,10 +1,13 @@
 import { zahl, btc, dauer } from "./format.js";
 import * as speicher from "./speicher.js";
+import { kampfSystem } from "./kampf.js";
 
 const $ = (id) => document.getElementById(id);
 
-let daten; // { einstellungen, zeitalter[], upgrades[] }
+let daten; // { einstellungen, zeitalter[], upgrades[], gegner{} }
 let stand; // Spielstand
+let kampf; // Kampf-System
+let ansicht = "sammeln"; // oder "kampf"
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
 
@@ -17,12 +20,13 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
+    json("data/gegner.json"),
   ]);
-  return { einstellungen, zeitalter, upgrades };
+  return { einstellungen, zeitalter, upgrades, gegner };
 }
 
 // ---------- Rechnen ----------
@@ -30,7 +34,9 @@ async function datenLaden() {
 const seite = () => stand.seiten[stand.aktiveSeite];
 const zeitalter = () => daten.zeitalter.find((z) => z.id === seite().zeitalter) || daten.zeitalter[0];
 const waehrung = () => zeitalter().waehrung;
-const upgradesHier = () => daten.upgrades.filter((u) => u.zeitalter === zeitalter().id);
+const upgradesHier = () => daten.upgrades.filter((u) => !u.zeitalter || u.zeitalter === zeitalter().id);
+const upgradeName = (u) => (u.namen && u.namen[zeitalter().id]) || u.name;
+const upgradeText = (u) => u.text.replace("{w}", waehrung().name);
 const stufe = (u) => seite().upgrades[u.id] || 0;
 const kosten = (u) => Math.ceil(u.grundKosten * Math.pow(u.kostenFaktor, stufe(u)));
 const guthaben = () => seite().waehrungen[waehrung().id] || 0;
@@ -43,12 +49,26 @@ function summe(wirkung) {
 
 const klickWert = () => zeitalter().klickGrundwert + summe("klick");
 const proSekunde = () => summe("proSekunde");
+const schaden = () => daten.einstellungen.kampf.grundSchaden + summe("schaden");
+const maxLeben = () => daten.einstellungen.kampf.grundLeben + summe("leben");
+const gegnerDaten = () => daten.gegner[zeitalter().id];
+const xpBedarf = (level) =>
+  Math.round(daten.einstellungen.level.grundXp * Math.pow(daten.einstellungen.level.faktor, level - 1));
 
 function gutschreiben(menge) {
   if (!(menge > 0)) return;
   const s = seite();
   s.waehrungen[waehrung().id] = guthaben() + menge;
   s.gesamtVerdient += menge;
+}
+
+function xpGeben(menge) {
+  const s = seite();
+  s.xp += menge;
+  while (s.xp >= xpBedarf(s.level)) {
+    s.xp -= xpBedarf(s.level);
+    s.level += 1;
+  }
 }
 
 // ---------- Zeit: aktiv und offline ----------
@@ -62,12 +82,13 @@ function tick() {
   if (sekunden >= off.abSekunden) {
     // Spiel war zu oder im Hintergrund: Formel statt Einzel-Schritte, mit Obergrenze.
     const gezaehlt = Math.min(sekunden, off.maxStunden * 3600);
-    const menge = proSekunde() * gezaehlt * off.anteil;
+    const menge = (proSekunde() + seite().kampf.rate) * gezaehlt * off.anteil;
     gutschreiben(menge);
     if (menge >= 1) offlineMeldung(sekunden, gezaehlt, menge);
     sichern();
   } else {
     gutschreiben(proSekunde() * sekunden);
+    kampf.schritt(sekunden);
   }
 
   if (jetzt - letztesSpeichern >= daten.einstellungen.speichern.alleSekunden * 1000) sichern();
@@ -97,6 +118,7 @@ function farbenSetzen() {
   stil.setProperty("--haupt", f.haupt);
   stil.setProperty("--zweit", f.zweit);
   stil.setProperty("--akzent", f.akzent);
+  stil.setProperty("--symbol", f.symbol || "#6f7780");
 }
 
 function anzeigeAktualisieren() {
@@ -111,6 +133,43 @@ function anzeigeAktualisieren() {
     const voll = stufe(u) >= u.maxStufe;
     knopf.disabled = voll || guthaben() < kosten(u);
   }
+  if (ansicht === "kampf") kampfZeichnen();
+}
+
+function kampfZeichnen() {
+  const z = kampf.zustand();
+  const s = seite();
+  $("spieler-level").textContent = "Level " + s.level + " · XP " + zahl(s.xp) + "/" + zahl(xpBedarf(s.level));
+  $("spieler-werte").textContent = zahl(schaden()) + " Schaden";
+  $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
+  $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(z.maxLeben);
+  $("gegner-name").textContent = z.gegner.name;
+  $("gegner-werte").textContent = zahl(z.gegner.schaden) + " Schaden";
+  $("gegner-figur").classList.toggle("boss", z.gegner.boss);
+  $("gegner-balken").style.width = (100 * Math.max(0, z.gegner.leben)) / z.gegner.maxLeben + "%";
+  $("gegner-leben").textContent = zahl(Math.max(0, z.gegner.leben)) + "/" + zahl(z.gegner.maxLeben);
+
+  const boss = gegnerDaten().boss;
+  const knopf = $("boss-knopf");
+  const gehtWeiter = boss && daten.zeitalter.some((x) => x.id === boss.naechstesZeitalter);
+  if (z.gegner.boss) {
+    knopf.textContent = "Boss-Kampf läuft …";
+    knopf.disabled = true;
+  } else if (!gehtWeiter) {
+    knopf.textContent = "Nächstes Zeitalter kommt später";
+    knopf.disabled = true;
+  } else {
+    knopf.textContent = "Boss herausfordern: " + (boss.name[stand.aktiveSeite] || boss.name.gut);
+    knopf.disabled = false;
+  }
+}
+
+function ansichtSetzen(neu) {
+  ansicht = neu;
+  $("ansicht-sammeln").hidden = ansicht !== "sammeln";
+  $("ansicht-kampf").hidden = ansicht !== "kampf";
+  leisteZeichnen();
+  anzeigeAktualisieren();
 }
 
 function upgradesZeichnen() {
@@ -122,7 +181,7 @@ function upgradesZeichnen() {
     knopf.type = "button";
     knopf.dataset.upgrade = u.id;
     const links = el("span", "upgrade-links");
-    links.append(el("span", "upgrade-name", u.name), el("span", "upgrade-text", u.text));
+    links.append(el("span", "upgrade-name", upgradeName(u)), el("span", "upgrade-text", upgradeText(u)));
     const rechts = el("span", "upgrade-rechts");
     rechts.append(
       el("span", "upgrade-stufe", "Stufe " + stufe(u)),
@@ -139,11 +198,16 @@ function leisteZeichnen() {
   const leiste = $("leiste");
   leiste.replaceChildren();
   for (const k of daten.einstellungen.leiste) {
+    const zurueck = k.id === "kaempfen" && ansicht === "kampf";
     const knopf = el("button", "rund" + (k.offen ? "" : " gesperrt"));
     knopf.type = "button";
-    knopf.append(el("span", "rund-symbol", k.symbol), el("span", "rund-name", k.name));
+    knopf.append(
+      el("span", "rund-symbol", zurueck ? k.symbolZurueck : k.symbol),
+      el("span", "rund-name", zurueck ? k.nameZurueck : k.name)
+    );
     knopf.addEventListener("click", () => {
       if (k.id === "menue") fensterZeigen("menue");
+      else if (k.id === "kaempfen") ansichtSetzen(ansicht === "kampf" ? "sammeln" : "kampf");
       else kurzMeldung(k.name + " kommt in einer späteren Version.");
     });
     leiste.append(knopf);
@@ -170,6 +234,36 @@ function verdienen(ereignis) {
   flug.style.top = ereignis.clientY - rahmen.top + "px";
   $("szene").append(flug);
   flug.addEventListener("animationend", () => flug.remove());
+}
+
+// ---------- Kampf: Boss und Aufstieg ----------
+
+function kampfEreignis(name, gegner) {
+  if (name === "bossNiederlage") {
+    kurzMeldung(gegner.name + " war zu stark. Rüste auf und versuch es noch mal.");
+  } else if (name === "bossSieg") {
+    aufsteigen(gegner);
+  }
+}
+
+function aufsteigen(boss) {
+  const neu = daten.zeitalter.find((z) => z.id === boss.naechstesZeitalter);
+  if (!neu) return;
+  const s = seite();
+  const alt = waehrung();
+  const menge = guthaben();
+  const getauscht = menge * (neu.umtauschVonVorher || 1);
+  s.waehrungen[alt.id] = 0;
+  s.waehrungen[neu.waehrung.id] = (s.waehrungen[neu.waehrung.id] || 0) + getauscht;
+  s.zeitalter = neu.id;
+  s.kampf = { index: 0, rate: 0 };
+  allesZeichnen();
+  sichern();
+  hinweis(
+    "Aufstieg!",
+    boss.name + " ist besiegt. Willkommen in Zeitalter " + neu.nummer + ": " + neu.name + ". Dein Vorrat wurde umgetauscht, der Wert in ₿ bleibt gleich.",
+    zahl(menge) + " " + alt.name + " → " + zahl(getauscht) + " " + neu.waehrung.name
+  );
 }
 
 function kaufen(u) {
@@ -204,9 +298,14 @@ function offlineMeldung(wegSekunden, gezaehlt, menge) {
   const off = daten.einstellungen.offline;
   let text = "Du warst " + dauer(wegSekunden) + " weg.";
   if (gezaehlt < wegSekunden) text += " Gezählt werden höchstens " + off.maxStunden + " Stunden.";
-  $("offline-text").textContent = text;
-  $("offline-menge").textContent = "+" + zahl(menge) + " " + waehrung().name;
-  fensterZeigen("offline");
+  hinweis("Willkommen zurück!", text, "+" + zahl(menge) + " " + waehrung().name);
+}
+
+function hinweis(titel, text, menge) {
+  $("hinweis-titel").textContent = titel;
+  $("hinweis-text").textContent = text;
+  $("hinweis-menge").textContent = menge;
+  fensterZeigen("hinweis");
 }
 
 // ---------- Export / Import ----------
@@ -245,6 +344,7 @@ function importieren(text) {
   speicher.sichern(stand); // alter Stand bleibt als Sicherung im Browser
   stand = ergebnis.stand;
   letzterTick = Date.now(); // Import zählt nicht als Offline-Zeit
+  kampf.neuStarten();
   sichern();
   allesZeichnen();
   $("import-text").value = "";
@@ -257,6 +357,7 @@ function neuAnfangen() {
   speicher.sichern(stand);
   stand = speicher.neuerStand(daten.einstellungen.startZeitalter);
   letzterTick = Date.now();
+  kampf.neuStarten();
   sichern();
   allesZeichnen();
   fensterSchliessen("menue");
@@ -266,6 +367,10 @@ function neuAnfangen() {
 
 function knoepfeVerbinden() {
   $("verdienen").addEventListener("pointerdown", verdienen);
+  $("boss-knopf").addEventListener("click", () => {
+    kampf.bossStarten();
+    kampfZeichnen();
+  });
   $("export-datei").addEventListener("click", exportDatei);
   $("export-text").addEventListener("click", exportText);
   $("import-knopf").addEventListener("click", () => importieren($("import-text").value));
@@ -296,6 +401,17 @@ async function start() {
   }
   stand = speicher.laden() || speicher.neuerStand(daten.einstellungen.startZeitalter);
   letzterTick = stand.zuletztGespeichert; // so rechnet der erste Tick die Offline-Zeit aus
+  kampf = kampfSystem({
+    seite,
+    seitenName: () => stand.aktiveSeite,
+    gegnerDaten,
+    schaden,
+    maxLeben,
+    schlagZeit: () => daten.einstellungen.kampf.sekundenProSchlag,
+    gutschreiben,
+    xpGeben,
+    ereignis: kampfEreignis,
+  });
   knoepfeVerbinden();
   allesZeichnen();
   tick();

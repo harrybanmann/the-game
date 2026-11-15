@@ -6,7 +6,8 @@
     "farben": {
       "haupt": "#8B5A2B",
       "zweit": "#E8D5A8",
-      "akzent": "#E8781E"
+      "akzent": "#E8781E",
+      "symbol": "#6f7780"
     },
     "waehrung": {
       "id": "feuerstein",
@@ -14,6 +15,25 @@
       "btcProStueck": 0.000001
     },
     "verdienKnopf": "Feuerstein sammeln",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "muscheln",
+    "nummer": 2,
+    "name": "Muscheln und erste Bauern",
+    "farben": {
+      "haupt": "#4FA7B5",
+      "zweit": "#E3C16F",
+      "akzent": "#F2B8A8",
+      "symbol": "#F7E3D8"
+    },
+    "waehrung": {
+      "id": "muschel",
+      "name": "Muscheln",
+      "btcProStueck": 0.0001
+    },
+    "umtauschVonVorher": 0.01,
+    "verdienKnopf": "Muscheln sammeln",
     "klickGrundwert": 1
   }
 ]

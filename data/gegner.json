@@ -1,0 +1,35 @@
+{
+  "_hinweis": "Zahlen sind Startwerte (Vorschlag). name.gut = Gegner der Beschützer-Seite, name.boese = Gegner der Dieb-Seite. Werte sind für beide Seiten gleich.",
+  "steinzeit": {
+    "reihenfolge": ["schwach", "schwach", "normal", "normal", "elite"],
+    "typen": {
+      "schwach": { "name": { "gut": "Fell-Dieb", "boese": "Späher" }, "leben": 10, "schaden": 1, "beute": 3, "xp": 1 },
+      "normal": { "name": { "gut": "Höhlen-Dieb", "boese": "Stammes-Wächter" }, "leben": 20, "schaden": 2, "beute": 8, "xp": 2 },
+      "elite": { "name": { "gut": "Keulen-Dieb", "boese": "Keulen-Wächter" }, "leben": 40, "schaden": 4, "beute": 20, "xp": 5 }
+    },
+    "boss": {
+      "name": { "gut": "Prometheus", "boese": "Prometheus" },
+      "leben": 100,
+      "schaden": 4,
+      "beute": 150,
+      "xp": 20,
+      "naechstesZeitalter": "muscheln"
+    }
+  },
+  "muscheln": {
+    "reihenfolge": ["schwach", "schwach", "normal", "normal", "elite"],
+    "typen": {
+      "schwach": { "name": { "gut": "Hühnerdieb", "boese": "Feldwache" }, "leben": 20, "schaden": 2, "beute": 1, "xp": 3 },
+      "normal": { "name": { "gut": "Muschel-Räuber", "boese": "Dorfwächter" }, "leben": 40, "schaden": 3, "beute": 2, "xp": 5 },
+      "elite": { "name": { "gut": "Ochsen-Räuber", "boese": "Stier-Wächter" }, "leben": 70, "schaden": 5, "beute": 5, "xp": 10 }
+    },
+    "boss": {
+      "name": { "gut": "Hermes", "boese": "Hermes" },
+      "leben": 200,
+      "schaden": 8,
+      "beute": 40,
+      "xp": 60,
+      "naechstesZeitalter": "bronzezeit"
+    }
+  }
+}
