@@ -1,0 +1,24 @@
+[
+  {
+    "id": "faustkeil",
+    "zeitalter": "steinzeit",
+    "name": "Besserer Faustkeil",
+    "text": "+1 Feuerstein pro Tippen",
+    "wirkung": "klick",
+    "wertProStufe": 1,
+    "grundKosten": 25,
+    "kostenFaktor": 1.25,
+    "maxStufe": 100
+  },
+  {
+    "id": "sammler",
+    "zeitalter": "steinzeit",
+    "name": "Sammler",
+    "text": "+0,5 Feuerstein pro Sekunde",
+    "wirkung": "proSekunde",
+    "wertProStufe": 0.5,
+    "grundKosten": 15,
+    "kostenFaktor": 1.15,
+    "maxStufe": 100
+  }
+]
