@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="The Game">
+  <meta name="theme-color" content="#3b2412">
+  <title>The Game</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="spiel">
+    <header id="kopf">
+      <div id="zeitalter-name"></div>
+      <div id="zaehler">
+        <span class="stein klein" aria-hidden="true"></span>
+        <span id="zaehler-zahl">0</span>
+        <span id="zaehler-name"></span>
+      </div>
+      <div id="zaehler-btc">≈ 0 ₿</div>
+      <div id="pro-sekunde"></div>
+    </header>
+
+    <main id="szene">
+      <div class="sonne" aria-hidden="true"></div>
+      <div class="berg berg-1" aria-hidden="true"></div>
+      <div class="berg berg-2" aria-hidden="true"></div>
+      <div class="boden" aria-hidden="true"></div>
+      <button id="verdienen" type="button">
+        <span class="stein gross" aria-hidden="true"></span>
+        <span id="verdienen-text"></span>
+      </button>
+    </main>
+
+    <section id="upgrades" aria-label="Verbesserungen"></section>
+
+    <nav id="leiste" aria-label="Hauptleiste"></nav>
+  </div>
+
+  <div id="menue" class="fenster" hidden>
+    <div class="karte">
+      <h2>Menü</h2>
+      <h3>Spielstand</h3>
+      <p id="speicher-hinweis" class="hinweis"></p>
+      <button id="export-datei" class="knopf" type="button">Exportieren (Datei)</button>
+      <button id="export-text" class="knopf" type="button">Exportieren (Text kopieren)</button>
+      <label class="knopf datei-knopf">Importieren (Datei)
+        <input id="import-datei" type="file" accept="application/json,.json">
+      </label>
+      <textarea id="import-text" rows="4" placeholder="Spielstand-Text hier einfügen"></textarea>
+      <button id="import-knopf" class="knopf" type="button">Text importieren</button>
+      <h3>Zentrale</h3>
+      <p class="hinweis">Seitenwechsel Gut/Böse, Haushalt, Tech-Baum und Dungeons kommen später.</p>
+      <button id="neu-anfangen" class="knopf rot" type="button">Neu anfangen</button>
+      <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
+    </div>
+  </div>
+
+  <div id="offline" class="fenster" hidden>
+    <div class="karte mitte">
+      <h2>Willkommen zurück!</h2>
+      <p id="offline-text" class="hinweis"></p>
+      <p id="offline-menge" class="gross-zahl"></p>
+      <button class="knopf" type="button" data-schliessen="offline">Einsammeln</button>
+    </div>
+  </div>
+
+  <div id="kurzmeldung" hidden></div>
+  <div id="lade-fehler" hidden></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
