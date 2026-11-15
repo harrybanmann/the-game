@@ -5,7 +5,8 @@
     "namen": {
       "steinzeit": "Besserer Faustkeil",
       "muscheln": "Besseres Netz",
-      "bronzezeit": "Bessere Gussform"
+      "bronzezeit": "Bessere Gussform",
+      "muenzen": "Bessere Prägung"
     },
     "text": "+1 {w} pro Tippen",
     "wirkung": "klick",
@@ -30,7 +31,8 @@
     "namen": {
       "steinzeit": "Stärkere Keule",
       "muscheln": "Stärkerer Speer",
-      "bronzezeit": "Schärfere Klinge"
+      "bronzezeit": "Schärfere Klinge",
+      "muenzen": "Schärfere Klinge"
     },
     "text": "+1 Schaden im Kampf",
     "wirkung": "schaden",
@@ -45,7 +47,8 @@
     "namen": {
       "steinzeit": "Dickeres Fell",
       "muscheln": "Lederweste",
-      "bronzezeit": "Bronzeschild"
+      "bronzezeit": "Bronzeschild",
+      "muenzen": "Rundschild"
     },
     "text": "+5 Leben im Kampf",
     "wirkung": "leben",

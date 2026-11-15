@@ -155,5 +155,57 @@
       "xp": 150,
       "naechstesZeitalter": "muenzen"
     }
+  },
+  "muenzen": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Taschendieb",
+          "boese": "Marktwache"
+        },
+        "leben": 180,
+        "schaden": 14,
+        "beute": 1,
+        "xp": 20
+      },
+      "normal": {
+        "name": {
+          "gut": "Münzfälscher",
+          "boese": "Münzwächter"
+        },
+        "leben": 330,
+        "schaden": 22,
+        "beute": 2,
+        "xp": 35
+      },
+      "elite": {
+        "name": {
+          "gut": "Gold-Schwindler",
+          "boese": "Schatz-Hüter"
+        },
+        "leben": 600,
+        "schaden": 34,
+        "beute": 5,
+        "xp": 60
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "König Krösus",
+        "boese": "König Krösus"
+      },
+      "leben": 2100,
+      "schaden": 60,
+      "beute": 40,
+      "xp": 400,
+      "naechstesZeitalter": "rom"
+    }
   }
 }

@@ -57,5 +57,25 @@
     "umtauschVonVorher": 0.01,
     "verdienKnopf": "Schekel verdienen",
     "klickGrundwert": 1
+  },
+  {
+    "id": "muenzen",
+    "nummer": 4,
+    "staerke": 27,
+    "name": "Erste Münzen (Lydien)",
+    "farben": {
+      "haupt": "#7C8B3A",
+      "zweit": "#F2E2B0",
+      "akzent": "#8E2D4A",
+      "symbol": "#F2B632"
+    },
+    "waehrung": {
+      "id": "stater",
+      "name": "Stater",
+      "btcProStueck": 0.1
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Stater prägen",
+    "klickGrundwert": 1
   }
 ]

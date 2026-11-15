@@ -160,6 +160,50 @@
         "art": "leben",
         "prozent": 0.06
       }
+    },
+    {
+      "id": "pferd",
+      "zeitalter": "muenzen",
+      "name": "Pferd",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "eule",
+      "zeitalter": "muenzen",
+      "name": "Eule",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "delfin",
+      "zeitalter": "muenzen",
+      "name": "Delfin",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "stier",
+      "zeitalter": "muenzen",
+      "name": "Stier",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
     }
   ]
 }

@@ -324,6 +324,94 @@
       },
       "schaden": 0,
       "leben": 8
+    },
+    {
+      "id": "xiphos",
+      "zeitalter": "muenzen",
+      "art": "nah",
+      "name": {
+        "gut": "Kurzschwert",
+        "boese": "Kurzschwert"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "labrys",
+      "zeitalter": "muenzen",
+      "art": "nah",
+      "name": {
+        "gut": "Doppelaxt",
+        "boese": "Doppelaxt"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "skythenbogen",
+      "zeitalter": "muenzen",
+      "art": "fern",
+      "name": {
+        "gut": "Reiterbogen",
+        "boese": "Reiterbogen"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "bleischleuder",
+      "zeitalter": "muenzen",
+      "art": "fern",
+      "name": {
+        "gut": "Bleischleuder",
+        "boese": "Bleischleuder"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "hoplitenhelm",
+      "zeitalter": "muenzen",
+      "art": "helm",
+      "name": {
+        "gut": "Hoplitenhelm",
+        "boese": "Hoplitenhelm"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "bronzehandschuhe",
+      "zeitalter": "muenzen",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Bronzehandschuhe",
+        "boese": "Bronzehandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "leinenpanzer",
+      "zeitalter": "muenzen",
+      "art": "ruestung",
+      "name": {
+        "gut": "Leinenpanzer",
+        "boese": "Leinenpanzer"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "hoplitenstiefel",
+      "zeitalter": "muenzen",
+      "art": "stiefel",
+      "name": {
+        "gut": "Hoplitenstiefel",
+        "boese": "Hoplitenstiefel"
+      },
+      "schaden": 0,
+      "leben": 8
     }
   ]
 }
