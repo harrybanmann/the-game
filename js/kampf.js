@@ -153,6 +153,7 @@ export function kampfSystem(api) {
     const w = api.kampfWerte();
     const ziele = art === "nah" && w.hand === "zweihand" ? lebende().filter((g) => g.x - heldX <= w.zweihandReichweite) : [naechster()];
     const krit = Math.random() < w.krit;
+    if (bossKampf && api.bossSchaden) faktor *= 1 + api.bossSchaden(); // Perma-Baum: Bossjäger
     let gemacht = 0;
     ziele.forEach((ziel, n) => {
       // Der Zweihänder trifft die weiteren Gegner nur mit einem Teil des Schadens.

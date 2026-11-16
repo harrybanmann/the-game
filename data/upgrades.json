@@ -12,7 +12,7 @@
     "wirkung": "klick",
     "wertProStufe": 1,
     "grundKosten": 25,
-    "kostenFaktor": 1.25,
+    "kostenFaktor": 1.07,
     "maxStufe": 100
   },
   {
@@ -22,7 +22,7 @@
     "wirkung": "proSekunde",
     "wertProStufe": 0.5,
     "grundKosten": 15,
-    "kostenFaktor": 1.15,
+    "kostenFaktor": 1.07,
     "maxStufe": 100
   },
   {
@@ -38,8 +38,9 @@
     "wirkung": "schaden",
     "wertProStufe": 1,
     "grundKosten": 30,
-    "kostenFaktor": 1.2,
-    "maxStufe": 100
+    "kostenFaktor": 1.07,
+    "maxStufe": 100,
+    "jeZeitalterFaktor": 10
   },
   {
     "id": "fell",
@@ -54,8 +55,9 @@
     "wirkung": "leben",
     "wertProStufe": 5,
     "grundKosten": 30,
-    "kostenFaktor": 1.2,
-    "maxStufe": 100
+    "kostenFaktor": 1.07,
+    "maxStufe": 100,
+    "jeZeitalterFaktor": 10
   },
   {
     "id": "tempo",
@@ -64,7 +66,7 @@
     "wirkung": "tempo",
     "wertProStufe": 0.005,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 2
   },
@@ -75,7 +77,7 @@
     "wirkung": "krit",
     "wertProStufe": 0.002,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 2
   },
@@ -86,7 +88,7 @@
     "wirkung": "block",
     "wertProStufe": 0.0015,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 3
   },
@@ -97,7 +99,7 @@
     "wirkung": "regeneration",
     "wertProStufe": 0.0005,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 3
   },
@@ -108,7 +110,7 @@
     "wirkung": "kritSchaden",
     "wertProStufe": 0.02,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 4
   },
@@ -119,7 +121,7 @@
     "wirkung": "beute",
     "wertProStufe": 0.01,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 4
   },
@@ -130,7 +132,7 @@
     "wirkung": "ausweichen",
     "wertProStufe": 0.0015,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 5
   },
@@ -141,7 +143,7 @@
     "wirkung": "raub",
     "wertProStufe": 0.0005,
     "grundKosten": 40,
-    "kostenFaktor": 1.2,
+    "kostenFaktor": 1.07,
     "maxStufe": 100,
     "abZeitalter": 6
   }

@@ -905,3 +905,16 @@ h3 { font-size: 15px; margin-top: 2px; }
 #wellen-punkte { gap: 2px; }
 #gegner-gruppe[data-phase="2"] .gegner.boss .figur { filter: drop-shadow(0 0 5px #ff9f2e); }
 #gegner-gruppe[data-phase="3"] .gegner.boss .figur { filter: drop-shadow(0 0 7px #ff3b2e) saturate(1.3); }
+
+/* ---------- Version 34: Energie, Aufstieg, Perma-Baum, Sammelbuch ---------- */
+#kampf-kopf { position: relative; }
+#energie-chip { position: absolute; left: 0; top: 0; padding: 2px 8px; font-size: 13px; background: rgba(30, 20, 12, 0.55); color: #ffd54a; border: 2px solid var(--umriss); border-radius: 12px; }
+.aufstieg-balken { display: block; width: 120px; height: 6px; margin: 3px auto 0; padding: 0; border: 1.5px solid var(--umriss); border-radius: 4px; background: rgba(255, 255, 255, 0.35); overflow: hidden; cursor: pointer; }
+#aufstieg-fuellung { display: block; height: 100%; width: 0; background: #ffd54a; }
+.ast-knopf.perma { outline: 2px solid #ffd54a; }
+.perma-ast { margin: 10px 0; }
+.perma-ast-name { font-weight: 700; margin-bottom: 4px; }
+.perma-reihe { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+.perma-reihe .tech-knoten { position: relative; }
+.sammel-raster .kachel.leer .kachel-bild { filter: grayscale(1) brightness(0.45); opacity: 0.7; }
+#sammelbuch { z-index: 60; }

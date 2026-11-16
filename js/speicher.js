@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 18;
+export const VERSION = 19;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -43,6 +43,9 @@ export function neuerStand(startZeitalter) {
       einstellungen: {},
       figur: { name: "", aussehen: {} },
       tech: { punkte: 0, stufen: {}, laeuft: {} },
+      perma: { punkte: 0, stufen: {}, neustarts: 0 },
+      energie: { wert: 0, letzter: Date.now() },
+      sammelbuch: { tiere: {}, reittiere: {}, sets: {} },
     },
     seiten: {
       gut: neueSeite(startZeitalter),
@@ -240,6 +243,19 @@ export function pruefen(stand) {
       aktiv: typeof au.aktiv === "string" ? au.aktiv : "blau",
     },
   };
+  // Version 34 (Harry 16.11.2026): Perma-Baum, Energie und Sammelbuch, für beide Seiten gemeinsam.
+  const pe = stand.gemeinsam.perma || {};
+  const zahlOder0 = (x) => Math.max(0, Math.floor(Number(x)) || 0);
+  stand.gemeinsam.perma = {
+    punkte: zahlOder0(pe.punkte),
+    neustarts: zahlOder0(pe.neustarts),
+    stufen: Object.fromEntries(Object.entries(pe.stufen || {}).filter(([k, v]) => typeof k === "string" && Number(v) > 0).map(([k, v]) => [k, zahlOder0(v)])),
+  };
+  const en = stand.gemeinsam.energie || {};
+  stand.gemeinsam.energie = { wert: Math.min(100, zahlOder0(en.wert)), letzter: Number.isFinite(en.letzter) ? en.letzter : Date.now() };
+  const sb = stand.gemeinsam.sammelbuch || {};
+  const fach = (x) => Object.fromEntries(Object.entries(x && typeof x === "object" ? x : {}).filter(([k, v]) => typeof k === "string" && Number.isFinite(v)).map(([k, v]) => [k, zahlOder0(v)]));
+  stand.gemeinsam.sammelbuch = { tiere: fach(sb.tiere), reittiere: fach(sb.reittiere), sets: fach(sb.sets) };
   stand.version = VERSION; // ältere Spielstände sind jetzt ergänzt
   return null;
 }

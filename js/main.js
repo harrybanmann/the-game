@@ -1,17 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=44";
-import * as speicher from "./speicher.js?v=44";
-import { kampfSystem } from "./kampf.js?v=44";
-import { waffenSystem } from "./waffen.js?v=44";
-import { tierSystem } from "./tiere.js?v=44";
-import { dungeonSystem } from "./dungeons.js?v=44";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=44";
-import { bitcoinSystem } from "./bitcoin.js?v=44";
-import { techSystem } from "./tech.js?v=44";
-import * as grafik from "./grafik.js?v=44";
-import { haushaltSystem } from "./haushalt.js?v=44";
-import { farmSystem } from "./farm.js?v=44";
-import { reittierSystem } from "./reittiere.js?v=44";
-import { setSystem } from "./sets.js?v=44";
+import { zahl, btc, dauer } from "./format.js?v=45";
+import * as speicher from "./speicher.js?v=45";
+import { kampfSystem } from "./kampf.js?v=45";
+import { waffenSystem } from "./waffen.js?v=45";
+import { tierSystem } from "./tiere.js?v=45";
+import { dungeonSystem } from "./dungeons.js?v=45";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=45";
+import { bitcoinSystem } from "./bitcoin.js?v=45";
+import { techSystem } from "./tech.js?v=45";
+import * as grafik from "./grafik.js?v=45";
+import { haushaltSystem } from "./haushalt.js?v=45";
+import { farmSystem } from "./farm.js?v=45";
+import { reittierSystem } from "./reittiere.js?v=45";
+import { setSystem } from "./sets.js?v=45";
+import { permaSystem } from "./perma.js?v=45";
 
 const $ = (id) => document.getElementById(id);
 
@@ -28,6 +29,8 @@ let haushalt; // Haushalt und Firma
 let farm; // Trading, Mining Farm, BTC-Markt
 let reittiere; // Reittiere (Angriffstempo)
 let sets; // Set-Teile aus den Dungeons
+let perma; // Perma-Baum (Punkte nur durch Neustart)
+let sammelTakt = 0;
 let farmReiter = "trading";
 let techAst = "produktion";
 let gewaehltesStueck = null; // { platz } oder { roh } (Lager)
@@ -43,7 +46,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten, farmDaten, reittierDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten, farmDaten, reittierDaten, permaDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -57,6 +60,7 @@ async function datenLaden() {
     json("data/haushalt.json"),
     json("data/farm.json"),
     json("data/reittiere.json"),
+    json("data/perma.json"),
   ]);
   return {
     einstellungen,
@@ -72,6 +76,7 @@ async function datenLaden() {
     haushalt: haushaltDaten,
     farm: farmDaten,
     reittiere: reittierDaten,
+    perma: permaDaten,
   };
 }
 
@@ -85,7 +90,10 @@ const waehrung = () => zeitalter().waehrung;
 const upgradesHier = () =>
   daten.upgrades.filter((u) => u.wirkung !== "klick" && (!u.zeitalter || u.zeitalter === zeitalter().id) && zeitalter().nummer >= (u.abZeitalter || 1));
 const upgradeName = (u) => (u.namen && u.namen[zeitalter().id]) || u.name;
-const upgradeText = (u) => u.text.replace("{w}", waehrung().name);
+const upgradeText = (u) =>
+  u.jeZeitalterFaktor && zeitalter().nummer > 1
+    ? u.text.replace(/^\+[\d,]+/, "+" + zahl(upgradeWert(u))).replace("{w}", waehrung().name)
+    : u.text.replace("{w}", waehrung().name);
 const stufe = (u) => seite().upgrades[u.id] || 0;
 const kosten = (u) =>
   Math.ceil(u.grundKosten * Math.pow(u.kostenFaktor, stufe(u)) * (1 - Math.min(0.6, tech ? tech.wert("rabatt") : 0)));
@@ -124,10 +132,19 @@ function freiBelohnen(neu) {
   if (neu.includes("tiere") && !t.eier.length && !t.brueten.length && !t.sammlung.length) tiere.eiGeben(daten.tiere.eiRatio.normal, 0);
 }
 
+// Schaden und Leben aus Upgrades bringen je Zeitalter 10× mehr (Harry 16.11.2026: neue Währung ist 10× mehr wert).
+const upgradeWert = (u) => u.wertProStufe * Math.pow(u.jeZeitalterFaktor || 1, zeitalter().nummer - 1);
 function summe(wirkung) {
   return upgradesHier()
     .filter((u) => u.wirkung === wirkung)
-    .reduce((s, u) => s + u.wertProStufe * stufe(u), 0);
+    .reduce((s, u) => s + upgradeWert(u) * stufe(u), 0);
+}
+// Fortschritt zum Aufstieg: alle Upgrades des Zeitalters auf Höchststufe (Harry 16.11.2026: Lv 100).
+function upgradeFortschritt() {
+  const liste = upgradesHier();
+  const hat = liste.reduce((s, u) => s + Math.min(stufe(u), u.maxStufe), 0);
+  const max = liste.reduce((s, u) => s + u.maxStufe, 0);
+  return { hat, max, voll: liste.filter((u) => stufe(u) >= u.maxStufe).length, anzahl: liste.length };
 }
 
 const klickWert = () => (zeitalter().klickGrundwert + summe("klick")) * (1 + tech.wert("produktion"));
@@ -202,6 +219,7 @@ function bezahlen(preis) {
 }
 
 function xpGeben(menge) {
+  menge *= 1 + (perma ? perma.wert("xp") : 0);
   const s = seite();
   s.xp += menge;
   while (s.xp >= xpBedarf(s.level)) {
@@ -218,12 +236,16 @@ function tick() {
   letzterTick = jetzt;
   const off = daten.einstellungen.offline;
 
+  const energieVorher = stand.gemeinsam.energie.wert;
+  energieSchritt(jetzt);
+  if (++sammelTakt % 20 === 0) sammelbuchPruefen();
   if (sekunden >= off.abSekunden) {
     // Spiel war zu oder im Hintergrund: Formel statt Einzel-Schritte, mit Obergrenze.
     const gezaehlt = Math.min(sekunden, offlineMaxStunden() * 3600);
     const menge = (proSekunde() + seite().kampf.rate) * gezaehlt * offlineAnteil();
     gutschreiben(menge);
     const beute = offlineBeute(gezaehlt);
+    beute.energie = stand.gemeinsam.energie.wert - energieVorher;
     if (sekunden >= off.meldungAbSekunden) offlineMeldung(sekunden, gezaehlt, menge, beute);
     sichern();
   } else {
@@ -344,6 +366,10 @@ function anzeigeAktualisieren() {
   if (btcDa) $("zaehler-btc").textContent = "₿ " + btc(s.btc.menge) + (farm.imCrash() ? " 📉" : "");
   $("chip-staerke").textContent = "⚔ " + zahl(staerke());
   $("chip-level").textContent = "Lv " + s.level;
+  $("energie-chip").textContent = "⚡ " + stand.gemeinsam.energie.wert;
+  const f = upgradeFortschritt();
+  $("aufstieg-fuellung").style.width = (f.max ? (100 * f.hat) / f.max : 0) + "%";
+  $("aufstieg-balken").title = "Aufstieg: Upgrades " + f.voll + "/" + f.anzahl + " auf Lv 100";
   $("chip-xp").style.width = Math.min(100, (100 * s.xp) / xpBedarf(s.level)) + "%";
   if (!$("btc-fenster").hidden) btcKnoepfe();
   for (const u of upgradesHier()) {
@@ -659,6 +685,10 @@ function aufstiegFehlt() {
   if (s.level < a.levelJeZeitalter * nr) fehlt.push("Level " + a.levelJeZeitalter * nr + " (du: " + s.level + ")");
   if (s.schmiede.stufe < a.schmiedeJeZeitalter * nr)
     fehlt.push("Schmiede " + a.schmiedeJeZeitalter * nr + " (du: " + s.schmiede.stufe + ")");
+  if (a.alleUpgradesMax) {
+    const f = upgradeFortschritt();
+    if (f.voll < f.anzahl) fehlt.push("Alle Upgrades auf Lv 100 (fertig: " + f.voll + " von " + f.anzahl + ")");
+  }
   return fehlt;
 }
 
@@ -797,6 +827,7 @@ function schmiedeInfo() {
       ],
       knoepfe: [
         { text: voll ? "Maximum" : rest !== null ? "Ausbau läuft …" : "Ausbauen · " + zahl(waffen.stufeKosten()) + " " + waehrung().name, aus: voll || rest !== null, aktion: schmiedeVerbessern },
+        ...(rest !== null ? [energieKnopf(rest, (sek) => (seite().schmiede.ausbauBis -= sek * 1000))] : []),
         { text: "Lager und Mergen", zu: true, aktion: () => fensterZeigen("waffen-fenster") },
       ],
     };
@@ -888,7 +919,9 @@ let offeneGruppe = null;
 let offenerReiter = null;
 const letzterReiter = {};
 // Ein Reiter ist nur da, wenn sein System freigeschaltet ist (4. Eintrag = Name in einstellungen.freischalten).
-const reiterOffen = (r) => !r[3] || (r[3] === "farm" ? frei("trading") || frei("bitcoin") : frei(r[3]));
+// Der Tech-Baum-Reiter ist nach einem Neustart sofort da, damit man die Perma-Punkte ausgeben kann.
+const reiterOffen = (r) =>
+  !r[3] || (r[3] === "farm" ? frei("trading") || frei("bitcoin") : r[3] === "tech" ? frei("tech") || (perma && perma.neustarts() > 0) : frei(r[3]));
 const reiterVon = (g) => (g.reiter || []).filter(reiterOffen);
 const gruppeVon = (fensterId) => GRUPPEN.find((g) => g.reiter && g.reiter.some((r) => r[0] === fensterId));
 
@@ -1205,7 +1238,7 @@ function autoZeichnen() {
 function autoSchritt(jetzt) {
   if (!autoAn) return;
   if (kampf.istBoss()) return;
-  if (jetzt - autoLetzter < waffen.autoSekunden() * 1000) return;
+  if (jetzt - autoLetzter < (waffen.autoSekunden() * 1000) / (1 + perma.wert("autoSchmiede"))) return;
   if (guthaben() < waffen.schmiedeKosten()) return;
   autoLetzter = jetzt;
   schmieden(true);
@@ -1306,6 +1339,7 @@ function brutZeichnen() {
       const bild = el("span", "ei gross");
       if (brut[i]) bild.style.backgroundImage = grafik.eiBild(brut[i].seltenheit.farbe);
       nest.append(bild, el("span", "nest-zeit"));
+      if (brut[i]) nest.addEventListener("click", () => brutInfo(i));
       nester.append(nest);
     }
   }
@@ -1751,10 +1785,20 @@ const AST_BILD = { produktion: "beutel", kampf: "schwert", handel: "farm", haush
 
 // Der Baum wächst von oben nach unten: je Ebene ein Knoten in der Mitte, darunter zwei an den Seiten.
 function techZeichnen() {
-  $("tech-punkte").textContent = "⚗ " + stand.gemeinsam.tech.punkte;
+  if (!frei("tech")) techAst = "perma"; // vor Zeitalter 3 (nach einem Neustart) nur der Perma-Baum
+  $("tech-punkte").textContent = techAst === "perma" ? "👑 " + perma.punkte() : "⚗ " + stand.gemeinsam.tech.punkte;
   const reiter = $("tech-reiter");
   reiter.replaceChildren();
-  for (const a of tech.aeste()) {
+  // Eigener Ast für den Perma-Baum (Punkte nur durch Neustart).
+  const pk = el("button", "ast-knopf perma" + (techAst === "perma" ? " an" : ""));
+  pk.type = "button";
+  pk.title = "Perma-Baum";
+  pk.style.backgroundImage = grafik.symbolBild("krone");
+  pk.addEventListener("click", () => {
+    techAst = "perma";
+    techZeichnen();
+  });
+  for (const a of frei("tech") ? tech.aeste() : []) {
     const offen = tech.astOffen(a.id);
     const k = el("button", "ast-knopf" + (a.id === techAst ? " an" : "") + (offen ? "" : " zu"));
     k.type = "button";
@@ -1766,8 +1810,10 @@ function techZeichnen() {
     });
     reiter.append(k);
   }
+  reiter.append(pk);
   const box = $("tech-ebenen");
   box.replaceChildren();
+  if (techAst === "perma") return permaZeichnen(box);
   const a = tech.aeste().find((x) => x.id === techAst);
   box.append(el("div", "tech-ast-name", a.name));
   if (!tech.astOffen(a.id)) {
@@ -1833,6 +1879,7 @@ function techInfo(astId, eb, nr) {
             sichern();
           },
         },
+        ...(hier ? [energieKnopf((lauf.bis - Date.now()) / 1000, (sek) => ((lauf.bis -= sek * 1000), techZeichnen()))] : []),
       ],
     };
   });
@@ -2079,7 +2126,7 @@ function weltBeute(gegner) {
     beuteZeigen(gegner, grafik.symbolBild("schluessel"));
   }
   // Harry 16.11.2026: Reittiere fallen selten auch bei Gegnern.
-  if (frei("reittiere") && b.reittier && wurf("reittier", 0)) {
+  if (frei("reittiere") && b.reittier && wurf("reittier", perma.wert("reittierChance"))) {
     const neu = reittiere.geben(zeitalter().id);
     beuteZeigen(gegner, grafik.reittierBild(neu.id));
     kurzMeldung("Neues Reittier: " + neu.seltenheit.name + " – " + neu.name);
@@ -2148,6 +2195,7 @@ function aufsteigen(boss) {
   const vorher = freiListe();
   s.zeitalter = neu.id;
   s.kampf = { index: 0, rate: 0, stufe: 1, welle: 1 };
+  s.upgrades = {}; // Harry 16.11.2026: im neuen Zeitalter beginnen die Upgrades wieder bei 0 (bringen aber mehr)
   const dazu = freiListe().filter((n) => !vorher.includes(n));
   freiBelohnen(dazu);
   const f = daten.einstellungen.freischalten;
@@ -2232,7 +2280,7 @@ function offlineBeute(sekunden) {
     ergebnis.schluessel = dungeons.schluessel() - vorher;
   }
   if (frei("reittiere") && b.reittier) {
-    ergebnis.reittiere = Math.min(20, ganz(erwartet(b.reittier.chance, 0)));
+    ergebnis.reittiere = Math.min(20, ganz(erwartet(b.reittier.chance, perma.wert("reittierChance"))));
     for (let i = 0; i < ergebnis.reittiere; i++) reittiere.geben(zeitalter().id);
   }
   return ergebnis;
@@ -2260,6 +2308,7 @@ function offlineMeldung(wegSekunden, gezaehlt, menge, beute) {
     if (beute.techpunkte > 0) eintrag(grafik.symbolBild("tech"), "+" + beute.techpunkte + " Tech-Punkte");
     if (beute.schluessel > 0) eintrag(grafik.symbolBild("schluessel"), "+" + beute.schluessel + " Schlüssel");
     if (beute.reittiere > 0) eintrag(grafik.symbolBild("tiere"), "+" + beute.reittiere + (beute.reittiere === 1 ? " Reittier" : " Reittiere"));
+    if (beute.energie > 0) eintrag(grafik.symbolBild("blitz"), "+" + beute.energie + " Energie");
     zeilen.push(liste);
     if (beute.siege > 0) zeilen.push(el("div", "hinweis", "Etwa " + zahl(beute.siege) + " Gegner besiegt. Die Stufe bleibt, bis du wieder spielst."));
     return { titel: "Willkommen zurück!", bild: grafik.symbolBild("uhr"), rund: true, zeilen, knoepfe: [{ text: "Weiter", zu: true, aktion: () => {} }] };
@@ -2326,6 +2375,222 @@ function neuAnfangen() {
   sichern();
   allesZeichnen();
   fensterSchliessen("menue");
+}
+
+// ---------- Version 34: Energie, Neustart, Perma-Baum, Sammelbuch (Harry 16.11.2026) ----------
+
+// Alle 10 Minuten 1 Energie, höchstens 100 (läuft auch offline über die Uhrzeit).
+function energieSchritt(jetzt) {
+  const e = daten.einstellungen.energie;
+  const en = stand.gemeinsam.energie;
+  const takt = e.alleSekunden * 1000;
+  if (en.wert >= e.max) {
+    en.letzter = jetzt;
+    return;
+  }
+  const n = Math.floor((jetzt - en.letzter) / takt);
+  if (n > 0) {
+    en.wert = Math.min(e.max, en.wert + n);
+    en.letzter += n * takt;
+  }
+}
+const energieMinuten = () => {
+  const e = daten.einstellungen.energie;
+  return Math.min(e.maxMinutenJePunkt, e.minutenJePunkt + perma.wert("energieZeit"));
+};
+// Knopf für ein Info-Fenster: verbraucht so viel Energie wie nötig (höchstens alles), um die Restzeit zu verkürzen.
+function energieKnopf(restSek, anwenden) {
+  const en = stand.gemeinsam.energie;
+  const proPunkt = energieMinuten() * 60;
+  const nutzen = Math.min(en.wert, Math.ceil(Math.max(0, restSek) / proPunkt));
+  const gespart = Math.min(Math.max(0, restSek), nutzen * proPunkt);
+  return {
+    text: nutzen > 0 ? "⚡ " + nutzen + " Energie · −" + dauer(Math.ceil(gespart)) : "⚡ Keine Energie",
+    aus: nutzen < 1 || !(restSek > 0),
+    aktion: () => {
+      en.wert -= nutzen;
+      anwenden(gespart);
+      kurzMeldung("⚡ " + dauer(Math.ceil(gespart)) + " gespart");
+      anzeigeAktualisieren();
+      sichern();
+    },
+  };
+}
+function energieInfo() {
+  infoZeigen(() => {
+    const e = daten.einstellungen.energie;
+    const en = stand.gemeinsam.energie;
+    const naechste = en.wert >= e.max ? null : Math.max(0, Math.ceil((en.letzter + e.alleSekunden * 1000 - Date.now()) / 1000));
+    return {
+      titel: "Energie " + en.wert + "/" + e.max,
+      bild: grafik.symbolBild("blitz"),
+      zeilen: [
+        "Alle " + Math.round(e.alleSekunden / 60) + " Minuten kommt 1 Energie dazu, höchstens " + e.max + ".",
+        marken([["1 Energie = " + energieMinuten() + " Min."], [naechste === null ? "voll" : "nächste in " + dauer(naechste)]]),
+        "Damit verkürzt du Wartezeiten: Schmiede-Ausbau, Forschung und Brüten (dort antippen). Im Perma-Baum wird 1 Energie bis zu 1 Stunde wert.",
+      ],
+    };
+  });
+}
+function brutInfo(i) {
+  infoZeigen(() => {
+    const b = seite().tiere.brueten[i];
+    if (!b) return null;
+    const selten = daten.waffen.seltenheiten[b.ei.seltenheit] || daten.waffen.seltenheiten[0];
+    const rest = Math.max(0, (b.fertigUm - Date.now()) / 1000);
+    return {
+      titel: "Ei im Nest",
+      bild: grafik.eiBild(selten.farbe),
+      zeilen: [marken([[selten.name, selten.farbe], ["⏱ " + dauer(Math.ceil(rest))]])],
+      knoepfe: [energieKnopf(rest, (sek) => (b.fertigUm -= sek * 1000))],
+    };
+  });
+}
+
+// Neustart: alles auf dieser Seite beginnt neu, außer Tech-Baum, Perma-Baum, Energie und Sammelbuch.
+function neustartInfo() {
+  infoZeigen(() => {
+    const nr = zeitalter().nummer;
+    const st = seite().kampf.stufe;
+    const p = perma.punkteFuer(nr, st);
+    return {
+      titel: "Neustart",
+      bild: grafik.symbolBild("krone"),
+      zeilen: [
+        marken([["+" + p + " Perma-Punkte"], ["Zeitalter " + nr], ["Stufe " + st]]),
+        "Neu beginnt alles auf dieser Seite: Zeitalter, Level, Geld, Upgrades, Ausrüstung, Tiere, Reittiere, Sets, Fähigkeiten.",
+        "Es bleibt: Tech-Baum, Perma-Baum, Energie und Sammelbuch.",
+        "Perma-Punkte gibt es nur durch einen Neustart: 10 je Zeitalter ab dem zweiten, dazu 1 je 5 Stufen. Ausgeben im Tech-Baum unter 👑.",
+      ],
+      knoepfe: [{ text: p > 0 ? "Neustart · +" + p + " 👑" : "Noch keine Perma-Punkte", aus: p <= 0, zu: true, aktion: neustartMachen }],
+    };
+  });
+}
+function neustartMachen() {
+  const p = perma.punkteFuer(zeitalter().nummer, seite().kampf.stufe);
+  if (p <= 0) return;
+  speicher.sichern(stand); // Sicherung des alten Stands
+  sammelbuchPruefen();
+  perma.gutschreiben(p);
+  stand.seiten[stand.aktiveSeite] = speicher.neueSeite(daten.einstellungen.startZeitalter);
+  letzterTick = Date.now();
+  kampf.neuStarten();
+  sichern();
+  allesZeichnen();
+  fensterSchliessen("menue");
+  hinweis("Neustart!", "Du hast " + p + " Perma-Punkte bekommen. Gib sie im Tech-Baum unter 👑 aus – sie bleiben für immer.", "👑");
+}
+
+const PERMA_BILD = {
+  schaden: "schwert", leben: "herz", xp: "stern", bossSchaden: "krone", beute: "muenze", tickets: "schluessel", eier: "ei",
+  reittierChance: "tiere", fpunkte: "stern", techpunkte: "tech", schmiedeSelten: "amboss", autoSchmiede: "uhr", rabatt: "upgrades",
+  energieZeit: "blitz", offline: "uhr", offlineBeute: "beutel", schluepfen: "nest", supporter: "tiere", setStaerke: "schild", setSelten: "schatz",
+};
+function permaZeichnen(box) {
+  box.append(el("div", "tech-ast-name", "Perma-Baum · " + perma.neustarts() + " Neustarts"));
+  for (const a of perma.aeste()) {
+    const ast = el("div", "perma-ast");
+    ast.append(el("div", "perma-ast-name", a.name));
+    const reihe = el("div", "perma-reihe");
+    a.knoten.forEach((k, i) => {
+      const st = perma.stufe(k.id);
+      const voll = st >= k.max;
+      const offen = perma.offen(a.id, i);
+      const knopf = el("button", "tech-knoten" + (voll ? " voll" : "") + (offen ? "" : " zu"));
+      knopf.type = "button";
+      const rund = el("span", "tech-rund");
+      rund.style.backgroundImage = grafik.symbolBild(offen ? PERMA_BILD[k.wirkung] || "krone" : "schloss");
+      knopf.append(rund, el("span", "tech-stand", voll ? "Max" : st + "/" + k.max));
+      knopf.addEventListener("click", () => permaInfo(a.id, i));
+      reihe.append(knopf);
+    });
+    ast.append(reihe);
+    box.append(ast);
+  }
+}
+function permaInfo(astId, i) {
+  infoZeigen(() => {
+    const a = perma.aeste().find((x) => x.id === astId);
+    const k = a.knoten[i];
+    const st = perma.stufe(k.id);
+    const voll = st >= k.max;
+    const offen = perma.offen(astId, i);
+    return {
+      titel: k.name,
+      bild: grafik.symbolBild(PERMA_BILD[k.wirkung] || "krone"),
+      farbe: voll ? "#4fc46a" : "#b8862e",
+      rund: true,
+      zeilen: [
+        k.text + " je Stufe.",
+        marken([["Stufe " + st + "/" + k.max], voll ? ["fertig"] : ["👑 " + perma.kosten(k)], ["Du hast 👑 " + perma.punkte()]]),
+        offen ? "Bleibt für immer, auch nach jedem Neustart." : "Gesperrt: erst den Knoten davor einmal kaufen.",
+      ],
+      knoepfe: [
+        {
+          text: voll ? "Maximum" : "Kaufen · 👑 " + perma.kosten(k),
+          aus: voll || !offen || perma.punkte() < perma.kosten(k),
+          aktion: () => {
+            const fehler = perma.kaufen(astId, i);
+            if (fehler) return kurzMeldung(fehler);
+            techZeichnen();
+            anzeigeAktualisieren();
+            sichern();
+          },
+        },
+      ],
+    };
+  });
+}
+
+// Sammelbuch: merkt sich die beste Seltenheit jedes Tiers, Reittiers und Set-Teils, das man je hatte.
+function sammelbuchPruefen() {
+  const sb = stand.gemeinsam.sammelbuch;
+  const merk = (fach, key, rang) => {
+    if (!(fach[key] >= rang)) fach[key] = rang;
+  };
+  const s = seite();
+  for (const t of s.tiere.sammlung) merk(sb.tiere, t.id, t.seltenheit);
+  for (const r of s.reittiere.sammlung) merk(sb.reittiere, r.id, r.seltenheit);
+  for (const e of s.sets.sammlung) merk(sb.sets, e.z + "|" + e.teil, e.seltenheit);
+  for (const t of Object.values(s.sets.an)) if (t) merk(sb.sets, t.z + "|" + t.teil, t.seltenheit);
+}
+function sammelbuchZeichnen() {
+  const sb = stand.gemeinsam.sammelbuch;
+  const box = $("sammelbuch-inhalt");
+  box.replaceChildren();
+  const selten = (rang) => daten.waffen.seltenheiten[rang] || daten.waffen.seltenheiten[0];
+  const abschnitt = (titel, eintraege) => {
+    const gefunden = eintraege.filter((e) => e.rang !== undefined).length;
+    box.append(el("h3", "", titel + " (" + gefunden + "/" + eintraege.length + ")"));
+    const raster = el("div", "kachel-raster sammel-raster");
+    for (const e of eintraege) {
+      const da = e.rang !== undefined;
+      raster.append(
+        bildKachel({
+          leer: !da,
+          farbe: da ? selten(e.rang).farbe : "",
+          bild: e.bild,
+          titel: e.name,
+          klick: () =>
+            infoZeigen(() => ({
+              titel: e.name,
+              bild: e.bild,
+              farbe: da ? selten(e.rang).farbe : "#cfd3da",
+              zeilen: [da ? marken([["Beste: " + selten(e.rang).name, selten(e.rang).farbe], ["Zeitalter " + e.za]]) : "Noch nicht gefunden · Zeitalter " + e.za],
+            })),
+        })
+      );
+    }
+    box.append(raster);
+  };
+  const za = (id) => zeitalterVon(id).nummer;
+  abschnitt("Haustiere", daten.tiere.tiere.map((t) => ({ name: t.name, bild: grafik.tierBild(t.id), rang: sb.tiere[t.id], za: za(t.zeitalter) })));
+  abschnitt("Reittiere", daten.reittiere.liste.map((t) => ({ name: t.name, bild: grafik.reittierBild(t.id), rang: sb.reittiere[t.id], za: za(t.zeitalter) })));
+  const teile = [];
+  for (const set of daten.dungeons.sets)
+    for (const teil of daten.dungeons.set.teile)
+      teile.push({ name: set.name + "-" + SET_TEIL_NAMEN[teil], bild: grafik.setTeilBild(teil, set), rang: sb.sets[set.zeitalter + "|" + teil], za: za(set.zeitalter) });
+  abschnitt("Set-Teile", teile);
 }
 
 // ---------- Start ----------
@@ -2426,6 +2691,14 @@ function knoepfeVerbinden() {
     e.target.value = "";
   });
   $("neu-anfangen").addEventListener("click", neuAnfangen);
+  $("neustart-knopf").addEventListener("click", neustartInfo);
+  $("sammelbuch-knopf").addEventListener("click", () => {
+    sammelbuchPruefen();
+    sammelbuchZeichnen();
+    $("sammelbuch").hidden = false;
+  });
+  $("energie-chip").addEventListener("click", energieInfo);
+  $("aufstieg-balken").addEventListener("click", bossTippen);
   $("seite-knopf").addEventListener("click", seiteWechseln);
   for (const knopf of document.querySelectorAll("[data-schliessen]")) {
     knopf.addEventListener("click", () => fensterSchliessen(knopf.dataset.schliessen));
@@ -2461,6 +2734,7 @@ async function start() {
     wellen: () => daten.einstellungen.kampf.wellen,
     gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute") + summe("beute"))),
     bossRegeln: () => daten.einstellungen.kampf.boss,
+    bossSchaden: () => (perma ? perma.wert("bossSchaden") : 0),
     zeitalterNummer: () => zeitalter().nummer,
     xpGeben,
     ereignis: kampfEreignis,
@@ -2485,6 +2759,10 @@ async function start() {
       (name === "haushalt" && frei("firma") && seite().haushalt.firma > 0) ||
       (name === "farm" && frei("trading")),
   });
+  // Perma-Baum: wirkt auf dieselben Werte wie der Tech-Baum (Schaden, Leben, Beute, Chancen …).
+  perma = permaSystem({ daten: () => daten.perma, permaStand: () => stand.gemeinsam.perma });
+  const techWert = tech.wert;
+  tech.wert = (id) => techWert(id) + perma.wert(id);
   haushalt = haushaltSystem({
     daten: () => daten.haushalt,
     seite,

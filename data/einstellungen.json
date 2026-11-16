@@ -66,7 +66,9 @@
   },
   "aufstieg": {
     "levelJeZeitalter": 10,
-    "schmiedeJeZeitalter": 3
+    "schmiedeJeZeitalter": 3,
+    "_hinweis": "Harry 16.11.2026: Aufsteigen erst, wenn alle Upgrades des Zeitalters auf Lv 100 sind. Beim Aufstieg beginnen die Upgrades wieder bei 0 (neue Währung, 10× mehr wert); Schaden und Leben bringen je Zeitalter 10× mehr.",
+    "alleUpgradesMax": true
   },
   "freischalten": {
     "_hinweis": "Harry 16.11.2026: Inhalte kommen nach und nach, historisch passend. Zeitalter und Level sind Vorschläge des Bau-Chats.",
@@ -170,5 +172,12 @@
         "boss": 0.25
       }
     }
+  },
+  "energie": {
+    "_hinweis": "Harry 16.11.2026: alle 10 Minuten 1 Energie, höchstens 100. Energie verkürzt Wartezeiten (Schmiede-Ausbau, Forschung, Brüten). 1 Punkt = 1 Minute, im Perma-Baum bis 1 Stunde.",
+    "alleSekunden": 600,
+    "max": 100,
+    "minutenJePunkt": 1,
+    "maxMinutenJePunkt": 60
   }
 }

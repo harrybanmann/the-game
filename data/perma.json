@@ -1,0 +1,208 @@
+{
+  "_hinweis": "Harry 16.11.2026: Neustart setzt alles zurück außer Tech-Baum (und diesem Perma-Baum). Dafür gibt es Perma-Punkte, nur durch Neustart. Der Baum verbessert alles im Spiel und soll lange dauern. Punkte, Kosten und Werte sind Vorschläge des Bau-Chats.",
+  "belohnung": {
+    "jeZeitalter": 10,
+    "stufenJePunkt": 5
+  },
+  "kosten": {
+    "grund": 1,
+    "jeStufe": 1
+  },
+  "aeste": [
+    {
+      "id": "kampf",
+      "name": "Kampf",
+      "bild": "schwert",
+      "knoten": [
+        {
+          "id": "p-schaden",
+          "name": "Ewige Kraft",
+          "wirkung": "schaden",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Schaden"
+        },
+        {
+          "id": "p-leben",
+          "name": "Ewiges Leben",
+          "wirkung": "leben",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Leben"
+        },
+        {
+          "id": "p-xp",
+          "name": "Erfahrung",
+          "wirkung": "xp",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Erfahrung"
+        },
+        {
+          "id": "p-boss",
+          "name": "Bossjäger",
+          "wirkung": "bossSchaden",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Schaden gegen Bosse"
+        }
+      ]
+    },
+    {
+      "id": "beute",
+      "name": "Beute",
+      "bild": "schatz",
+      "knoten": [
+        {
+          "id": "p-geld",
+          "name": "Goldader",
+          "wirkung": "beute",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Geld von Gegnern"
+        },
+        {
+          "id": "p-schluessel",
+          "name": "Schlüsselfinder",
+          "wirkung": "tickets",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Schlüssel-Chance"
+        },
+        {
+          "id": "p-eier",
+          "name": "Nestsucher",
+          "wirkung": "eier",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Eier-Chance"
+        },
+        {
+          "id": "p-reittier",
+          "name": "Pferdeflüsterer",
+          "wirkung": "reittierChance",
+          "wert": 0.1,
+          "max": 20,
+          "text": "+10 % Reittier-Chance"
+        },
+        {
+          "id": "p-fpunkte",
+          "name": "Sternensammler",
+          "wirkung": "fpunkte",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % ★-Chance"
+        },
+        {
+          "id": "p-tech",
+          "name": "Forscherglück",
+          "wirkung": "techpunkte",
+          "wert": 0.05,
+          "max": 20,
+          "text": "+5 % Tech-Punkte-Chance"
+        }
+      ]
+    },
+    {
+      "id": "schmiede",
+      "name": "Schmiede",
+      "bild": "amboss",
+      "knoten": [
+        {
+          "id": "p-selten",
+          "name": "Meisterhand",
+          "wirkung": "schmiedeSelten",
+          "wert": 0.02,
+          "max": 20,
+          "text": "Seltene Stücke 2 % häufiger"
+        },
+        {
+          "id": "p-auto",
+          "name": "Schneller Hammer",
+          "wirkung": "autoSchmiede",
+          "wert": 0.05,
+          "max": 20,
+          "text": "Auto-Schmiede 5 % schneller"
+        },
+        {
+          "id": "p-rabatt",
+          "name": "Händlerkunst",
+          "wirkung": "rabatt",
+          "wert": 0.01,
+          "max": 20,
+          "text": "Upgrades 1 % billiger"
+        }
+      ]
+    },
+    {
+      "id": "zeit",
+      "name": "Zeit",
+      "bild": "uhr",
+      "knoten": [
+        {
+          "id": "p-energie",
+          "name": "Zeitkraft",
+          "wirkung": "energieZeit",
+          "wert": 1,
+          "max": 59,
+          "text": "+1 Minute pro Energie-Punkt"
+        },
+        {
+          "id": "p-offline",
+          "name": "Lange Pause",
+          "wirkung": "offline",
+          "wert": 0.5,
+          "max": 16,
+          "text": "+0,5 Std. Offline-Zeit"
+        },
+        {
+          "id": "p-offlinebeute",
+          "name": "Fleißige Helfer",
+          "wirkung": "offlineBeute",
+          "wert": 0.02,
+          "max": 25,
+          "text": "+2 % Offline-Ertrag"
+        },
+        {
+          "id": "p-schluepfen",
+          "name": "Warmes Nest",
+          "wirkung": "schluepfen",
+          "wert": 0.03,
+          "max": 20,
+          "text": "Eier schlüpfen 3 % schneller"
+        }
+      ]
+    },
+    {
+      "id": "begleiter",
+      "name": "Begleiter",
+      "bild": "tiere",
+      "knoten": [
+        {
+          "id": "p-supporter",
+          "name": "Rudelführer",
+          "wirkung": "supporter",
+          "wert": 0.03,
+          "max": 20,
+          "text": "+3 % Supporter-Bonus"
+        },
+        {
+          "id": "p-setstaerke",
+          "name": "Set-Meister",
+          "wirkung": "setStaerke",
+          "wert": 0.03,
+          "max": 20,
+          "text": "+3 % Set-Bonus"
+        },
+        {
+          "id": "p-setselten",
+          "name": "Dungeon-Glück",
+          "wirkung": "setSelten",
+          "wert": 0.02,
+          "max": 20,
+          "text": "Seltene Set-Teile 2 % häufiger"
+        }
+      ]
+    }
+  ]
+}

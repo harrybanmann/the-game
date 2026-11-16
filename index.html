@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=44">
+  <link rel="stylesheet" href="css/style.css?v=45">
 </head>
 <body>
   <div id="spiel">
@@ -39,8 +39,10 @@
 
     <main id="szene">
       <div id="kampf-kopf">
+        <button id="energie-chip" class="chip energie" type="button" aria-label="Energie"></button>
         <div id="stufe-text"></div>
         <div id="wellen-punkte" aria-hidden="true"></div>
+        <button id="aufstieg-balken" class="aufstieg-balken" type="button" aria-label="Aufstieg: Upgrades auf Lv 100"><span id="aufstieg-fuellung"></span></button>
         <div id="faehigkeit-leiste" aria-hidden="true"></div>
       </div>
       <div class="arena" id="arena">
@@ -98,8 +100,21 @@
       <h3>Gut und Böse</h3>
       <button id="seite-knopf" class="knopf" type="button"></button>
       <p class="hinweis">Beide Seiten spielen sich gleich, nur Gegner, Namen und Look sind anders. Jede Seite hat ihren eigenen Spielstand.</p>
-      <button id="neu-anfangen" class="knopf rot" type="button">Neu anfangen</button>
+      <h3>Fortschritt</h3>
+      <button id="sammelbuch-knopf" class="knopf" type="button">Sammelbuch 📖</button>
+      <button id="neustart-knopf" class="knopf" type="button">Neustart mit Perma-Punkten 👑</button>
+      <p class="hinweis">Beim Neustart bleiben Tech-Baum, Perma-Baum, Energie und Sammelbuch.</p>
+      <button id="neu-anfangen" class="knopf rot" type="button">Alles löschen und neu anfangen</button>
       <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
+    </div>
+  </div>
+
+  <div id="sammelbuch" class="fenster" hidden>
+    <div class="karte">
+      <h2>Sammelbuch</h2>
+      <p class="hinweis">Alles, was du je gefunden hast, mit der besten Seltenheit. Bleibt auch nach einem Neustart.</p>
+      <div id="sammelbuch-inhalt"></div>
+      <button class="knopf rot" type="button" data-schliessen="sammelbuch">Zurück</button>
     </div>
   </div>
 
@@ -276,7 +291,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=44"></script>
+  <script type="module" src="js/main.js?v=45"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {
