@@ -45,7 +45,7 @@ export function tierSystem(api) {
 
   const schluepfZeit = (seltenheit) => {
     const zeiten = d().schluepfSekunden;
-    return zeiten[Math.min(seltenheit, zeiten.length - 1)] * 1000;
+    return zeiten[Math.min(seltenheit, zeiten.length - 1)] * 1000 * api.schluepfFaktor();
   };
 
   function starten(basis) {
@@ -84,8 +84,8 @@ export function tierSystem(api) {
     plaetzeAbLevel: () => d().plaetzeAbLevel,
     // Würfelt nach einem Sieg, ob ein Ei fällt. typ: schwach, normal, elite oder boss.
     eiWurf(typ) {
-      if (Math.random() >= (d().eiChance[typ] || 0)) return null;
-      if (t().eier.length >= d().eierLagerMax) return null;
+      if (Math.random() >= (d().eiChance[typ] || 0) * api.eiChanceFaktor()) return null;
+      if (t().eier.length >= d().eierLagerMax + api.lagerPlus()) return null;
       const ratio = typ === "boss" ? d().eiRatio.boss : d().eiRatio.normal;
       const ei = { zeitalter: api.zeitalterId(), seltenheit: wuerfeln(ratio) };
       t().eier.push(ei);
@@ -130,8 +130,9 @@ export function tierSystem(api) {
       for (const nr of t().supporter.slice(0, plaetze())) {
         const s = werte(finde(nr));
         if (!s) continue;
-        if (s.supporterArt === "schaden") bonus.schadenProzent += s.supporterProzent;
-        else bonus.lebenProzent += s.supporterProzent;
+        const p = s.supporterProzent * api.supporterFaktor();
+        if (s.supporterArt === "schaden") bonus.schadenProzent += p;
+        else bonus.lebenProzent += p;
       }
       return bonus;
     },

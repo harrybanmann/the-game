@@ -1,11 +1,12 @@
-import { zahl, btc, dauer } from "./format.js?v=14";
-import * as speicher from "./speicher.js?v=14";
-import { kampfSystem } from "./kampf.js?v=14";
-import { waffenSystem } from "./waffen.js?v=14";
-import { tierSystem } from "./tiere.js?v=14";
-import { dungeonSystem } from "./dungeons.js?v=14";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=14";
-import { bitcoinSystem } from "./bitcoin.js?v=14";
+import { zahl, btc, dauer } from "./format.js?v=15";
+import * as speicher from "./speicher.js?v=15";
+import { kampfSystem } from "./kampf.js?v=15";
+import { waffenSystem } from "./waffen.js?v=15";
+import { tierSystem } from "./tiere.js?v=15";
+import { dungeonSystem } from "./dungeons.js?v=15";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=15";
+import { bitcoinSystem } from "./bitcoin.js?v=15";
+import { techSystem } from "./tech.js?v=15";
 
 const $ = (id) => document.getElementById(id);
 
@@ -17,6 +18,8 @@ let tiere; // Tiere und Eier
 let dungeons; // Dungeons und Tickets
 let faehigkeiten; // Fähigkeiten
 let bitcoin; // Bitcoin und Händler
+let tech; // Tech-Baum
+let techAst = "produktion";
 let gewaehltesTier = null;
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
@@ -30,7 +33,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -40,6 +43,7 @@ async function datenLaden() {
     json("data/dungeons.json"),
     json("data/faehigkeiten.json"),
     json("data/bitcoin.json"),
+    json("data/tech.json"),
   ]);
   return {
     einstellungen,
@@ -51,6 +55,7 @@ async function datenLaden() {
     dungeons: dungeonDaten,
     faehigkeiten: faehigkeitDaten,
     bitcoin: btcDaten,
+    tech: techDaten,
   };
 }
 
@@ -63,7 +68,8 @@ const upgradesHier = () => daten.upgrades.filter((u) => !u.zeitalter || u.zeital
 const upgradeName = (u) => (u.namen && u.namen[zeitalter().id]) || u.name;
 const upgradeText = (u) => u.text.replace("{w}", waehrung().name);
 const stufe = (u) => seite().upgrades[u.id] || 0;
-const kosten = (u) => Math.ceil(u.grundKosten * Math.pow(u.kostenFaktor, stufe(u)));
+const kosten = (u) =>
+  Math.ceil(u.grundKosten * Math.pow(u.kostenFaktor, stufe(u)) * (1 - Math.min(0.6, tech ? tech.wert("rabatt") : 0)));
 const guthaben = () => seite().waehrungen[waehrung().id] || 0;
 
 function summe(wirkung) {
@@ -72,19 +78,19 @@ function summe(wirkung) {
     .reduce((s, u) => s + u.wertProStufe * stufe(u), 0);
 }
 
-const klickWert = () => zeitalter().klickGrundwert + summe("klick");
-const proSekunde = () => summe("proSekunde");
+const klickWert = () => (zeitalter().klickGrundwert + summe("klick")) * (1 + tech.wert("produktion"));
+const proSekunde = () => summe("proSekunde") * (1 + tech.wert("produktion"));
 function schaden() {
   const b = waffen.bonus();
   const tb = tiere.bonus();
   const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
-  return grund * (1 + b.set) * (1 + tb.schadenProzent) * (1 + b.schmuckSet);
+  return grund * (1 + b.set) * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden"));
 }
 function maxLeben() {
   const tb = tiere.bonus();
   const b = waffen.bonus();
   const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + b.leben + tb.leben;
-  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet);
+  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("leben"));
 }
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
@@ -122,7 +128,7 @@ function tick() {
 
   if (sekunden >= off.abSekunden) {
     // Spiel war zu oder im Hintergrund: Formel statt Einzel-Schritte, mit Obergrenze.
-    const gezaehlt = Math.min(sekunden, off.maxStunden * 3600);
+    const gezaehlt = Math.min(sekunden, Math.min(24, off.maxStunden + tech.wert("offline")) * 3600);
     const menge = (proSekunde() + seite().kampf.rate) * gezaehlt * off.anteil;
     gutschreiben(menge);
     if (menge >= 1 && sekunden >= off.meldungAbSekunden) offlineMeldung(sekunden, gezaehlt, menge);
@@ -133,6 +139,12 @@ function tick() {
   }
 
   dungeons.schritt();
+  for (const name of tech.schritt(jetzt)) {
+    kurzMeldung("Forschung fertig: " + name);
+    if (!$("tech-fenster").hidden) techZeichnen();
+    sichern();
+  }
+  if (!$("tech-fenster").hidden) techZeiten();
   const zurueck = bitcoin.schritt(jetzt);
   if (zurueck > 0 && !$("btc-fenster").hidden) btcZeichnen();
   if (waffen.schritt(jetzt)) {
@@ -801,10 +813,82 @@ function btcZeichnen() {
   btcKnoepfe();
 }
 
+// ---------- Tech-Baum ----------
+
+function techZeiten() {
+  for (const a of tech.aeste()) {
+    const l = tech.laeuft(a.id);
+    const feld = document.querySelector(`[data-tech-lauf="${a.id}"]`);
+    if (feld) feld.textContent = l ? "Forschung läuft: noch " + dauer(Math.ceil((l.bis - Date.now()) / 1000)) : "";
+  }
+}
+
+function techZeichnen() {
+  $("tech-punkte").textContent = "Tech-Punkte: " + seite().tech.punkte + " (gibt es in den Dungeons)";
+  const reiter = $("tech-reiter");
+  reiter.replaceChildren();
+  for (const a of tech.aeste()) {
+    const k = el("button", "knopf klein" + (a.id === techAst ? "" : " matt"), a.name + (tech.astOffen(a.id) ? "" : " 🔒"));
+    k.type = "button";
+    k.addEventListener("click", () => {
+      techAst = a.id;
+      techZeichnen();
+    });
+    reiter.append(k);
+  }
+  const box = $("tech-ebenen");
+  box.replaceChildren();
+  const a = tech.aeste().find((x) => x.id === techAst);
+  if (!tech.astOffen(a.id)) {
+    const grund = { farm: "mit der Mining Farm", haushalt: "mit Haushalt und Firma", dungeons: "mit den Dungeons" }[a.offen];
+    box.append(el("p", "hinweis", "Dieser Ast öffnet sich " + (grund || "später") + "."));
+    return;
+  }
+  const lauf = el("p", "ergebnis");
+  lauf.dataset.techLauf = a.id;
+  box.append(lauf);
+  for (let eb = 1; eb <= tech.ebenen(); eb++) {
+    const offen = tech.ebeneOffen(a.id, eb);
+    const zeile = el("div", "tech-ebene" + (offen ? "" : " zu"));
+    zeile.append(el("div", "tech-ebene-titel", "Ebene " + eb + (offen ? "" : " · gesperrt (Zeitalter " + eb + " und Ebene davor)")));
+    const reihe = el("div", "tech-reihe");
+    for (let nr = 1; nr <= tech.knotenJeEbene(); nr++) {
+      const k = tech.knoten(a.id, eb, nr);
+      const st = tech.stufe(k.id);
+      const voll = st >= tech.maxStufe();
+      const knopf = el("button", "tech-knoten" + (voll ? " voll" : ""));
+      knopf.type = "button";
+      knopf.disabled = !offen;
+      knopf.append(
+        el("span", "tech-name", k.effekt.name),
+        el("span", "tech-stufe", st + "/" + tech.maxStufe()),
+        el("span", "tech-text", k.effekt.text),
+        el("span", "tech-preis", voll ? "fertig" : tech.kosten(k) + " TP · " + dauer(tech.dauer(k)))
+      );
+      knopf.addEventListener("click", () => {
+        const fehler = tech.starten(a.id, eb, nr);
+        if (fehler) return kurzMeldung(fehler);
+        kurzMeldung("Forschung gestartet: " + k.effekt.name);
+        techZeichnen();
+        sichern();
+      });
+      reihe.append(knopf);
+    }
+    zeile.append(reihe);
+    box.append(zeile);
+    if (!offen) break; // nur die erste gesperrte Ebene zeigen
+  }
+  techZeiten();
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
   if (name === "sieg") {
+    if (gegner.boss && Math.random() < tech.wert("bossEi")) {
+      const extra = tiere.eiGeben(2.5, 0);
+      kurzMeldung("Zweites Boss-Ei: " + extra.name);
+    }
     const ei = tiere.eiWurf(gegner.typ);
     if (ei) {
       kurzMeldung("Ei gefunden: " + ei.seltenheit.name);
@@ -951,6 +1035,11 @@ function knoepfeVerbinden() {
     dungeonsZeichnen();
     fensterZeigen("dungeon-fenster");
   });
+  $("tech-knopf").addEventListener("click", () => {
+    fensterSchliessen("menue");
+    techZeichnen();
+    fensterZeigen("tech-fenster");
+  });
   $("btc-knopf").addEventListener("click", () => {
     fensterSchliessen("menue");
     btcZeichnen();
@@ -1032,11 +1121,17 @@ async function start() {
     maxLeben,
     schlagZeit: () => daten.einstellungen.kampf.sekundenProSchlag,
     wellen: () => daten.einstellungen.kampf.wellen,
-    gutschreiben,
+    gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute"))),
     xpGeben,
     ereignis: kampfEreignis,
     trank: () => daten.dungeons.heiltrank,
     faehigkeiten: () => faehigkeiten,
+  });
+  tech = techSystem({
+    daten: () => daten.tech,
+    seite,
+    zeitalterNummer: () => zeitalter().nummer,
+    systemOffen: (name) => name === "immer" || name === "dungeons",
   });
   bitcoin = bitcoinSystem({
     daten: () => daten.bitcoin,
@@ -1063,6 +1158,10 @@ async function start() {
     zeitalterId: () => zeitalter().id,
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     level: () => seite().level,
+    schluepfFaktor: () => 1 - Math.min(0.75, tech.wert("schluepfen")),
+    eiChanceFaktor: () => 1 + tech.wert("eier"),
+    lagerPlus: () => tech.wert("lager"),
+    supporterFaktor: () => 1 + tech.wert("supporter"),
   });
   faehigkeiten = faehigkeitenSystem({
     daten: () => daten.faehigkeiten,
@@ -1083,7 +1182,16 @@ async function start() {
     eiGeben: (ratio, plus) => tiere.eiGeben(ratio, plus),
     schmiedenGratis: () => waffen.schmiedenGratis(),
     gutschreiben,
-    punkteGeben: (stufe, meilenstein) => faehigkeiten.punkteGeben(stufe, meilenstein),
+    punkteGeben: (stufe, meilenstein) => {
+      const vorher = seite().faehigkeiten.punkte;
+      faehigkeiten.punkteGeben(stufe, meilenstein);
+      const dazu = seite().faehigkeiten.punkte - vorher;
+      const extra = Math.round(dazu * tech.wert("fpunkte"));
+      seite().faehigkeiten.punkte += extra;
+      return dazu + extra;
+    },
+    techPunkteGeben: (stufe, meilenstein) => tech.punkteGeben(stufe, meilenstein),
+    ticketsPlus: () => tech.wert("tickets"),
     mengeText: (menge) => zahl(menge) + " " + waehrung().name,
   });
   knoepfeVerbinden();

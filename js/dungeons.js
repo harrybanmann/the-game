@@ -19,7 +19,7 @@ export function dungeonSystem(api) {
       const tage = Math.round((Date.parse(tag) - Date.parse(stand.letzterTag)) / 86400000);
       if (tage > 0) {
         for (const art of d().arten) {
-          stand.tickets[art.id] = Math.min(d().ticketsMax, (stand.tickets[art.id] || 0) + tage * d().ticketsProTag);
+          stand.tickets[art.id] = Math.min(d().ticketsMax + api.ticketsPlus(), (stand.tickets[art.id] || 0) + tage * d().ticketsProTag);
         }
       }
     }
@@ -41,6 +41,7 @@ export function dungeonSystem(api) {
     const meilenstein = stufe % d().meilensteinAlle === 0;
     const teile = [];
     teile.push(api.punkteGeben(stufe, meilenstein) + " Fähigkeitspunkte");
+    teile.push(api.techPunkteGeben(stufe, meilenstein) + " Tech-Punkte");
     if (art === "eier") {
       const ratio = Math.max(d().ei.ratioEnde, d().ei.ratioStart - d().ei.ratioProStufe * (stufe - 1));
       teile.push("Ei (" + api.eiGeben(ratio, 0).name + ")");

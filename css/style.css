@@ -427,3 +427,21 @@ textarea {
 .kachel-lv { position: absolute; top: 2px; left: 3px; font-size: 9px; color: #fff;
   text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }
 #schmuck-plaetze { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+/* ---------- Tech-Baum ---------- */
+#tech-reiter { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+#tech-reiter .knopf.klein { margin: 0; font-size: 13px; }
+#tech-ebenen { display: flex; flex-direction: column; gap: 8px; }
+.tech-ebene.zu { opacity: 0.55; }
+.tech-ebene-titel { font-size: 15px; color: var(--zweit); margin-bottom: 4px; }
+.tech-reihe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.tech-knoten {
+  min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 3px; text-align: center;
+  background: #121829; border: 3px solid var(--panel-hell); border-radius: 12px; cursor: pointer;
+}
+.tech-knoten.voll { border-color: #ffd54a; }
+.tech-knoten:disabled { cursor: default; }
+.tech-name { font-size: 12px; line-height: 1.1; }
+.tech-stufe { font-size: 14px; color: #ffd54a; }
+.tech-text { font-size: 9px; line-height: 1.15; opacity: 0.85; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+.tech-preis { font-size: 10px; background: rgba(255, 255, 255, 0.12); padding: 1px 5px; border-radius: 999px; }

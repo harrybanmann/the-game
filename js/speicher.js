@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 10;
+export const VERSION = 11;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -20,6 +20,7 @@ export function neueSeite(startZeitalter) {
     schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
     lager: [],
     traenke: 0,
+    tech: { punkte: 0, stufen: {}, laeuft: {} },
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { letzterTag: "", tickets: {}, stufe: {} },
@@ -95,6 +96,16 @@ export function pruefen(stand) {
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
     seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    const te = seite.tech || {};
+    const st = {};
+    for (const [id, n] of Object.entries(te.stufen || {})) {
+      const v = Math.floor(Number(n));
+      if (Number.isFinite(v) && v > 0) st[id] = Math.min(5, v);
+    }
+    const lf = {};
+    for (const [astId, l] of Object.entries(te.laeuft || {}))
+      if (l && typeof l.knoten === "string" && Number.isFinite(l.bis)) lf[astId] = { knoten: l.knoten, bis: l.bis };
+    seite.tech = { punkte: Math.max(0, Math.floor(Number(te.punkte)) || 0), stufen: st, laeuft: lf };
     const bt = seite.btc || {};
     const ups = {};
     for (const [platz, n] of Object.entries(bt.upgrades || {})) {

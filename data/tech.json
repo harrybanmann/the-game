@@ -1,0 +1,193 @@
+{
+  "_hinweis": "Harry (Tech-Baum-Chat): 4 Äste, je 12 Ebenen × 3 Knoten, je 5 Stufen; pro Zeitalter eine Ebene, Voraussetzung Ebene davor; Wartezeit Minuten → Tage; Tech-Währung aus Dungeons; ein Knoten beschleunigt alle Forschungen; anfangs nur Produktion offen, andere öffnen mit ihrem System; eine Forschung je Ast; alle Äste gleich aufgebaut. 'weniger Kreditzinsen' ersetzt durch Schulden-Bremse (Bau-Korrekturen 4). Namen, Wirkungen und Zahlen sind Vorschläge.",
+  "ebenen": 12,
+  "knotenJeEbene": 3,
+  "maxStufe": 5,
+  "kosten": {
+    "grund": 2,
+    "ebeneFaktor": 1.8
+  },
+  "dauer": {
+    "grundSekunden": 180,
+    "ebeneFaktor": 1.7
+  },
+  "dungeonPunkte": {
+    "grund": 5,
+    "jeStufe": 0.5,
+    "meilenstein": 10
+  },
+  "aeste": [
+    {
+      "id": "produktion",
+      "name": "Produktion",
+      "offen": "immer",
+      "effekte": [
+        {
+          "id": "produktion",
+          "name": "Mehr Güter",
+          "text": "+10 % Güter pro Sekunde und pro Tippen",
+          "wert": 0.1
+        },
+        {
+          "id": "beute",
+          "name": "Bessere Preise",
+          "text": "+5 % Beute aus Kämpfen",
+          "wert": 0.05
+        },
+        {
+          "id": "offline",
+          "name": "Länger offline",
+          "text": "+0,5 Std. Offline-Zeit (höchstens 24 Std.)",
+          "wert": 0.5
+        },
+        {
+          "id": "rabatt",
+          "name": "Billigere Upgrades",
+          "text": "−2 % Upgrade-Kosten (höchstens −60 %)",
+          "wert": 0.02
+        },
+        {
+          "id": "lager",
+          "name": "Mehr Lagerplatz",
+          "text": "+2 Plätze im Eier-Lager",
+          "wert": 2
+        },
+        {
+          "id": "tempo",
+          "name": "Schnellere Forschung",
+          "text": "+4 % Forschungs-Tempo",
+          "wert": 0.04
+        }
+      ]
+    },
+    {
+      "id": "kampf",
+      "name": "Kampf und Dungeons",
+      "offen": "dungeons",
+      "effekte": [
+        {
+          "id": "schaden",
+          "name": "Mehr Schaden",
+          "text": "+3 % Schaden",
+          "wert": 0.03
+        },
+        {
+          "id": "leben",
+          "name": "Mehr Leben",
+          "text": "+3 % Leben",
+          "wert": 0.03
+        },
+        {
+          "id": "tickets",
+          "name": "Mehr Tickets",
+          "text": "+1 Ticket-Höchstzahl je Dungeon",
+          "wert": 1
+        },
+        {
+          "id": "fpunkte",
+          "name": "Mehr Fähigkeitspunkte",
+          "text": "+10 % Fähigkeitspunkte",
+          "wert": 0.1
+        },
+        {
+          "id": "techpunkte",
+          "name": "Mehr Tech-Punkte",
+          "text": "+10 % Tech-Punkte",
+          "wert": 0.1
+        },
+        {
+          "id": "bossEi",
+          "name": "Boss-Ei",
+          "text": "+5 % Chance auf ein zweites Boss-Ei",
+          "wert": 0.05
+        },
+        {
+          "id": "schluepfen",
+          "name": "Schneller schlüpfen",
+          "text": "−4 % Schlüpfzeit (höchstens −75 %)",
+          "wert": 0.04
+        },
+        {
+          "id": "eier",
+          "name": "Mehr Eier",
+          "text": "+5 % Ei-Chance",
+          "wert": 0.05
+        },
+        {
+          "id": "supporter",
+          "name": "Stärkere Supporter",
+          "text": "+5 % Supporter-Bonus",
+          "wert": 0.05
+        }
+      ]
+    },
+    {
+      "id": "handel",
+      "name": "Handel und Mining",
+      "offen": "farm",
+      "effekte": [
+        {
+          "id": "tradingGewinn",
+          "name": "Mehr Trading-Gewinn",
+          "text": "+5 % Trading-Gewinn",
+          "wert": 0.05
+        },
+        {
+          "id": "rechenleistung",
+          "name": "Mehr Rechenleistung",
+          "text": "+5 % Rechenleistung der Farm",
+          "wert": 0.05
+        },
+        {
+          "id": "farmRabatt",
+          "name": "Billigere Farm-Teile",
+          "text": "−3 % Kosten für Farm-Teile",
+          "wert": 0.03
+        },
+        {
+          "id": "offlineMining",
+          "name": "Länger offline schürfen",
+          "text": "+0,5 Std. Offline-Mining",
+          "wert": 0.5
+        }
+      ]
+    },
+    {
+      "id": "haushalt",
+      "name": "Haushalt",
+      "offen": "haushalt",
+      "effekte": [
+        {
+          "id": "gehalt",
+          "name": "Mehr Gehalt",
+          "text": "+5 % Gehalt und Firmen-Einnahmen",
+          "wert": 0.05
+        },
+        {
+          "id": "schuldenBremse",
+          "name": "Kleinere Schulden-Bremse",
+          "text": "−2 Prozentpunkte Schulden-Bremse",
+          "wert": 0.02
+        },
+        {
+          "id": "rechnungen",
+          "name": "Niedrigere Rechnungen",
+          "text": "−3 % Rechnungen",
+          "wert": 0.03
+        },
+        {
+          "id": "aussehen",
+          "name": "Billigeres Aussehen",
+          "text": "−3 % Kosten für Aussehen",
+          "wert": 0.03
+        },
+        {
+          "id": "sparzins",
+          "name": "Höherer Sparzins",
+          "text": "+0,1 Prozentpunkte Sparzins",
+          "wert": 0.001
+        }
+      ]
+    }
+  ]
+}
