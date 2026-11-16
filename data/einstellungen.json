@@ -16,14 +16,15 @@
     "grundLeben": 20,
     "sekundenProSchlag": 1,
     "wellen": {
-      "proStufe": 3,
+      "proStufe": 10,
       "startGegner": 1,
       "mehrAlleStufen": 3,
-      "maxGegner": 5,
+      "maxGegner": 10,
       "staerkeFaktor": 1.12,
       "beuteFaktor": 1.08,
       "eliteAlleStufen": 5,
-      "heilungZwischen": 0.25
+      "heilungZwischen": 0.25,
+      "_hinweis": "Harry 16.11.2026: jede Stufe hat 10 Ebenen, Ebene n hat n Gegner. Wer verliert, beginnt die Stufe wieder bei Ebene 1."
     },
     "lauf": {
       "_hinweis": "Abstand 1 = rechter Rand, 0 = Startplatz des Helden. tempo = Strecke pro Sekunde. Vorschlag.",
@@ -38,6 +39,25 @@
       "heldZurueck": 0.7,
       "heldMax": 0.5,
       "nahReichweite": 0.08
+    },
+    "boss": {
+      "_hinweis": "Harry 16.11.2026: Bosse deutlich schwerer, nicht mehr mit einem Schlag. Der Boss ist so stark wie die Gegner auf Stufe 10 × Zeitalter, mal lebenFaktor. Unter 2/3 und 1/3 Leben wechselt er die Phase: mehr Schaden, schnellere Fähigkeiten, kurz ein Schild. Zahlen sind Vorschläge.",
+      "stufeJeZeitalter": 10,
+      "lebenFaktor": 2,
+      "schadenFaktor": 1,
+      "schildSekunden": 2,
+      "phasen": [
+        {
+          "ab": 0.66,
+          "schaden": 1.3,
+          "tempo": 1.25
+        },
+        {
+          "ab": 0.33,
+          "schaden": 1.6,
+          "tempo": 1.5
+        }
+      ]
     }
   },
   "level": {
@@ -139,6 +159,15 @@
       },
       "menge": {
         "boss": 2
+      }
+    },
+    "reittier": {
+      "_hinweis": "Harry 16.11.2026: Reittiere fallen selten auch bei Gegnern (ab dem Freischalten der Reittiere). Vorschlag.",
+      "chance": {
+        "schwach": 0.001,
+        "normal": 0.002,
+        "elite": 0.01,
+        "boss": 0.25
       }
     }
   }

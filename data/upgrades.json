@@ -56,5 +56,93 @@
     "grundKosten": 30,
     "kostenFaktor": 1.2,
     "maxStufe": 100
+  },
+  {
+    "id": "tempo",
+    "name": "Schnellere Schläge",
+    "text": "+0,5 % Angriffstempo",
+    "wirkung": "tempo",
+    "wertProStufe": 0.005,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 2
+  },
+  {
+    "id": "krit",
+    "name": "Kritischer Blick",
+    "text": "+0,2 % Chance auf kritischen Treffer",
+    "wirkung": "krit",
+    "wertProStufe": 0.002,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 2
+  },
+  {
+    "id": "block",
+    "name": "Abwehr",
+    "text": "+0,15 % Chance zu blocken",
+    "wirkung": "block",
+    "wertProStufe": 0.0015,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 3
+  },
+  {
+    "id": "regeneration",
+    "name": "Erholung",
+    "text": "+0,05 % Leben pro Sekunde",
+    "wirkung": "regeneration",
+    "wertProStufe": 0.0005,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 3
+  },
+  {
+    "id": "kritSchaden",
+    "name": "Wucht",
+    "text": "+2 % Schaden bei kritischen Treffern",
+    "wirkung": "kritSchaden",
+    "wertProStufe": 0.02,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 4
+  },
+  {
+    "id": "beute",
+    "name": "Beutejäger",
+    "text": "+1 % {w} von Gegnern",
+    "wirkung": "beute",
+    "wertProStufe": 0.01,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 4
+  },
+  {
+    "id": "ausweichen",
+    "name": "Flinke Füße",
+    "text": "+0,15 % Chance auszuweichen",
+    "wirkung": "ausweichen",
+    "wertProStufe": 0.0015,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 5
+  },
+  {
+    "id": "raub",
+    "name": "Lebensraub",
+    "text": "+0,05 % Schaden heilt dich",
+    "wirkung": "raub",
+    "wertProStufe": 0.0005,
+    "grundKosten": 40,
+    "kostenFaktor": 1.2,
+    "maxStufe": 100,
+    "abZeitalter": 6
   }
 ]

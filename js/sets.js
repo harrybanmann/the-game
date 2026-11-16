@@ -27,7 +27,7 @@ export function setSystem(api) {
     if (!set) return null;
     const selten = api.seltenheiten()[teil.seltenheit] || api.seltenheiten()[0];
     const c = d().set;
-    const prozent = c.grundProzent * selten.faktor * (1 + c.jeZeitalter * (api.zeitalterNummerVon(teil.z) - 1)) * (mitHaendler ? api.haendlerFaktor("set-" + teil.teil) : 1);
+    const prozent = c.grundProzent * (selten.prozent || selten.faktor) * (1 + c.jeZeitalter * (api.zeitalterNummerVon(teil.z) - 1)) * (mitHaendler ? api.haendlerFaktor("set-" + teil.teil) : 1);
     return { ...teil, set, seltenheitInfo: selten, prozent, zeitalterNr: api.zeitalterNummerVon(teil.z) };
   }
 
@@ -64,8 +64,10 @@ export function setSystem(api) {
     werte,
     setVon,
     // Belohnung aus einem Dungeon: zufälliges Teil des Sets dieses Zeitalters.
+    // Harry 16.11.2026: jedes Zeitalter bringt ein neues Teil (Helm, Handschuhe, Rüstung, Waffe); nur offene Teile fallen.
+    offen: (teil) => (api.zeitalterNummer ? api.zeitalterNummer() : 99) >= ((d().set.teilAbZeitalter || {})[teil] || 1),
     geben(z, ratio) {
-      const teile = d().set.teile;
+      const teile = d().set.teile.filter((t) => this.offen(t));
       const teil = { z, teil: teile[Math.floor(Math.random() * teile.length)], seltenheit: wuerfeln(ratio) };
       const angelegt = einsortieren(teil);
       return { ...werte(teil), angelegt };

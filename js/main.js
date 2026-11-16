@@ -1,17 +1,17 @@
-import { zahl, btc, dauer } from "./format.js?v=42";
-import * as speicher from "./speicher.js?v=42";
-import { kampfSystem } from "./kampf.js?v=42";
-import { waffenSystem } from "./waffen.js?v=42";
-import { tierSystem } from "./tiere.js?v=42";
-import { dungeonSystem } from "./dungeons.js?v=42";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=42";
-import { bitcoinSystem } from "./bitcoin.js?v=42";
-import { techSystem } from "./tech.js?v=42";
-import * as grafik from "./grafik.js?v=42";
-import { haushaltSystem } from "./haushalt.js?v=42";
-import { farmSystem } from "./farm.js?v=42";
-import { reittierSystem } from "./reittiere.js?v=42";
-import { setSystem } from "./sets.js?v=42";
+import { zahl, btc, dauer } from "./format.js?v=44";
+import * as speicher from "./speicher.js?v=44";
+import { kampfSystem } from "./kampf.js?v=44";
+import { waffenSystem } from "./waffen.js?v=44";
+import { tierSystem } from "./tiere.js?v=44";
+import { dungeonSystem } from "./dungeons.js?v=44";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=44";
+import { bitcoinSystem } from "./bitcoin.js?v=44";
+import { techSystem } from "./tech.js?v=44";
+import * as grafik from "./grafik.js?v=44";
+import { haushaltSystem } from "./haushalt.js?v=44";
+import { farmSystem } from "./farm.js?v=44";
+import { reittierSystem } from "./reittiere.js?v=44";
+import { setSystem } from "./sets.js?v=44";
 
 const $ = (id) => document.getElementById(id);
 
@@ -81,7 +81,9 @@ const seite = () => stand.seiten[stand.aktiveSeite];
 const zeitalter = () => daten.zeitalter.find((z) => z.id === seite().zeitalter) || daten.zeitalter[0];
 const waehrung = () => zeitalter().waehrung;
 // Das Sammeln per Fingertipp gibt es nicht mehr (Harry 16.11.2026), deshalb fehlen die Tipp-Upgrades in der Liste.
-const upgradesHier = () => daten.upgrades.filter((u) => u.wirkung !== "klick" && (!u.zeitalter || u.zeitalter === zeitalter().id));
+// Harry 16.11.2026: 10 Kampf-Werte als Upgrades; die neuen kommen nach und nach (abZeitalter).
+const upgradesHier = () =>
+  daten.upgrades.filter((u) => u.wirkung !== "klick" && (!u.zeitalter || u.zeitalter === zeitalter().id) && zeitalter().nummer >= (u.abZeitalter || 1));
 const upgradeName = (u) => (u.namen && u.namen[zeitalter().id]) || u.name;
 const upgradeText = (u) => u.text.replace("{w}", waehrung().name);
 const stufe = (u) => seite().upgrades[u.id] || 0;
@@ -142,19 +144,32 @@ function setBonus() {
   const f = 1 + tech.wert("setStaerke");
   return { ...b, schaden: b.schaden * f, leben: b.leben * f };
 }
+// Zweiter Bonus des gesattelten Reittiers (Heilung, Schlüssel, Eier, Fähigkeitspunkte).
+const reittierBonus = (art) => (reittiere && frei("reittiere") ? reittiere.bonus(art) : 0);
+const REITTIER_BONUS = {
+  heilung: (w) => "Heilung +" + prozent(w) + " Leben/Sek.",
+  schluessel: (w) => "Schlüssel-Chance +" + prozent(w),
+  eier: (w) => "Eier-Chance +" + prozent(w),
+  fpunkte: (w) => "★-Chance +" + prozent(w),
+};
 const traenkeMax = () => daten.dungeons.heiltrank.max + tech.wert("traenkePlatz");
 // Die eine Waffe bestimmt den Kampfstil; die Zusatzwerte (Block, Tempo …) kommen von der ganzen Ausrüstung.
 function kampfWerte() {
   const b = waffen.bonus();
   const z = b.zusatz;
+  // Zusatzwerte der Ausrüstung plus Upgrades, gedeckelt wie bei der Ausrüstung.
+  const deckel = (id) => ((daten.waffen.zusatzWerte || []).find((x) => x.id === id) || { max: 1 }).max;
+  const wert = (id) => Math.min(deckel(id), (z[id] || 0) + summe(id));
   return {
     art: b.kampfArt,
     hand: b.hand,
-    block: z.block || 0,
-    krit: z.krit || 0,
-    raub: z.raub || 0,
-    ausweichen: z.ausweichen || 0,
-    tempo: z.tempo || 0,
+    block: wert("block"),
+    krit: wert("krit"),
+    raub: wert("raub"),
+    ausweichen: wert("ausweichen"),
+    tempo: wert("tempo"),
+    kritSchaden: summe("kritSchaden"),
+    regeneration: summe("regeneration") + reittierBonus("heilung"),
     zweihandReichweite: daten.waffen.zweihandReichweite,
     zweihandNebenschaden: daten.waffen.zweihandNebenschaden,
   };
@@ -496,20 +511,22 @@ function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
   const trank = daten.dungeons.heiltrank;
-  $("stufe-text").textContent = z.boss ? "Boss · Tränke " + s.traenke + "/" + traenkeMax() : "Stufe " + z.stufe;
+  // Harry 16.11.2026: Stufe und Ebene wie „46-3“ (10 Ebenen je Stufe).
+  $("stufe-text").textContent = z.boss ? "Boss · Phase " + z.bossPhase + " · Tränke " + s.traenke + "/" + traenkeMax() : "Stufe " + z.stufe + "-" + z.welle;
   // Punkte für die Wellen der Stufe: geschaffte sind gefüllt, die laufende ist größer.
   const punkte = $("wellen-punkte");
   const kp = z.boss ? "boss" : z.wellenProStufe + "|" + z.welle;
   if (punkte.dataset.k !== kp) {
     punkte.dataset.k = kp;
     punkte.replaceChildren();
-    if (!z.boss) for (let i = 1; i <= z.wellenProStufe; i++) punkte.append(el("span", "punkt" + (i < z.welle ? " fertig" : i === z.welle ? " jetzt" : "")));
+    if (!z.boss) for (let i = 1; i <= z.wellenProStufe; i++) punkte.append(el("span", "punkt klein" + (i < z.welle ? " fertig" : i === z.welle ? " jetzt" : "")));
   }
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
   $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
 
   // Figuren bleiben bestehen und werden nur verschoben, damit Laufen und Treffer-Effekte flüssig sind.
   const gruppe = $("gegner-gruppe");
+  gruppe.dataset.phase = z.boss ? z.bossPhase : ""; // Boss-Phase färbt den Boss (CSS)
   const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + "/" + g.art + (g.boss ? "/B" : "")).join("|");
   if (gruppe.dataset.k !== schluessel) {
     gruppe.dataset.k = schluessel;
@@ -616,8 +633,7 @@ function kampfZeichnen() {
 }
 
 function bossTippen() {
-  const z = kampf.zustand();
-  if (z.boss) return;
+  if (kampf.istBoss()) return;
   const fehlt = aufstiegFehlt();
   const boss = gegnerDaten().boss;
   if (fehlt !== null && !fehlt.length) {
@@ -1188,7 +1204,7 @@ function autoZeichnen() {
 
 function autoSchritt(jetzt) {
   if (!autoAn) return;
-  if (kampf.zustand().boss) return;
+  if (kampf.istBoss()) return;
   if (jetzt - autoLetzter < waffen.autoSekunden() * 1000) return;
   if (guthaben() < waffen.schmiedeKosten()) return;
   autoLetzter = jetzt;
@@ -1374,6 +1390,12 @@ function dungeonsZeichnen() {
   for (const p of daten.dungeons.set.teile) {
     const w = sets.angelegt(p);
     const lv = bitcoin.stufe("set-" + p);
+    // Noch gesperrte Plätze (Harry 16.11.2026: ein neues Teil je Zeitalter) zeigen ein Schloss.
+    if (!w && !sets.offen(p)) {
+      const ab = (daten.dungeons.set.teilAbZeitalter || {})[p] || 1;
+      plaetze.append(bildKachel({ leer: true, bild: grafik.symbolBild("schloss"), marke: "ZA " + ab, klick: () => setPlatzInfo(p) }));
+      continue;
+    }
     plaetze.append(
       bildKachel({
         leer: !w,
@@ -1422,7 +1444,11 @@ function setPlatzInfo(p) {
       titelFarbe: w ? w.seltenheitInfo.farbe : "",
       bild: grafik.setTeilBild(p, w ? w.set : null),
       farbe: w ? w.seltenheitInfo.farbe : "#cfd3da",
-      zeilen: [w ? el("div", "hinweis", w.seltenheitInfo.name) : "Noch leer. Set-Teile gibt es in den Dungeons.", w ? setWerteZeile(w) : "", haendlerZeile("set-" + p)],
+      zeilen: [
+        w ? el("div", "hinweis", w.seltenheitInfo.name) : sets.offen(p) ? "Noch leer. Set-Teile gibt es in den Dungeons." : "Dieses Set-Teil fällt ab Zeitalter " + ((daten.dungeons.set.teilAbZeitalter || {})[p] || 1) + " in den Dungeons.",
+        w ? setWerteZeile(w) : "",
+        haendlerZeile("set-" + p),
+      ],
       knoepfe: [haendlerKnopf("set-" + p)],
     };
   });
@@ -1658,7 +1684,11 @@ function reittierInfo(nr) {
       titelFarbe: w.seltenheit.farbe,
       bild: grafik.reittierBild(w.id),
       farbe: w.seltenheit.farbe,
-      zeilen: [marken([[w.seltenheit.name, w.seltenheit.farbe], ["Zeitalter " + zeitalterVon(w.zeitalter).nummer], ["Tempo +" + prozent(w.tempo)]]), "Mit Reittier greifst du schneller an."],
+      zeilen: [
+        marken([[w.seltenheit.name, w.seltenheit.farbe], ["Zeitalter " + zeitalterVon(w.zeitalter).nummer], ["Tempo +" + prozent(w.tempo)]]),
+        w.bonusArt && REITTIER_BONUS[w.bonusArt] ? marken([[REITTIER_BONUS[w.bonusArt](w.bonusWert)]]) : "",
+        "Mit Reittier greifst du schneller an. Der zweite Bonus wirkt, solange es gesattelt ist.",
+      ],
       knoepfe: [
         { text: a && a.nr === w.nr ? "Gesattelt" : "Satteln", aus: !!a && a.nr === w.nr, aktion: tun(() => reittiere.satteln(w.nr)) },
         { text: "Mergen (3 gleiche → nächste Stufe)", aus: !reittiere.mergbar(w.nr), aktion: tun(() => reittiere.mergen(w.nr)) },
@@ -1996,7 +2026,7 @@ function farmZeichnen(neu) {
 // ---------- Seitenwechsel Gut/Böse (nur in der Zentrale = Menü, nie im Boss-Kampf) ----------
 
 function seiteWechseln() {
-  if (kampf.zustand().boss) return kurzMeldung("Mitten im Boss-Kampf geht das nicht.");
+  if (kampf.istBoss()) return kurzMeldung("Mitten im Boss-Kampf geht das nicht.");
   const ziel = stand.aktiveSeite === "gut" ? "boese" : "gut";
   const zielName = ziel === "boese" ? "Dieb" : "Beschützer";
   const neu = !stand.seiten[ziel];
@@ -2036,7 +2066,7 @@ function weltBeute(gegner) {
   const typ = gegner.boss ? "boss" : gegner.typ;
   const wurf = (art, plus) => Math.random() < (b[art].chance[typ] || 0) * (1 + plus);
   const menge = (art) => (b[art].menge && b[art].menge[typ]) || 1;
-  if (frei("faehigkeiten") && wurf("fpunkte", tech.wert("fpunkte"))) {
+  if (frei("faehigkeiten") && wurf("fpunkte", tech.wert("fpunkte") + reittierBonus("fpunkte"))) {
     seite().faehigkeiten.punkte += menge("fpunkte");
     beuteZeigen(gegner, grafik.symbolBild("stern"));
   }
@@ -2044,9 +2074,17 @@ function weltBeute(gegner) {
     stand.gemeinsam.tech.punkte += menge("techpunkte");
     beuteZeigen(gegner, grafik.symbolBild("tech"));
   }
-  if (frei("dungeons") && wurf("schluessel", tech.wert("tickets"))) {
+  if (frei("dungeons") && wurf("schluessel", tech.wert("tickets") + reittierBonus("schluessel"))) {
     dungeons.schluesselGeben(menge("schluessel"));
     beuteZeigen(gegner, grafik.symbolBild("schluessel"));
+  }
+  // Harry 16.11.2026: Reittiere fallen selten auch bei Gegnern.
+  if (frei("reittiere") && b.reittier && wurf("reittier", 0)) {
+    const neu = reittiere.geben(zeitalter().id);
+    beuteZeigen(gegner, grafik.reittierBild(neu.id));
+    kurzMeldung("Neues Reittier: " + neu.seltenheit.name + " – " + neu.name);
+    reittierAnzeigen();
+    if (!$("reittiere-fenster").hidden) reittiereZeichnen();
   }
 }
 
@@ -2170,18 +2208,18 @@ function offlineBeute(sekunden) {
   // Erwartungswert ganzzahlig machen: Ganzes sicher, Rest als Wurf.
   const ganz = (x) => Math.floor(x) + (Math.random() < x - Math.floor(x) ? 1 : 0);
   const erwartet = (chance, plus) => typen.reduce((s, t) => s + (r[t] || 0) * sekunden * anteil * (chance[t] || 0), 0) * (1 + plus);
-  const ergebnis = { siege: Math.round(typen.reduce((s, t) => s + (r[t] || 0), 0) * sekunden * anteil), xp: 0, eier: 0, fpunkte: 0, techpunkte: 0, schluessel: 0 };
+  const ergebnis = { siege: Math.round(typen.reduce((s, t) => s + (r[t] || 0), 0) * sekunden * anteil), xp: 0, eier: 0, fpunkte: 0, techpunkte: 0, schluessel: 0, reittiere: 0 };
   const levelVorher = seite().level;
   ergebnis.xp = Math.round((r.xp || 0) * sekunden * anteil);
   if (ergebnis.xp > 0) xpGeben(ergebnis.xp);
   ergebnis.level = seite().level - levelVorher;
   if (frei("tiere")) {
     const platz = Math.max(0, daten.tiere.eierLagerMax - seite().tiere.eier.length);
-    ergebnis.eier = Math.min(platz, ganz(erwartet(daten.tiere.eiChance, tech.wert("eier"))));
+    ergebnis.eier = Math.min(platz, ganz(erwartet(daten.tiere.eiChance, tech.wert("eier") + reittierBonus("eier"))));
     for (let i = 0; i < ergebnis.eier; i++) tiere.eiGeben(daten.tiere.eiRatio.normal, 0);
   }
   if (frei("faehigkeiten")) {
-    ergebnis.fpunkte = ganz(erwartet(b.fpunkte.chance, tech.wert("fpunkte")));
+    ergebnis.fpunkte = ganz(erwartet(b.fpunkte.chance, tech.wert("fpunkte") + reittierBonus("fpunkte")));
     seite().faehigkeiten.punkte += ergebnis.fpunkte;
   }
   if (frei("tech")) {
@@ -2190,8 +2228,12 @@ function offlineBeute(sekunden) {
   }
   if (frei("dungeons")) {
     const vorher = dungeons.schluessel();
-    dungeons.schluesselGeben(ganz(erwartet(b.schluessel.chance, tech.wert("tickets"))));
+    dungeons.schluesselGeben(ganz(erwartet(b.schluessel.chance, tech.wert("tickets") + reittierBonus("schluessel"))));
     ergebnis.schluessel = dungeons.schluessel() - vorher;
+  }
+  if (frei("reittiere") && b.reittier) {
+    ergebnis.reittiere = Math.min(20, ganz(erwartet(b.reittier.chance, 0)));
+    for (let i = 0; i < ergebnis.reittiere; i++) reittiere.geben(zeitalter().id);
   }
   return ergebnis;
 }
@@ -2217,6 +2259,7 @@ function offlineMeldung(wegSekunden, gezaehlt, menge, beute) {
     if (beute.fpunkte > 0) eintrag(grafik.symbolBild("stern"), "+" + beute.fpunkte + " Fähigkeitspunkte");
     if (beute.techpunkte > 0) eintrag(grafik.symbolBild("tech"), "+" + beute.techpunkte + " Tech-Punkte");
     if (beute.schluessel > 0) eintrag(grafik.symbolBild("schluessel"), "+" + beute.schluessel + " Schlüssel");
+    if (beute.reittiere > 0) eintrag(grafik.symbolBild("tiere"), "+" + beute.reittiere + (beute.reittiere === 1 ? " Reittier" : " Reittiere"));
     zeilen.push(liste);
     if (beute.siege > 0) zeilen.push(el("div", "hinweis", "Etwa " + zahl(beute.siege) + " Gegner besiegt. Die Stufe bleibt, bis du wieder spielst."));
     return { titel: "Willkommen zurück!", bild: grafik.symbolBild("uhr"), rund: true, zeilen, knoepfe: [{ text: "Weiter", zu: true, aktion: () => {} }] };
@@ -2416,7 +2459,9 @@ async function start() {
     tempo: angriffsTempo,
     kampfWerte,
     wellen: () => daten.einstellungen.kampf.wellen,
-    gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute"))),
+    gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute") + summe("beute"))),
+    bossRegeln: () => daten.einstellungen.kampf.boss,
+    zeitalterNummer: () => zeitalter().nummer,
     xpGeben,
     ereignis: kampfEreignis,
     trank: () => daten.dungeons.heiltrank,
@@ -2497,7 +2542,7 @@ async function start() {
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     level: () => seite().level,
     schluepfFaktor: () => 1 - Math.min(0.75, tech.wert("schluepfen")),
-    eiChanceFaktor: () => 1 + tech.wert("eier"),
+    eiChanceFaktor: () => 1 + tech.wert("eier") + reittierBonus("eier"),
     lagerPlus: () => 0,
     brutPlaetze: () => 1 + Math.floor(tech.wert("brutplatz") + 1e-9),
     offen: () => frei("tiere"),
@@ -2529,6 +2574,7 @@ async function start() {
     seltenheiten: () => daten.waffen.seltenheiten,
     zeitalterNummerVon: (id) => (daten.zeitalter.find((z) => z.id === id) || { nummer: 1 }).nummer,
     haendlerFaktor: (platz) => bitcoin.faktor(platz),
+    zeitalterNummer: () => zeitalter().nummer,
   });
   dungeons = dungeonSystem({
     daten: () => daten.dungeons,

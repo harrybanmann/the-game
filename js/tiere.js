@@ -35,7 +35,7 @@ export function tierSystem(api) {
       schaden: vorlage.schaden * faktor,
       leben: vorlage.leben * faktor,
       supporterArt: vorlage.supporter.art,
-      supporterProzent: vorlage.supporter.prozent * selten.faktor * stern,
+      supporterProzent: vorlage.supporter.prozent * (selten.prozent || selten.faktor) * stern, // Prozent-Boni bleiben flach
       staerke: (vorlage.schaden * 5 + vorlage.leben) * faktor,
     };
   }

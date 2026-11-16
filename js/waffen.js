@@ -74,8 +74,10 @@ export function waffenSystem(api) {
     platz = platz || (vorlage.art === "ring" ? "ring1" : istWaffenArt(vorlage.art) ? "waffe" : vorlage.art);
     const selten = d().seltenheiten[stueck.seltenheit] || d().seltenheiten[0];
     const sterne = stueck.sterne || 0;
+    // Harry 16.11.2026: die Seltenheit entscheidet. Alle Stücke wachsen mit dem aktuellen Zeitalter mit,
+    // damit ein Göttliches immer stärker ist als ein Legendäres, egal aus welchem Zeitalter.
     const faktor =
-      selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * (1 + sterne * d().sternBonus) * api.platzFaktor(platz);
+      selten.faktor * api.zeitalterStaerke(api.zeitalterId()) * (1 + sterne * d().sternBonus) * api.platzFaktor(platz);
     return {
       id: vorlage.id,
       art: vorlage.art,
@@ -137,7 +139,10 @@ export function waffenSystem(api) {
   function einsortieren(stueck) {
     const platz = zielPlatz(stueck);
     const alt = werte(hole(platz), platz);
-    const besser = passtZumStil(stueck) && (!alt || werte(stueck, platz).staerke > alt.staerke || (alt.art !== vorlageVon(stueck).art && !!stil()));
+    // Höhere Seltenheit gewinnt immer; bei gleicher Seltenheit entscheidet die Stärke.
+    const altRang = hole(platz) ? hole(platz).seltenheit : -1;
+    const hoeher = !alt || stueck.seltenheit > altRang || (stueck.seltenheit === altRang && werte(stueck, platz).staerke > alt.staerke);
+    const besser = passtZumStil(stueck) && (hoeher || (alt.art !== vorlageVon(stueck).art && !!stil()));
     if (besser) anlegen(stueck);
     else ablegen(stueck);
     return besser;

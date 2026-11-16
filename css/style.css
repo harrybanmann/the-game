@@ -898,3 +898,10 @@ h3 { font-size: 15px; margin-top: 2px; }
 .beute-liste { display: flex; flex-direction: column; gap: 5px; width: 100%; }
 .beute-eintrag { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.28); font-size: 14px; }
 .wert-bild.gross { width: 24px; height: 24px; flex: 0 0 24px; }
+
+/* ---------- Version 32: 10 Ebenen je Stufe, Boss-Phasen ---------- */
+.punkt.klein { width: 5px; height: 5px; border-width: 1.5px; }
+.punkt.klein.jetzt { width: 8px; height: 8px; }
+#wellen-punkte { gap: 2px; }
+#gegner-gruppe[data-phase="2"] .gegner.boss .figur { filter: drop-shadow(0 0 5px #ff9f2e); }
+#gegner-gruppe[data-phase="3"] .gegner.boss .figur { filter: drop-shadow(0 0 7px #ff3b2e) saturate(1.3); }

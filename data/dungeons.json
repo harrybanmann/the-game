@@ -32,7 +32,14 @@
       "2": 0.05,
       "4": 0.15
     },
-    "meilensteinTeile": 1
+    "meilensteinTeile": 1,
+    "teilAbZeitalter": {
+      "helm": 1,
+      "handschuhe": 2,
+      "ruestung": 3,
+      "waffe": 4
+    },
+    "_hinweisTeile": "Harry 16.11.2026: Jedes Zeitalter bringt am Anfang ein neues Set-Teil: Helm, dann Handschuhe, Rüstung, Waffe. Die Dungeons geben nur Teile, die schon offen sind (nach dem aktuellen Zeitalter)."
   },
   "sets": [
     {

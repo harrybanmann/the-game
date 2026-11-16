@@ -1,6 +1,6 @@
-// Automatischer Kampf in Wellen: Jede Stufe hat mehrere Wellen, jede Welle mehrere Gegner.
-// Je höher die Stufe, desto mehr und stärkere Gegner. Boss per Knopf (mit Aufstiegs-Bedingungen).
-// Verlieren kostet nichts: Die Stufe beginnt wieder bei Welle 1.
+// Automatischer Kampf: Jede Stufe hat 10 Ebenen (intern „Welle“), Ebene n hat n Gegner (Harry 16.11.2026).
+// Je höher die Stufe, desto stärkere Gegner. Boss per Knopf (mit Aufstiegs-Bedingungen).
+// Verlieren kostet nichts, aber die Stufe beginnt wieder bei Ebene 1.
 // Ablauf (Harry 16.11.2026): Gegner laufen von rechts heran. Der Held trägt EINE Waffe:
 // Nahkämpfer laufen den Gegnern entgegen und schlagen zu, Fernkämpfer bleiben stehen und schießen.
 // Jeder Gegner ist entweder Nahkämpfer (läuft heran, schlägt) oder Fernkämpfer (bleibt auf Abstand, schießt), nie beides.
@@ -19,6 +19,7 @@ export function kampfSystem(api) {
   let bossUhren = {};
   let bossWutBis = 0;
   let bossSchildBis = 0;
+  let bossPhase = 1;
   let aussetzen = 0;
   let kampfZeit = 0;
   let tierUhr = 0;
@@ -50,10 +51,8 @@ export function kampfSystem(api) {
     };
   }
 
-  function anzahl(stufe, welle) {
-    const c = w();
-    return Math.min(c.maxGegner, c.startGegner + Math.floor((stufe - 1) / c.mehrAlleStufen) + Math.floor((welle - 1) / 2));
-  }
+  // Ebene n hat n Gegner.
+  const anzahl = (stufe, welle) => Math.max(1, Math.min(w().maxGegner, welle));
 
   function welleStellen(heilen) {
     const d = api.gegnerDaten();
@@ -158,13 +157,25 @@ export function kampfSystem(api) {
     ziele.forEach((ziel, n) => {
       // Der Zweihänder trifft die weiteren Gegner nur mit einem Teil des Schadens.
       const anteil = n === 0 ? 1 : w.zweihandNebenschaden;
-      gemacht += treffen(api.schaden() * faktor * anteil * (krit ? 2 : 1), n === 0 ? (art === "nah" ? "schlag" : "schuss") : "mitSchlag", ziel, krit ? "krit" : "");
+      gemacht += treffen(api.schaden() * faktor * anteil * (krit ? 2 + (w.kritSchaden || 0) : 1), n === 0 ? (art === "nah" ? "schlag" : "schuss") : "mitSchlag", ziel, krit ? "krit" : "");
     });
     if (w.raub > 0 && gemacht > 0) spielerLeben = Math.min(api.maxLeben(), spielerLeben + gemacht * w.raub);
   }
 
+  // Boss-Phasen: unter 2/3 und 1/3 Leben wird der Boss wütender (mehr Schaden, schnellere Fähigkeiten, kurz ein Schild).
+  const phaseRegel = () => (bossPhase > 1 ? (api.bossRegeln().phasen || [])[bossPhase - 2] : null) || { schaden: 1, tempo: 1 };
   function bossZug(dt) {
     const boss = gegner[0];
+    const phasen = api.bossRegeln().phasen || [];
+    const anteil = boss.leben / boss.maxLeben;
+    const soll = 1 + phasen.filter((p) => anteil <= p.ab).length;
+    if (soll > bossPhase) {
+      bossPhase = soll;
+      bossSchildBis = kampfZeit + (api.bossRegeln().schildSekunden || 0);
+      merken({ art: "bossPhase", phase: bossPhase });
+      api.hinweis(boss.name + " wird wütend: Phase " + bossPhase + "!");
+    }
+    dt *= phaseRegel().tempo;
     for (const f of boss.faehigkeiten) {
       bossUhren[f.id] = (bossUhren[f.id] || 0) + dt;
       if (bossUhren[f.id] < f.alle) continue;
@@ -242,8 +253,10 @@ export function kampfSystem(api) {
       // Block und Ausweichen wehren den Treffer ganz ab.
       if (Math.random() < w.block) merken({ art: "block" });
       else if (Math.random() < w.ausweichen) merken({ art: "ausweichen" });
-      else spielerLeben -= g.schaden * fae.schutzFaktor() * (g.boss ? wut : 1);
+      else spielerLeben -= g.schaden * fae.schutzFaktor() * (g.boss ? wut * phaseRegel().schaden : 1);
     }
+    // Erholung (Upgrade): ein kleiner Teil des Lebens kommt jede Sekunde zurück.
+    if (w.regeneration > 0 && spielerLeben > 0) spielerLeben = Math.min(api.maxLeben(), spielerLeben + api.maxLeben() * w.regeneration * dt);
     if (spielerLeben <= 0) return niederlage(), true;
     // Heiltrank: nur im Boss-Kampf, automatisch unter der Schwelle.
     const regel = api.trank();
@@ -272,7 +285,17 @@ export function kampfSystem(api) {
       if (!boss || bossKampf) return;
       takt = 0;
       traenkeDabei = Math.min(api.seite().traenke, api.trank().bossMax);
-      gegner = [machGegner(boss, "boss", 1, 1, true, "nah", 1, api.lauf().bossHalt)];
+      // Harry 16.11.2026: Bosse deutlich schwerer. Der Boss ist so stark wie die Gegner auf Stufe 10 × Zeitalter.
+      const r = api.bossRegeln();
+      const c = w();
+      const bs = Math.max(1, r.stufeJeZeitalter * api.zeitalterNummer());
+      const faktor = Math.pow(c.staerkeFaktor, bs - 1);
+      const g = machGegner(boss, "boss", faktor, Math.pow(c.beuteFaktor, bs - 1), true, "nah", 1, api.lauf().bossHalt);
+      g.leben *= r.lebenFaktor;
+      g.maxLeben *= r.lebenFaktor;
+      g.schaden *= r.schadenFaktor;
+      gegner = [g];
+      bossPhase = 1;
       heldX = 0;
       spielerUhr = 0;
       effekte = [];
@@ -292,6 +315,9 @@ export function kampfSystem(api) {
       heldX = 0;
       welleStellen("voll");
     },
+    // Nur Abfrage, ob gerade ein Boss-Kampf läuft. zustand() verbraucht die Effekte (Schüsse, Hiebe)
+    // und darf deshalb nur vom Zeichnen aufgerufen werden, sonst fehlen Pfeile und Schläge.
+    istBoss: () => bossKampf,
     zustand() {
       if (!gegner.length) welleStellen("voll");
       const max = api.maxLeben();
@@ -299,6 +325,7 @@ export function kampfSystem(api) {
         gegner,
         effekte: effekte.splice(0),
         boss: bossKampf,
+        bossPhase,
         stufe: k().stufe,
         welle: k().welle,
         wellenProStufe: w().proStufe,

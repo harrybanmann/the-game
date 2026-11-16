@@ -5,44 +5,51 @@
       "id": "gewoehnlich",
       "name": "Gewöhnlich",
       "farbe": "#9aa3ad",
-      "faktor": 1
+      "faktor": 1,
+      "prozent": 1
     },
     {
       "id": "ungewoehnlich",
       "name": "Ungewöhnlich",
       "farbe": "#4fc46a",
-      "faktor": 1.5
+      "faktor": 2,
+      "prozent": 1.5
     },
     {
       "id": "selten",
       "name": "Selten",
       "farbe": "#4a9cf0",
-      "faktor": 2.25
+      "faktor": 4,
+      "prozent": 2.25
     },
     {
       "id": "episch",
       "name": "Episch",
       "farbe": "#a565e8",
-      "faktor": 3.5
+      "faktor": 8,
+      "prozent": 3.5
     },
     {
       "id": "legendaer",
       "name": "Legendär",
       "farbe": "#f39a2b",
-      "faktor": 5
+      "faktor": 16,
+      "prozent": 5
     },
     {
       "id": "mythisch",
       "name": "Mythisch",
       "farbe": "#e0483f",
-      "faktor": 7.5
+      "faktor": 32,
+      "prozent": 7.5
     },
     {
       "id": "goettlich",
       "name": "Göttlich",
       "farbe": "#ffd54a",
-      "faktor": 11,
-      "glanz": true
+      "faktor": 64,
+      "glanz": true,
+      "prozent": 11
     }
   ],
   "schmiede": {
@@ -64,7 +71,7 @@
     "2": 0.05,
     "4": 0.15
   },
-  "sternBonus": 0.25,
+  "sternBonus": 1.0,
   "maxSterne": 5,
   "waffen": [
     {
@@ -1641,5 +1648,7 @@
       "text": "Chance, einem Treffer auszuweichen"
     }
   ],
-  "zweihandNebenschaden": 0.5
+  "zweihandNebenschaden": 0.5,
+  "_hinweisSeltenheit": "Harry 16.11.2026: jede Seltenheit doppelt so stark wie die vorige (Göttlich = 64 × Gewöhnlich). prozent = alte, flachere Stufung für Prozent-Boni (Tier-Supporter, Set-Teile), damit die nicht explodieren.",
+  "_hinweisSterne": "Harry 16.11.2026: jeder Stern +100 %, bei 5 Sternen +500 %."
 }

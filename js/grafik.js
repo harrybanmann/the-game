@@ -679,6 +679,11 @@ const SYMBOLE = {
   schluessel: () => `<circle cx="20" cy="22" r="13" fill="#f2c230" ${S}/><circle cx="20" cy="22" r="5" fill="#9a6a3c" ${S3}/><path d="M30,30 L56,56 M44,44 l-6,6 M50,50 l-6,6" stroke="${U}" stroke-width="11" stroke-linecap="round"/><path d="M30,30 L56,56 M44,44 l-6,6 M50,50 l-6,6" stroke="#f2c230" stroke-width="5" stroke-linecap="round"/>`,
   zu: () => `<path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="${U}" stroke-width="16" stroke-linecap="round"/><path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>`,
   pfeil: () => `<path d="M2,32 H44" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M2,32 H44" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M62,32 L44,22 V42 Z" fill="#d5dbe2" ${S3}/>`,
+  blitz: () => `<path d="M38,4 L12,36 H30 L24,60 L52,26 H34 Z" fill="#ffd54a" ${S}/>`,
+  ziel: () => `<circle cx="32" cy="32" r="25" fill="#fff" ${S}/><circle cx="32" cy="32" r="16" fill="#e8475a" ${S3}/><circle cx="32" cy="32" r="7" fill="#fff" ${S3}/>`,
+  schild: () => `<path d="M32,6 L54,14 V30 Q54,50 32,58 Q10,50 10,30 V14 Z" fill="#8a94a3" ${S}/><path d="M32,14 L46,19 V30 Q46,44 32,50 Z" fill="#c6cdd4"/>`,
+  feder: () => `<path d="M50,8 Q20,14 14,46 L10,58 L18,50 Q46,44 50,8 Z" fill="#dff1f6" ${S}/><path d="M16,50 Q30,30 44,16" fill="none" stroke="${U}" stroke-width="3" stroke-linecap="round"/>`,
+  tropfen: () => `<path d="M32,6 Q52,32 52,42 Q52,58 32,58 Q12,58 12,42 Q12,32 32,6 Z" fill="#e8475a" ${S}/><path d="M22,40 Q22,32 28,26" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>`,
   amboss: () => `<path d="M4,30 H40 Q48,30 50,36 H38 V42 Q38,46 42,50 V56 H12 V50 Q16,46 16,42 Q6,40 4,30 Z" fill="#8a94a3" ${S}/><g transform="rotate(30 44 18)"><rect x="41" y="14" width="6" height="30" rx="3" fill="#9a6a3c" ${S3}/><rect x="32" y="4" width="24" height="14" rx="4" fill="#d5dbe2" ${S}/></g>`,
 };
 // Symbol für eine Tech-Wirkung (mehrere Wirkungen teilen sich ein Bild).
@@ -689,7 +694,10 @@ const TECH_BILD = {
   gehalt: "beutel", schuldenBremse: "schloss", rechnungen: "muenze", aussehen: "held", sparzins: "plus",
 };
 export const techBild = (effektId) => symbolBild(TECH_BILD[effektId] || "tech");
-const UPGRADE_BILD = { klick: "tippen", proSekunde: "beutel", schaden: "schwert", leben: "herz" };
+const UPGRADE_BILD = {
+  klick: "tippen", proSekunde: "beutel", schaden: "schwert", leben: "herz",
+  tempo: "uhr", krit: "blitz", kritSchaden: "ziel", block: "schild", ausweichen: "feder", raub: "tropfen", regeneration: "plus", beute: "muenze",
+};
 export const upgradeBild = (wirkung) => symbolBild(UPGRADE_BILD[wirkung] || "upgrades");
 const DUNGEON_BILD = { eier: "ei", ausruestung: "amboss", schatz: "schatz" };
 export const dungeonBild = (art) => symbolBild(DUNGEON_BILD[art] || "dungeons");

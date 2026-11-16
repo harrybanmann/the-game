@@ -1,32 +1,170 @@
 {
   "_hinweis": "Harry 16.11.2026: Reittiere mit Seltenheit und Sternen, je Zeitalter eigene, geben Angriffstempo. Namen, Zahlen und die Ei-Chance sind Vorschläge.",
   "eiChance": 0.25,
-  "tempo": { "grund": 0.05, "jeZeitalter": 0.02, "jeSeltenheit": 0.5, "jeStern": 0.2, "max": 2 },
+  "tempo": {
+    "grund": 0.05,
+    "jeZeitalter": 0.02,
+    "jeSeltenheit": 0.5,
+    "jeStern": 0.2,
+    "max": 2
+  },
   "maxSterne": 5,
   "liste": [
-    { "id": "wollnashorn", "zeitalter": "steinzeit", "name": "Wollnashorn" },
-    { "id": "riesenhirsch", "zeitalter": "steinzeit", "name": "Riesenhirsch" },
-    { "id": "reitochse", "zeitalter": "muscheln", "name": "Reit-Ochse" },
-    { "id": "pony", "zeitalter": "muscheln", "name": "Pony" },
-    { "id": "onager", "zeitalter": "bronzezeit", "name": "Wildesel" },
-    { "id": "dromedar", "zeitalter": "bronzezeit", "name": "Dromedar" },
-    { "id": "lydischesross", "zeitalter": "muenzen", "name": "Lydisches Ross" },
-    { "id": "maultier", "zeitalter": "muenzen", "name": "Maultier" },
-    { "id": "roemerross", "zeitalter": "rom", "name": "Römer-Ross" },
-    { "id": "kriegselefant", "zeitalter": "rom", "name": "Kriegselefant" },
-    { "id": "schlachtross", "zeitalter": "mittelalter", "name": "Schlachtross" },
-    { "id": "steppenpony", "zeitalter": "mittelalter", "name": "Steppenpony" },
-    { "id": "schimmel", "zeitalter": "banken", "name": "Schimmel" },
-    { "id": "kutschpferd", "zeitalter": "banken", "name": "Kutschpferd" },
-    { "id": "mustang", "zeitalter": "entdeckungen", "name": "Mustang" },
-    { "id": "lama", "zeitalter": "entdeckungen", "name": "Lama" },
-    { "id": "rennpferd", "zeitalter": "aktien", "name": "Rennpferd" },
-    { "id": "postpferd", "zeitalter": "aktien", "name": "Postpferd" },
-    { "id": "dampfross", "zeitalter": "industrie", "name": "Dampfross" },
-    { "id": "eisenochse", "zeitalter": "industrie", "name": "Eisen-Ochse" },
-    { "id": "rennkamel", "zeitalter": "fiat", "name": "Rennkamel" },
-    { "id": "stahlhengst", "zeitalter": "fiat", "name": "Stahl-Hengst" },
-    { "id": "neonross", "zeitalter": "digital", "name": "Neon-Ross" },
-    { "id": "hoverwolf", "zeitalter": "digital", "name": "Hover-Wolf" }
-  ]
+    {
+      "id": "wollnashorn",
+      "zeitalter": "steinzeit",
+      "name": "Wollnashorn",
+      "bonus": "heilung"
+    },
+    {
+      "id": "riesenhirsch",
+      "zeitalter": "steinzeit",
+      "name": "Riesenhirsch",
+      "bonus": "schluessel"
+    },
+    {
+      "id": "reitochse",
+      "zeitalter": "muscheln",
+      "name": "Reit-Ochse",
+      "bonus": "eier"
+    },
+    {
+      "id": "pony",
+      "zeitalter": "muscheln",
+      "name": "Pony",
+      "bonus": "fpunkte"
+    },
+    {
+      "id": "onager",
+      "zeitalter": "bronzezeit",
+      "name": "Wildesel",
+      "bonus": "heilung"
+    },
+    {
+      "id": "dromedar",
+      "zeitalter": "bronzezeit",
+      "name": "Dromedar",
+      "bonus": "schluessel"
+    },
+    {
+      "id": "lydischesross",
+      "zeitalter": "muenzen",
+      "name": "Lydisches Ross",
+      "bonus": "eier"
+    },
+    {
+      "id": "maultier",
+      "zeitalter": "muenzen",
+      "name": "Maultier",
+      "bonus": "fpunkte"
+    },
+    {
+      "id": "roemerross",
+      "zeitalter": "rom",
+      "name": "Römer-Ross",
+      "bonus": "heilung"
+    },
+    {
+      "id": "kriegselefant",
+      "zeitalter": "rom",
+      "name": "Kriegselefant",
+      "bonus": "schluessel"
+    },
+    {
+      "id": "schlachtross",
+      "zeitalter": "mittelalter",
+      "name": "Schlachtross",
+      "bonus": "eier"
+    },
+    {
+      "id": "steppenpony",
+      "zeitalter": "mittelalter",
+      "name": "Steppenpony",
+      "bonus": "fpunkte"
+    },
+    {
+      "id": "schimmel",
+      "zeitalter": "banken",
+      "name": "Schimmel",
+      "bonus": "heilung"
+    },
+    {
+      "id": "kutschpferd",
+      "zeitalter": "banken",
+      "name": "Kutschpferd",
+      "bonus": "schluessel"
+    },
+    {
+      "id": "mustang",
+      "zeitalter": "entdeckungen",
+      "name": "Mustang",
+      "bonus": "eier"
+    },
+    {
+      "id": "lama",
+      "zeitalter": "entdeckungen",
+      "name": "Lama",
+      "bonus": "fpunkte"
+    },
+    {
+      "id": "rennpferd",
+      "zeitalter": "aktien",
+      "name": "Rennpferd",
+      "bonus": "heilung"
+    },
+    {
+      "id": "postpferd",
+      "zeitalter": "aktien",
+      "name": "Postpferd",
+      "bonus": "schluessel"
+    },
+    {
+      "id": "dampfross",
+      "zeitalter": "industrie",
+      "name": "Dampfross",
+      "bonus": "eier"
+    },
+    {
+      "id": "eisenochse",
+      "zeitalter": "industrie",
+      "name": "Eisen-Ochse",
+      "bonus": "fpunkte"
+    },
+    {
+      "id": "rennkamel",
+      "zeitalter": "fiat",
+      "name": "Rennkamel",
+      "bonus": "heilung"
+    },
+    {
+      "id": "stahlhengst",
+      "zeitalter": "fiat",
+      "name": "Stahl-Hengst",
+      "bonus": "schluessel"
+    },
+    {
+      "id": "neonross",
+      "zeitalter": "digital",
+      "name": "Neon-Ross",
+      "bonus": "eier"
+    },
+    {
+      "id": "hoverwolf",
+      "zeitalter": "digital",
+      "name": "Hover-Wolf",
+      "bonus": "fpunkte"
+    }
+  ],
+  "beuteRatio": 5,
+  "zweitBonus": {
+    "_hinweis": "Harry 16.11.2026: Reittiere geben mehr als Tempo. Jedes Reittier hat einen zweiten Bonus: Heilung (Anteil Leben pro Sekunde) oder mehr Chance auf Schlüssel, Eier oder Fähigkeitspunkte. Wächst mit Seltenheit und Sternen wie das Tempo. Zahlen sind Vorschläge.",
+    "jeSeltenheit": 0.5,
+    "jeStern": 0.2,
+    "werte": {
+      "heilung": 0.002,
+      "schluessel": 0.1,
+      "eier": 0.1,
+      "fpunkte": 0.1
+    }
+  }
 }

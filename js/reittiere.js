@@ -18,9 +18,15 @@ export function reittierSystem(api) {
       (c.grund + c.jeZeitalter * (api.zeitalterNummerVon(vorlage.zeitalter) - 1)) * (1 + c.jeSeltenheit * tier.seltenheit) * (1 + c.jeStern * sterne) *
         (api.haendlerFaktor ? api.haendlerFaktor() : 1)
     );
+    // Zweiter Bonus (Harry 16.11.2026): Heilung oder mehr Drop-Chance, wächst wie das Tempo.
+    const zb = d().zweitBonus || { werte: {} };
+    const bonusArt = vorlage.bonus || null;
+    const bonusWert = bonusArt ? (zb.werte[bonusArt] || 0) * (1 + zb.jeSeltenheit * tier.seltenheit) * (1 + zb.jeStern * sterne) * (api.haendlerFaktor ? api.haendlerFaktor() : 1) : 0;
     return {
       nr: tier.nr,
       id: vorlage.id,
+      bonusArt,
+      bonusWert,
       name: vorlage.name,
       zeitalter: vorlage.zeitalter,
       seltenheit: api.seltenheiten()[tier.seltenheit] || api.seltenheiten()[0],
@@ -33,6 +39,30 @@ export function reittierSystem(api) {
 
   const gleiche = (tier) =>
     r().sammlung.filter((x) => x !== tier && x.id === tier.id && x.seltenheit === tier.seltenheit && (x.sterne || 0) === (tier.sterne || 0));
+
+  function wuerfeln(ratio) {
+    const gewichte = api.seltenheiten().map((_, i) => Math.pow(ratio, -i));
+    let z = Math.random() * gewichte.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < gewichte.length; i++) {
+      z -= gewichte[i];
+      if (z < 0) return i;
+    }
+    return 0;
+  }
+
+  // Legt ein neues Reittier eines Zeitalters an und sattelt es, wenn es schneller ist.
+  function neuesTier(zId, seltenheit) {
+    let auswahl = d().liste.filter((x) => x.zeitalter === zId);
+    if (!auswahl.length) auswahl = d().liste;
+    const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];
+    const tier = { nr: r().naechsteNr, id: vorlage.id, seltenheit, sterne: 0 };
+    r().naechsteNr += 1;
+    r().sammlung.push(tier);
+    const neu = werte(tier);
+    const jetzt = werte(finde(r().aktiv));
+    if (!jetzt || neu.tempo > jetzt.tempo) r().aktiv = tier.nr;
+    return { ...neu, reittier: true };
+  }
 
   function besteNehmen() {
     const beste = r().sammlung.map(werte).filter(Boolean).sort((a, b) => b.tempo - a.tempo)[0];
@@ -55,16 +85,14 @@ export function reittierSystem(api) {
     // Wird beim Schlüpfen gefragt: mit etwas Glück kommt ein Reittier statt eines Haustiers.
     ausEi(ei) {
       if (Math.random() >= d().eiChance) return null;
-      let auswahl = d().liste.filter((x) => x.zeitalter === ei.zeitalter);
-      if (!auswahl.length) auswahl = d().liste;
-      const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];
-      const tier = { nr: r().naechsteNr, id: vorlage.id, seltenheit: ei.seltenheit, sterne: 0 };
-      r().naechsteNr += 1;
-      r().sammlung.push(tier);
-      const neu = werte(tier);
-      const jetzt = werte(finde(r().aktiv));
-      if (!jetzt || neu.tempo > jetzt.tempo) r().aktiv = tier.nr;
-      return { ...neu, reittier: true };
+      return neuesTier(ei.zeitalter, ei.seltenheit);
+    },
+    // Harry 16.11.2026: Reittiere fallen selten auch direkt bei Gegnern.
+    geben: (zId) => neuesTier(zId, wuerfeln(d().beuteRatio || 5)),
+    // Zweiter Bonus des gesattelten Reittiers für eine Art (heilung, schluessel, eier, fpunkte), sonst 0.
+    bonus(art) {
+      const a = werte(finde(r().aktiv));
+      return a && a.bonusArt === art ? a.bonusWert : 0;
     },
     satteln(nr) {
       if (finde(nr)) r().aktiv = nr;
