@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 12;
+export const VERSION = 13;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -20,6 +20,9 @@ export function neueSeite(startZeitalter) {
     schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
     lager: [],
     traenke: 0,
+    trading: { kurse: {}, positionen: [], letzter: 0, dividendeLetzter: 0 },
+    farm: { rechner: {}, teile: {}, letzter: 0 },
+    btcMarkt: { faktor: 1, crashBis: 0, vorCrash: 1, letzter: 0 },
     haushalt: { schulden: 0, firma: 0, letzter: 0 },
     tech: { punkte: 0, stufen: {}, laeuft: {} },
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
@@ -97,6 +100,37 @@ export function pruefen(stand) {
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
     seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    const zahl = (x, std) => (Number.isFinite(Number(x)) ? Number(x) : std);
+    const zaehlen = (o) => {
+      const aus = {};
+      for (const [k, v] of Object.entries(o || {})) {
+        const n = Math.floor(Number(v));
+        if (Number.isFinite(n) && n > 0) aus[k] = n;
+      }
+      return aus;
+    };
+    const trd = seite.trading || {};
+    const kurse = {};
+    for (const [id, k] of Object.entries(trd.kurse || {}))
+      if (k && Number(k.preis) > 0)
+        kurse[id] = { preis: Number(k.preis), verlauf: (Array.isArray(k.verlauf) ? k.verlauf : []).map(Number).filter((x) => x > 0).slice(-60) };
+    seite.trading = {
+      kurse,
+      positionen: (Array.isArray(trd.positionen) ? trd.positionen : [])
+        .filter((p) => p && typeof p.wert === "string" && Number(p.einsatz) > 0 && Number(p.einstieg) > 0)
+        .map((p) => ({ wert: p.wert, richtung: p.richtung === "short" ? "short" : "long", einsatz: Number(p.einsatz), einstieg: Number(p.einstieg), seit: zahl(p.seit, 0) })),
+      letzter: zahl(trd.letzter, 0),
+      dividendeLetzter: zahl(trd.dividendeLetzter, 0),
+    };
+    const frm = seite.farm || {};
+    seite.farm = { rechner: zaehlen(frm.rechner), teile: zaehlen(frm.teile), letzter: zahl(frm.letzter, 0) };
+    const mkt = seite.btcMarkt || {};
+    seite.btcMarkt = {
+      faktor: Math.max(0.01, zahl(mkt.faktor, 1)),
+      crashBis: zahl(mkt.crashBis, 0),
+      vorCrash: Math.max(0.01, zahl(mkt.vorCrash, 1)),
+      letzter: zahl(mkt.letzter, 0),
+    };
     const hh = seite.haushalt || {};
     seite.haushalt = {
       schulden: Math.max(0, Number(hh.schulden) || 0),

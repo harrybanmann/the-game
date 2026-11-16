@@ -56,7 +56,8 @@
       "id": "farm",
       "name": "Farm",
       "symbol": "📈",
-      "offen": false
+      "fenster": "farm-fenster",
+      "offen": true
     },
     {
       "id": "menue",

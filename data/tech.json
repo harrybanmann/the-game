@@ -149,6 +149,12 @@
           "name": "Länger offline schürfen",
           "text": "+0,5 Std. Offline-Mining",
           "wert": 0.5
+        },
+        {
+          "id": "energie",
+          "name": "Neue Energiequelle",
+          "text": "Schaltet die nächste Energie-Stufe frei (Solar, Wasserkraft, Superkraftwerk)",
+          "wert": 1
         }
       ]
     },

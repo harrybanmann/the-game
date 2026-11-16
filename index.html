@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/style.css?v=17">
 </head>
 <body>
   <div id="spiel">
@@ -207,6 +207,32 @@
     </div>
   </div>
 
+  <div id="farm-fenster" class="fenster" hidden>
+    <div class="karte">
+      <h2>Farm und Trading</h2>
+      <div id="farm-reiter" class="btc-kauf">
+        <button class="knopf klein" type="button" data-reiter="trading">Trading</button>
+        <button class="knopf klein" type="button" data-reiter="mining">Mining Farm</button>
+      </div>
+      <p id="farm-btc" class="hinweis"></p>
+      <div id="trading-teil">
+        <p id="trading-einsatz" class="hinweis"></p>
+        <div id="trading-werte"></div>
+        <h3>Offene Trades</h3>
+        <div id="trading-positionen"></div>
+      </div>
+      <div id="mining-teil" hidden>
+        <p id="mining-stand" class="ergebnis"></p>
+        <p id="mining-ertrag" class="hinweis"></p>
+        <h3>Rechner</h3>
+        <div id="mining-rechner"></div>
+        <h3>Ausrüstung</h3>
+        <div id="mining-teile"></div>
+      </div>
+      <button class="knopf rot" type="button" data-schliessen="farm-fenster">Zurück</button>
+    </div>
+  </div>
+
   <div id="hinweis" class="fenster" hidden>
     <div class="karte mitte">
       <h2 id="hinweis-titel"></h2>
@@ -219,7 +245,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=16"></script>
+  <script type="module" src="js/main.js?v=17"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

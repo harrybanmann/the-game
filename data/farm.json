@@ -1,0 +1,189 @@
+{
+  "_hinweis": "Harry (Trading-Chat, 15.11.2026): erfundene Werte mit witzigen Namen, ruhig = kleine Schwankung und sichere Auszahlung, wild = große Schwankung; Zufalls-Nachrichten; neue Werte mit den Zeitaltern; Long/Short ohne Hebel, schließen wann man will; gehaltene Aktien zahlen aus; Chart alle paar Sekunden. Farm: Rechner alter Laptop → Büro-PC → Gaming-PC → Grafikkarten-Rig → Server-Rack → Spezial-Miner; Netzteil, Kühlung, Internet, Regale; Strom kostet, später Solar → Wasserkraft → Superkraftwerk per Tech-Baum; Offline-Ertrag höchstens 8 Std.; BTC steigt mit Crashs 30–50 % für etwa einen Tag. Einsatz/Strom in der Währung des Zeitalters (Bau-Korrekturen 7). Zahlen und Namen sind Vorschläge.",
+  "trading": {
+    "sekundenProSchritt": 3,
+    "verlauf": 60,
+    "nachrichtChance": 0.02,
+    "dividendeProStunde": 0.004,
+    "werte": [
+      {
+        "id": "feuerstein-holding",
+        "name": "Feuerstein Holding",
+        "ab": 1,
+        "art": "ruhig",
+        "vol": 0.006
+      },
+      {
+        "id": "mammut-milch",
+        "name": "Mammut Milch AG",
+        "ab": 1,
+        "art": "ruhig",
+        "vol": 0.01
+      },
+      {
+        "id": "muschel-soehne",
+        "name": "Muschel & Söhne",
+        "ab": 2,
+        "art": "ruhig",
+        "vol": 0.008
+      },
+      {
+        "id": "banana-bank",
+        "name": "Banana Bank AG",
+        "ab": 2,
+        "art": "mittel",
+        "vol": 0.02
+      },
+      {
+        "id": "kuhfladen-energie",
+        "name": "Kuhfladen Energie",
+        "ab": 3,
+        "art": "mittel",
+        "vol": 0.025
+      },
+      {
+        "id": "bronze-bros",
+        "name": "Bronze-Bros",
+        "ab": 3,
+        "art": "wild",
+        "vol": 0.045
+      },
+      {
+        "id": "kroesus-gold",
+        "name": "Krösus Gold-ETF",
+        "ab": 4,
+        "art": "mittel",
+        "vol": 0.02
+      },
+      {
+        "id": "mooncoin",
+        "name": "MoonCoin",
+        "ab": 4,
+        "art": "wild",
+        "vol": 0.06
+      }
+    ],
+    "nachrichten": {
+      "gut": [
+        "{n}: Rekord-Ernte gemeldet!",
+        "{n}: Der König kauft ein!",
+        "{n}: Neue Handelsroute eröffnet!"
+      ],
+      "schlecht": [
+        "{n}: Lager abgebrannt!",
+        "{n}: Gerücht über Betrug!",
+        "{n}: Karawane überfallen!"
+      ]
+    }
+  },
+  "farm": {
+    "offlineStunden": 8,
+    "btcJeHashProStunde": 3e-07,
+    "rechner": [
+      {
+        "id": "laptop",
+        "name": "Alter Laptop",
+        "ab": 1,
+        "hash": 1,
+        "watt": 1,
+        "preis": 200
+      },
+      {
+        "id": "buero",
+        "name": "Büro-PC",
+        "ab": 2,
+        "hash": 3,
+        "watt": 2,
+        "preis": 1000
+      },
+      {
+        "id": "gaming",
+        "name": "Gaming-PC",
+        "ab": 3,
+        "hash": 10,
+        "watt": 5,
+        "preis": 5000
+      },
+      {
+        "id": "grafik",
+        "name": "Grafikkarten-Rig",
+        "ab": 4,
+        "hash": 40,
+        "watt": 15,
+        "preis": 30000
+      },
+      {
+        "id": "server",
+        "name": "Server-Rack",
+        "ab": 5,
+        "hash": 150,
+        "watt": 40,
+        "preis": 200000
+      },
+      {
+        "id": "spezial",
+        "name": "Spezial-Miner",
+        "ab": 7,
+        "hash": 600,
+        "watt": 100,
+        "preis": 1500000
+      }
+    ],
+    "teile": [
+      {
+        "id": "netzteil",
+        "name": "Netzteil",
+        "text": "−5 % Strom je Stufe"
+      },
+      {
+        "id": "kuehlung",
+        "name": "Kühlung",
+        "text": "+5 % Rechenleistung je Stufe"
+      },
+      {
+        "id": "internet",
+        "name": "Internet",
+        "text": "+5 % Rechenleistung je Stufe"
+      },
+      {
+        "id": "regale",
+        "name": "Regale",
+        "text": "+1 Platz für Rechner je Stufe"
+      }
+    ],
+    "teilKosten": {
+      "grund": 300,
+      "faktor": 1.6,
+      "maxStufe": 20
+    },
+    "startPlaetze": 2,
+    "energie": [
+      {
+        "name": "Steckdose",
+        "preisJeWattStunde": 0.5
+      },
+      {
+        "name": "Solar",
+        "preisJeWattStunde": 0.25
+      },
+      {
+        "name": "Wasserkraft",
+        "preisJeWattStunde": 0.1
+      },
+      {
+        "name": "Superkraftwerk",
+        "preisJeWattStunde": 0
+      }
+    ]
+  },
+  "btcMarkt": {
+    "wachstumProTag": 0.02,
+    "crashChanceProStunde": 0.014,
+    "crashTiefe": [
+      0.3,
+      0.5
+    ],
+    "crashStunden": 24,
+    "erholung": 1.05
+  }
+}

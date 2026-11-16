@@ -1,13 +1,14 @@
-import { zahl, btc, dauer } from "./format.js?v=16";
-import * as speicher from "./speicher.js?v=16";
-import { kampfSystem } from "./kampf.js?v=16";
-import { waffenSystem } from "./waffen.js?v=16";
-import { tierSystem } from "./tiere.js?v=16";
-import { dungeonSystem } from "./dungeons.js?v=16";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=16";
-import { bitcoinSystem } from "./bitcoin.js?v=16";
-import { techSystem } from "./tech.js?v=16";
-import { haushaltSystem } from "./haushalt.js?v=16";
+import { zahl, btc, dauer } from "./format.js?v=17";
+import * as speicher from "./speicher.js?v=17";
+import { kampfSystem } from "./kampf.js?v=17";
+import { waffenSystem } from "./waffen.js?v=17";
+import { tierSystem } from "./tiere.js?v=17";
+import { dungeonSystem } from "./dungeons.js?v=17";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=17";
+import { bitcoinSystem } from "./bitcoin.js?v=17";
+import { techSystem } from "./tech.js?v=17";
+import { haushaltSystem } from "./haushalt.js?v=17";
+import { farmSystem } from "./farm.js?v=17";
 
 const $ = (id) => document.getElementById(id);
 
@@ -21,6 +22,8 @@ let faehigkeiten; // Fähigkeiten
 let bitcoin; // Bitcoin und Händler
 let tech; // Tech-Baum
 let haushalt; // Haushalt und Firma
+let farm; // Trading, Mining Farm, BTC-Markt
+let farmReiter = "trading";
 let techAst = "produktion";
 let gewaehltesTier = null;
 let letzterTick = Date.now();
@@ -35,7 +38,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten, farmDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -47,6 +50,7 @@ async function datenLaden() {
     json("data/bitcoin.json"),
     json("data/tech.json"),
     json("data/haushalt.json"),
+    json("data/farm.json"),
   ]);
   return {
     einstellungen,
@@ -60,6 +64,7 @@ async function datenLaden() {
     bitcoin: btcDaten,
     tech: techDaten,
     haushalt: haushaltDaten,
+    farm: farmDaten,
   };
 }
 
@@ -75,6 +80,8 @@ const stufe = (u) => seite().upgrades[u.id] || 0;
 const kosten = (u) =>
   Math.ceil(u.grundKosten * Math.pow(u.kostenFaktor, stufe(u)) * (1 - Math.min(0.6, tech ? tech.wert("rabatt") : 0)));
 const guthaben = () => seite().waehrungen[waehrung().id] || 0;
+// Kurs der Zeitalter-Währung in ₿: wird BTC mehr wert, gibt es weniger ₿ pro Einheit.
+const btcKurs = () => waehrung().btcProStueck / (farm ? farm.marktFaktor() : 1);
 
 function summe(wirkung) {
   return upgradesHier()
@@ -144,6 +151,8 @@ function tick() {
   }
 
   dungeons.schritt();
+  for (const n of farm.schritt(jetzt)) if (!$("farm-fenster").hidden) kurzMeldung(n);
+  if (!$("farm-fenster").hidden) farmZeichnen(false);
   haushalt.schritt(jetzt, Math.min(24, off.maxStunden + tech.wert("offline")) * 3600);
   if (!$("haushalt-fenster").hidden) haushaltZeichnen();
   for (const name of tech.schritt(jetzt)) {
@@ -202,7 +211,7 @@ function anzeigeAktualisieren() {
   const w = waehrung();
   $("zaehler-zahl").textContent = zahl(guthaben());
   $("zaehler-name").textContent = w.name;
-  $("zaehler-btc").textContent = "≈ " + btc(guthaben() * w.btcProStueck) + " ₿";
+  $("zaehler-btc").textContent = "≈ " + btc(guthaben() * btcKurs()) + " ₿" + (farm.imCrash() ? " 📉" : "");
   $("pro-sekunde").textContent =
     zahl(proSekunde()) + " pro Sek. · " + zahl(klickWert()) + " pro Tippen · Dein ₿ " + btc(seite().btc.menge);
   if (!$("btc-fenster").hidden) btcKnoepfe();
@@ -359,7 +368,7 @@ function leisteZeichnen() {
     knopf.addEventListener("click", () => {
       if (k.id === "menue") fensterZeigen("menue");
       else if (k.fenster) {
-        ({ tiere: tiereZeichnen, waffen: waffenZeichnen, upgrades: upgradesZeichnen })[k.id]();
+        ({ tiere: tiereZeichnen, waffen: waffenZeichnen, upgrades: upgradesZeichnen, farm: () => farmZeichnen(true) })[k.id]();
         fensterZeigen(k.fenster);
       } else kurzMeldung(k.name + " kommt in einer späteren Version.");
     });
@@ -939,6 +948,137 @@ function haushaltZeichnen() {
   }
 }
 
+// ---------- Farm und Trading ----------
+
+function linie(werte) {
+  if (werte.length < 2) return "";
+  const min = Math.min(...werte);
+  const max = Math.max(...werte);
+  const spanne = max - min || 1;
+  return werte.map((v, i) => ((i / (werte.length - 1)) * 100).toFixed(1) + "," + (28 - ((v - min) / spanne) * 26).toFixed(1)).join(" ");
+}
+
+function farmZeichnen(neu) {
+  for (const b of document.querySelectorAll("#farm-reiter button")) b.classList.toggle("matt", b.dataset.reiter !== farmReiter);
+  $("trading-teil").hidden = farmReiter !== "trading";
+  $("mining-teil").hidden = farmReiter !== "mining";
+  const w = waehrung().name;
+  $("farm-btc").textContent =
+    "Dein ₿ " + btc(seite().btc.menge) + " · 1 " + w + " = " + btc(btcKurs()) + " ₿" + (farm.imCrash() ? " · CRASH, günstig nachkaufen!" : "");
+  if (farmReiter === "trading") {
+    const einsatz = Math.floor(guthaben() * 0.1);
+    $("trading-einsatz").textContent = "Einsatz je Trade: 10 % deines Geldes = " + zahl(einsatz) + " " + w + " (kein Hebel)";
+    const liste = $("trading-werte");
+    if (neu || liste.childElementCount !== farm.offeneWerte().length) {
+      liste.replaceChildren();
+      for (const x of farm.offeneWerte()) {
+        const karte = el("div", "wert");
+        karte.dataset.wert = x.id;
+        const kopf = el("div", "wert-kopf");
+        kopf.append(el("span", "wert-name", x.name), el("span", "wert-art " + x.art, x.art), el("span", "wert-preis"));
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 100 30");
+        svg.setAttribute("preserveAspectRatio", "none");
+        svg.classList.add("wert-chart");
+        const pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        svg.append(pl);
+        const knoepfe = el("div", "btc-kauf");
+        for (const [richtung, text] of [["long", "Long ↑"], ["short", "Short ↓"]]) {
+          const k = el("button", "knopf klein", text);
+          k.type = "button";
+          k.addEventListener("click", () => {
+            const e = Math.floor(guthaben() * 0.1);
+            if (!farm.eroeffnen(x.id, richtung, e)) return kurzMeldung("Zu wenig Geld für einen Trade.");
+            kurzMeldung(text + " " + x.name + " mit " + zahl(e) + " " + w);
+            farmZeichnen(true);
+            sichern();
+          });
+          knoepfe.append(k);
+        }
+        karte.append(kopf, svg, knoepfe);
+        liste.append(karte);
+      }
+    }
+    for (const karte of liste.children) {
+      const id = karte.dataset.wert;
+      karte.querySelector(".wert-preis").textContent = zahl(farm.preis(id));
+      const v = farm.verlauf(id);
+      const pl = karte.querySelector("polyline");
+      pl.setAttribute("points", linie(v));
+      pl.setAttribute("class", v.length > 1 && v[v.length - 1] < v[0] ? "faellt" : "steigt");
+    }
+    const pos = $("trading-positionen");
+    pos.replaceChildren();
+    farm.positionen().forEach((p, i) => {
+      const name = (farm.offeneWerte().find((x) => x.id === p.wert) || { name: p.wert }).name;
+      const g = farm.gewinn(p);
+      const zeile = el("div", "lager-zeile");
+      const info = el("span", "lager-info");
+      const ergebnis = el("span", "lager-name", (g >= 0 ? "+" : "") + zahl(g) + " " + w);
+      ergebnis.style.color = g >= 0 ? "#4fc46a" : "#e0564c";
+      info.append(el("span", "hinweis", (p.richtung === "long" ? "Long " : "Short ") + name + " · " + zahl(p.einsatz) + " " + w), ergebnis);
+      const k = el("button", "knopf klein", "Schließen");
+      k.type = "button";
+      k.addEventListener("click", () => {
+        const erg = farm.schliessen(i);
+        kurzMeldung("Trade geschlossen: " + (erg >= 0 ? "+" : "") + zahl(erg) + " " + w);
+        farmZeichnen(true);
+        sichern();
+      });
+      zeile.append(info, k);
+      pos.append(zeile);
+    });
+    if (!farm.positionen().length)
+      pos.append(el("p", "hinweis", "Keine offenen Trades. Long = du setzt auf steigende Kurse, Short = auf fallende. Ruhige Werte zahlen bei Long eine kleine Dividende."));
+  } else {
+    const l = farm.leistung();
+    $("mining-stand").textContent =
+      "Rechner " + farm.anzahlRechner() + "/" + farm.plaetze() + " · Leistung " + zahl(l.hash) + " · Strom " + zahl(l.watt) + " W (" + farm.energieName() + ")";
+    $("mining-ertrag").textContent =
+      "+" + btc(farm.btcProStunde()) + " ₿ pro Stunde · Strom −" + zahl(farm.stromProStunde()) + " " + w + " pro Stunde · offline höchstens " + daten.farm.farm.offlineStunden + " Std.";
+    if (!neu) return;
+    const rl = $("mining-rechner");
+    rl.replaceChildren();
+    for (const r of farm.rechnerListe()) {
+      const zeile = el("div", "lager-zeile" + (r.offen ? "" : " zu"));
+      const info = el("span", "lager-info");
+      info.append(el("span", "lager-name", r.name + " ×" + r.anzahl), el("span", "hinweis", r.offen ? "Leistung " + r.hash + " · " + r.watt + " W" : "ab Zeitalter " + r.ab));
+      const k = el("button", "knopf klein", zahl(farm.rechnerPreis(r)) + " " + w);
+      k.type = "button";
+      k.disabled = !r.offen;
+      k.addEventListener("click", () => {
+        const f = farm.rechnerKaufen(r);
+        if (f) return kurzMeldung(f);
+        kurzMeldung(r.name + " gekauft. Der Tech-Ast Handel und Mining ist offen.");
+        farmZeichnen(true);
+        sichern();
+      });
+      zeile.append(info, k);
+      rl.append(zeile);
+    }
+    const tl = $("mining-teile");
+    tl.replaceChildren();
+    for (const t of farm.teileListe()) {
+      const st = farm.teilStufe(t.id);
+      const zeile = el("div", "lager-zeile");
+      const info = el("span", "lager-info");
+      info.append(el("span", "lager-name", t.name + " · Stufe " + st), el("span", "hinweis", t.text));
+      const voll = st >= farm.teilMax();
+      const k = el("button", "knopf klein", voll ? "Max" : zahl(farm.teilKosten(t.id)) + " " + w);
+      k.type = "button";
+      k.disabled = voll;
+      k.addEventListener("click", () => {
+        const f = farm.teilKaufen(t.id);
+        if (f) return kurzMeldung(f);
+        farmZeichnen(true);
+        sichern();
+      });
+      zeile.append(info, k);
+      tl.append(zeile);
+    }
+  }
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
@@ -1107,6 +1247,12 @@ function knoepfeVerbinden() {
     anzeigeAktualisieren();
     sichern();
   });
+  for (const b of document.querySelectorAll("#farm-reiter button")) {
+    b.addEventListener("click", () => {
+      farmReiter = b.dataset.reiter;
+      farmZeichnen(true);
+    });
+  }
   $("tech-knopf").addEventListener("click", () => {
     fensterSchliessen("menue");
     techZeichnen();
@@ -1203,7 +1349,8 @@ async function start() {
     daten: () => daten.tech,
     seite,
     zeitalterNummer: () => zeitalter().nummer,
-    systemOffen: (name) => name === "immer" || name === "dungeons" || (name === "haushalt" && seite().haushalt.firma > 0),
+    systemOffen: (name) =>
+      name === "immer" || name === "dungeons" || (name === "haushalt" && seite().haushalt.firma > 0) || (name === "farm" && farm.hatFarm()),
   });
   haushalt = haushaltSystem({
     daten: () => daten.haushalt,
@@ -1215,12 +1362,28 @@ async function start() {
     bezahlen,
     aussehen: () => stand.gemeinsam.figur.aussehen,
   });
+  farm = farmSystem({
+    daten: () => daten.farm,
+    seite,
+    zeitalterNummer: () => zeitalter().nummer,
+    tech: (id) => tech.wert(id),
+    jetzt: () => Date.now(),
+    bezahlen,
+    gutschreiben,
+    btcVerteilt: () => seite().btc.menge + seite().btc.kasse,
+    maxBtc: () => daten.bitcoin.maxBtc,
+    btcGeben: (menge) => {
+      const b = seite().btc;
+      b.menge += Math.max(0, Math.min(menge, daten.bitcoin.maxBtc - b.menge - b.kasse));
+    },
+    meldung: (text) => kurzMeldung(text),
+  });
   bitcoin = bitcoinSystem({
     daten: () => daten.bitcoin,
     seite,
     seitenName: () => stand.aktiveSeite,
     zeitalterNummer: () => zeitalter().nummer,
-    kurs: () => waehrung().btcProStueck,
+    kurs: btcKurs,
     guthaben,
     bezahlen,
   });
