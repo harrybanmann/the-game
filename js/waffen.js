@@ -109,6 +109,7 @@ export function waffenSystem(api) {
   const schmiedeKosten = () => d().schmiede.kosten;
   const stufeVoll = () => s().schmiede.stufe >= d().schmiede.maxStufe;
   const stufeKosten = () => Math.ceil(d().schmiede.stufenKosten * Math.pow(d().schmiede.stufenFaktor, s().schmiede.stufe));
+  const stufeDauer = () => Math.round(d().schmiede.dauerGrund * Math.pow(d().schmiede.dauerFaktor, s().schmiede.stufe));
 
   return {
     chancen,
@@ -164,8 +165,22 @@ export function waffenSystem(api) {
       const besser = einsortieren(neu);
       return { neu: werte(neu), besser };
     },
+    stufeDauer,
+    ausbauRest(jetzt) {
+      const bis = s().schmiede.ausbauBis;
+      return bis ? Math.max(0, (bis - jetzt) / 1000) : null;
+    },
+    // Ausbau starten: kostet sofort, fertig nach der Wartezeit (läuft auch offline weiter).
     stufeKaufen() {
-      if (stufeVoll() || !api.bezahlen(stufeKosten())) return false;
+      if (s().schmiede.ausbauBis || stufeVoll() || !api.bezahlen(stufeKosten())) return false;
+      s().schmiede.ausbauBis = Date.now() + stufeDauer() * 1000;
+      return true;
+    },
+    // Gibt true zurück, wenn ein Ausbau gerade fertig geworden ist.
+    schritt(jetzt) {
+      const bis = s().schmiede.ausbauBis;
+      if (!bis || jetzt < bis) return false;
+      s().schmiede.ausbauBis = null;
       s().schmiede.stufe += 1;
       return true;
     },

@@ -1,10 +1,10 @@
-import { zahl, btc, dauer } from "./format.js?v=11";
-import * as speicher from "./speicher.js?v=11";
-import { kampfSystem } from "./kampf.js?v=11";
-import { waffenSystem } from "./waffen.js?v=11";
-import { tierSystem } from "./tiere.js?v=11";
-import { dungeonSystem } from "./dungeons.js?v=11";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=11";
+import { zahl, btc, dauer } from "./format.js?v=12";
+import * as speicher from "./speicher.js?v=12";
+import { kampfSystem } from "./kampf.js?v=12";
+import { waffenSystem } from "./waffen.js?v=12";
+import { tierSystem } from "./tiere.js?v=12";
+import { dungeonSystem } from "./dungeons.js?v=12";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=12";
 
 const $ = (id) => document.getElementById(id);
 
@@ -16,7 +16,6 @@ let tiere; // Tiere und Eier
 let dungeons; // Dungeons und Tickets
 let faehigkeiten; // Fähigkeiten
 let gewaehltesTier = null;
-let ansicht = "sammeln"; // oder "kampf"
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
 
@@ -130,6 +129,11 @@ function tick() {
   }
 
   dungeons.schritt();
+  if (waffen.schritt(jetzt)) {
+    kurzMeldung("Schmiede ist jetzt Stufe " + seite().schmiede.stufe + "!");
+    if (!$("waffen-fenster").hidden) waffenZeichnen();
+    sichern();
+  }
   for (const tier of tiere.schritt(jetzt)) {
     kurzMeldung("Geschlüpft: " + tier.seltenheit.name + " – " + tier.name);
     if (!$("tiere-fenster").hidden) tiereZeichnen();
@@ -178,7 +182,8 @@ function anzeigeAktualisieren() {
     const voll = stufe(u) >= u.maxStufe;
     knopf.disabled = voll || guthaben() < kosten(u);
   }
-  if (ansicht === "kampf") kampfZeichnen();
+  kampfZeichnen();
+  ambossZeichnen();
   if (!$("waffen-fenster").hidden) waffenKnoepfe();
   if (!$("tiere-fenster").hidden) brutZeichnen();
 }
@@ -187,38 +192,107 @@ function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
   const trank = daten.dungeons.heiltrank;
+  $("stufe-text").textContent = z.boss ? "Boss-Kampf" : "Stufe " + z.stufe + "-" + z.welle;
   $("spieler-level").textContent =
     "Level " + s.level + " · XP " + zahl(s.xp) + "/" + zahl(xpBedarf(s.level)) + " · Heiltränke " + s.traenke + "/" + trank.max;
   $("spieler-werte").textContent = zahl(schaden()) + " Schaden";
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
   $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
-  $("gegner-name").textContent = z.gegner.name;
-  $("gegner-werte").textContent = zahl(z.gegner.schaden) + " Schaden";
-  $("gegner-figur").classList.toggle("boss", z.gegner.boss);
-  $("gegner-balken").style.width = (100 * Math.max(0, z.gegner.leben)) / z.gegner.maxLeben + "%";
-  $("gegner-leben").textContent = zahl(Math.max(0, z.gegner.leben)) + "/" + zahl(z.gegner.maxLeben);
 
-  const boss = gegnerDaten().boss;
+  const gruppe = $("gegner-gruppe");
+  gruppe.replaceChildren();
+  for (const g of z.gegner) {
+    const box = el("div", "gegner" + (g.leben <= 0 ? " weg" : "") + (g.boss ? " boss" : ""));
+    const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
+    const balken = el("div", "balken klein");
+    const fuell = el("div", "fuellung rot");
+    fuell.style.width = (100 * Math.max(0, g.leben)) / g.maxLeben + "%";
+    balken.append(fuell);
+    box.append(el("div", "gegner-name", g.name), figur, balken);
+    gruppe.append(box);
+  }
+
   const knopf = $("boss-knopf");
-  const gehtWeiter = boss && daten.zeitalter.some((x) => x.id === boss.naechstesZeitalter);
-  if (z.gegner.boss) {
+  const fehlt = aufstiegFehlt();
+  if (z.boss) {
     knopf.textContent = "Boss-Kampf läuft …";
     knopf.disabled = true;
-  } else if (!gehtWeiter) {
+  } else if (fehlt === null) {
     knopf.textContent = "Nächstes Zeitalter kommt später";
     knopf.disabled = true;
+  } else if (fehlt.length) {
+    knopf.textContent = "Noch nötig: " + fehlt.join(", ");
+    knopf.disabled = true;
   } else {
+    const boss = gegnerDaten().boss;
     knopf.textContent = "Boss herausfordern: " + (boss.name[stand.aktiveSeite] || boss.name.gut);
     knopf.disabled = false;
   }
 }
 
-function ansichtSetzen(neu) {
-  ansicht = neu;
-  $("ansicht-sammeln").hidden = ansicht !== "sammeln";
-  $("ansicht-kampf").hidden = ansicht !== "kampf";
-  leisteZeichnen();
-  anzeigeAktualisieren();
+// Bedingungen für den Boss (Harry): Level ≥ 10 × Zeitalter, Schmiede ≥ 3 × Zeitalter.
+// null = es gibt noch kein nächstes Zeitalter; [] = alles erfüllt.
+function aufstiegFehlt() {
+  const boss = gegnerDaten().boss;
+  if (!boss || !daten.zeitalter.some((x) => x.id === boss.naechstesZeitalter)) return null;
+  const a = daten.einstellungen.aufstieg;
+  const nr = zeitalter().nummer;
+  const s = seite();
+  const fehlt = [];
+  if (s.level < a.levelJeZeitalter * nr) fehlt.push("Level " + a.levelJeZeitalter * nr + " (du: " + s.level + ")");
+  if (s.schmiede.stufe < a.schmiedeJeZeitalter * nr)
+    fehlt.push("Schmiede " + a.schmiedeJeZeitalter * nr + " (du: " + s.schmiede.stufe + ")");
+  return fehlt;
+}
+
+// ---------- Ausrüstungs-Raster (wie Forge Master) ----------
+
+const PLAETZE = [
+  ["nah", "Nahkampf", "🗡"],
+  ["fern", "Fernkampf", "🏹"],
+  ["helm", "Helm", "⛑"],
+  ["handschuhe", "Handschuhe", "🧤"],
+  ["ruestung", "Rüstung", "🦺"],
+  ["stiefel", "Stiefel", "🥾"],
+  ["ring1", "Ring", "💍"],
+  ["ring2", "Ring", "💍"],
+  ["amulett", "Amulett", "📿"],
+  ["guertel", "Gürtel", "🎗"],
+];
+
+function rasterZeichnen() {
+  const raster = $("ausruestung-raster");
+  raster.replaceChildren();
+  const aktiv = waffen.aktiveArt();
+  for (const [art, name, symbol] of PLAETZE) {
+    const offen = ["nah", "fern", "helm", "handschuhe", "ruestung", "stiefel"].includes(art);
+    const w = offen ? waffen.werte(waffen.hole(art)) : null;
+    const kachel = el("button", "kachel" + (w ? "" : " leer") + (offen ? "" : " zu"));
+    kachel.type = "button";
+    kachel.title = name;
+    if (w) {
+      kachel.style.background = w.seltenheit.farbe;
+      if (w.seltenheit.glanz) kachel.classList.add("glanz");
+      if ((art === "nah" || art === "fern") && art === aktiv) kachel.classList.add("aktiv");
+    }
+    kachel.append(el("span", "kachel-symbol", symbol), el("span", "kachel-name", w ? w.name : offen ? name : "bald"));
+    if (w) kachel.append(el("span", "sterne", sterne(w.sterne)));
+    kachel.addEventListener("click", () => {
+      if (!offen) return kurzMeldung(name + " kommt in einer späteren Version.");
+      waffenZeichnen();
+      fensterZeigen("waffen-fenster");
+    });
+    raster.append(kachel);
+  }
+}
+
+function ambossZeichnen() {
+  $("amboss-text").textContent = "Schmieden · " + zahl(waffen.schmiedeKosten()) + " " + waehrung().name;
+  $("amboss-knopf").classList.toggle("matt", guthaben() < waffen.schmiedeKosten());
+  const rest = waffen.ausbauRest(Date.now());
+  $("schmiede-stufe-knopf").textContent = "Schmiede Stufe " + seite().schmiede.stufe;
+  $("schmiede-zeit").textContent =
+    rest !== null ? "Ausbau: noch " + dauer(Math.ceil(rest)) : waffen.stufeVoll() ? "Maximum" : "Ausbau: " + zahl(waffen.stufeKosten()) + " " + waehrung().name;
 }
 
 function upgradesZeichnen() {
@@ -247,18 +321,13 @@ function leisteZeichnen() {
   const leiste = $("leiste");
   leiste.replaceChildren();
   for (const k of daten.einstellungen.leiste) {
-    const zurueck = k.id === "kaempfen" && ansicht === "kampf";
     const knopf = el("button", "rund" + (k.offen ? "" : " gesperrt"));
     knopf.type = "button";
-    knopf.append(
-      el("span", "rund-symbol", zurueck ? k.symbolZurueck : k.symbol),
-      el("span", "rund-name", zurueck ? k.nameZurueck : k.name)
-    );
+    knopf.append(el("span", "rund-symbol", k.symbol), el("span", "rund-name", k.name));
     knopf.addEventListener("click", () => {
       if (k.id === "menue") fensterZeigen("menue");
-      else if (k.id === "kaempfen") ansichtSetzen(ansicht === "kampf" ? "sammeln" : "kampf");
       else if (k.fenster) {
-        (k.id === "tiere" ? tiereZeichnen : waffenZeichnen)();
+        ({ tiere: tiereZeichnen, waffen: waffenZeichnen, upgrades: upgradesZeichnen })[k.id]();
         fensterZeigen(k.fenster);
       } else kurzMeldung(k.name + " kommt in einer späteren Version.");
     });
@@ -272,6 +341,7 @@ function allesZeichnen() {
   $("verdienen-text").textContent = zeitalter().verdienKnopf;
   upgradesZeichnen();
   leisteZeichnen();
+  rasterZeichnen();
 }
 
 // ---------- Aktionen ----------
@@ -345,6 +415,7 @@ function ruestungKarte(art, titel) {
 }
 
 function waffenGeaendert() {
+  rasterZeichnen();
   waffenZeichnen();
   anzeigeAktualisieren();
   sichern();
@@ -397,10 +468,13 @@ function waffenKnoepfe() {
   const voll = waffen.stufeVoll();
   $("schmieden-knopf").textContent = "Schmieden (" + zahl(waffen.schmiedeKosten()) + " " + waehrung().name + ")";
   $("schmieden-knopf").disabled = guthaben() < waffen.schmiedeKosten();
+  const rest = waffen.ausbauRest(Date.now());
   $("schmiede-knopf").textContent = voll
     ? "Schmiede ist auf Maximum"
-    : "Schmiede verbessern (" + zahl(waffen.stufeKosten()) + " " + waehrung().name + ")";
-  $("schmiede-knopf").disabled = voll || guthaben() < waffen.stufeKosten();
+    : rest !== null
+      ? "Ausbau läuft: noch " + dauer(Math.ceil(rest))
+      : "Schmiede verbessern (" + zahl(waffen.stufeKosten()) + " " + waehrung().name + ", " + dauer(waffen.stufeDauer()) + ")";
+  $("schmiede-knopf").disabled = voll || rest !== null || guthaben() < waffen.stufeKosten();
 }
 
 function waffenZeichnen() {
@@ -421,6 +495,7 @@ function waffenZeichnen() {
     b.set > 0
       ? "Waffen-Set aktiv: " + bonusText
       : "Waffen-Set: Nah- und Fernkampf-Waffe aus demselben Zeitalter geben " + bonusText + ".";
+  rasterZeichnen();
   $("schmiede-stufe").textContent = "Schmiede Stufe " + seite().schmiede.stufe;
   const liste = $("schmiede-chancen");
   liste.replaceChildren();
@@ -442,13 +517,18 @@ function schmieden() {
   text.textContent =
     r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – ausgerüstet!" : " – ins Lager gelegt.");
   text.style.color = r.neu.seltenheit.farbe;
+  if ($("waffen-fenster").hidden) kurzMeldung(text.textContent);
   waffenZeichnen();
   anzeigeAktualisieren();
   sichern();
 }
 
 function schmiedeVerbessern() {
+  if (seite().schmiede.ausbauBis) return kurzMeldung("Der Ausbau läuft schon.");
+  if (!waffen.stufeVoll() && guthaben() < waffen.stufeKosten())
+    return kurzMeldung("Zu wenig " + waehrung().name + ". Ausbau kostet " + zahl(waffen.stufeKosten()) + ".");
   if (!waffen.stufeKaufen()) return;
+  kurzMeldung("Ausbau gestartet, fertig in " + dauer(waffen.stufeDauer()));
   waffenZeichnen();
   anzeigeAktualisieren();
   sichern();
@@ -676,7 +756,8 @@ function aufsteigen(boss) {
   s.waehrungen[alt.id] = 0;
   s.waehrungen[neu.waehrung.id] = (s.waehrungen[neu.waehrung.id] || 0) + getauscht;
   s.zeitalter = neu.id;
-  s.kampf = { index: 0, rate: 0 };
+  s.kampf = { index: 0, rate: 0, stufe: 1, welle: 1 };
+  kampf.neuStarten();
   allesZeichnen();
   sichern();
   hinweis(
@@ -817,6 +898,11 @@ function knoepfeVerbinden() {
     faehigkeitGeaendert();
   });
   $("schmieden-knopf").addEventListener("click", schmieden);
+  $("amboss-knopf").addEventListener("click", () => {
+    if (guthaben() < waffen.schmiedeKosten()) return kurzMeldung("Zu wenig " + waehrung().name + " zum Schmieden.");
+    schmieden();
+  });
+  $("schmiede-stufe-knopf").addEventListener("click", schmiedeVerbessern);
   $("alles-mergen").addEventListener("click", allesMergen);
   $("schmiede-knopf").addEventListener("click", schmiedeVerbessern);
   $("export-datei").addEventListener("click", exportDatei);
@@ -856,6 +942,7 @@ async function start() {
     schaden,
     maxLeben,
     schlagZeit: () => daten.einstellungen.kampf.sekundenProSchlag,
+    wellen: () => daten.einstellungen.kampf.wellen,
     gutschreiben,
     xpGeben,
     ereignis: kampfEreignis,

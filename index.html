@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=11">
+  <link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
   <div id="spiel">
@@ -33,33 +33,41 @@
       <div class="berg berg-1" aria-hidden="true"></div>
       <div class="berg berg-2" aria-hidden="true"></div>
       <div class="boden" aria-hidden="true"></div>
-      <div id="ansicht-sammeln" class="ansicht">
+      <div id="kampf-kopf">
+        <div id="stufe-text"></div>
+        <div id="spieler-level"></div>
+      </div>
+      <div class="arena">
+        <div class="kaempfer">
+          <div class="kaempfer-name">Du</div>
+          <div class="figur spieler" aria-hidden="true"></div>
+          <div class="balken"><div id="spieler-balken" class="fuellung"></div><span id="spieler-leben"></span></div>
+          <div id="spieler-werte" class="kaempfer-werte"></div>
+        </div>
+        <div id="gegner-gruppe"></div>
+      </div>
+      <div id="szene-knoepfe">
         <button id="verdienen" type="button">
-          <span class="stein gross" aria-hidden="true"></span>
+          <span class="stein klein" aria-hidden="true"></span>
           <span id="verdienen-text"></span>
         </button>
-      </div>
-      <div id="ansicht-kampf" class="ansicht" hidden>
-        <div id="spieler-level"></div>
-        <div class="arena">
-          <div class="kaempfer">
-            <div class="kaempfer-name">Du</div>
-            <div class="figur spieler" aria-hidden="true"></div>
-            <div class="balken"><div id="spieler-balken" class="fuellung"></div><span id="spieler-leben"></span></div>
-            <div id="spieler-werte" class="kaempfer-werte"></div>
-          </div>
-          <div class="kaempfer">
-            <div id="gegner-name" class="kaempfer-name"></div>
-            <div id="gegner-figur" class="figur gegner" aria-hidden="true"></div>
-            <div class="balken"><div id="gegner-balken" class="fuellung rot"></div><span id="gegner-leben"></span></div>
-            <div id="gegner-werte" class="kaempfer-werte"></div>
-          </div>
-        </div>
         <button id="boss-knopf" class="knopf rot" type="button"></button>
       </div>
     </main>
 
-    <section id="upgrades" aria-label="Verbesserungen"></section>
+    <section id="ausruestung-bereich" aria-label="Ausrüstung">
+      <div id="ausruestung-raster"></div>
+      <div id="amboss-reihe">
+        <button id="amboss-knopf" type="button">
+          <span class="amboss-bild" aria-hidden="true">🔨</span>
+          <span id="amboss-text">Schmieden</span>
+        </button>
+        <div id="amboss-rechts">
+          <button id="schmiede-stufe-knopf" class="knopf" type="button"></button>
+          <span id="schmiede-zeit"></span>
+        </div>
+      </div>
+    </section>
 
     <nav id="leiste" aria-label="Hauptleiste"></nav>
   </div>
@@ -142,6 +150,14 @@
     </div>
   </div>
 
+  <div id="upgrades-fenster" class="fenster" hidden>
+    <div class="karte">
+      <h2>Upgrades</h2>
+      <section id="upgrades" aria-label="Verbesserungen"></section>
+      <button class="knopf rot" type="button" data-schliessen="upgrades-fenster">Zurück</button>
+    </div>
+  </div>
+
   <div id="hinweis" class="fenster" hidden>
     <div class="karte mitte">
       <h2 id="hinweis-titel"></h2>
@@ -154,6 +170,6 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=11"></script>
+  <script type="module" src="js/main.js?v=12"></script>
 </body>
 </html>

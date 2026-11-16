@@ -48,10 +48,12 @@
   "schmiede": {
     "kosten": 20,
     "stufenKosten": 100,
-    "stufenFaktor": 1.6,
-    "maxStufe": 20,
+    "stufenFaktor": 1.8,
+    "maxStufe": 40,
     "ratioStart": 5,
-    "ratioEnde": 2
+    "ratioEnde": 2,
+    "dauerGrund": 60,
+    "dauerFaktor": 1.8
   },
   "setBonusSchaden": 0.1,
   "ruestungSet": {

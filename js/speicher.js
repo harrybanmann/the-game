@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 7;
+export const VERSION = 8;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -13,8 +13,8 @@ export function neueSeite(startZeitalter) {
     gesamtVerdient: 0,
     level: 1,
     xp: 0,
-    kampf: { index: 0, rate: 0 },
-    schmiede: { stufe: 0, geschmiedet: 0 },
+    kampf: { index: 0, rate: 0, stufe: 1, welle: 1 },
+    schmiede: { stufe: 0, geschmiedet: 0, ausbauBis: null },
     waffen: { nah: null, fern: null, aktiv: "nah" },
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
     lager: [],
@@ -61,11 +61,14 @@ export function pruefen(stand) {
     seite.kampf = {
       index: Math.max(0, Math.floor(Number(k.index)) || 0),
       rate: Math.max(0, Number(k.rate) || 0),
+      stufe: Math.max(1, Math.floor(Number(k.stufe)) || 1),
+      welle: Math.max(1, Math.floor(Number(k.welle)) || 1),
     };
     const sch = seite.schmiede || {};
     seite.schmiede = {
       stufe: Math.max(0, Math.floor(Number(sch.stufe)) || 0),
       geschmiedet: Math.max(0, Math.floor(Number(sch.geschmiedet)) || 0),
+      ausbauBis: Number.isFinite(sch.ausbauBis) ? sch.ausbauBis : null,
     };
     const w = seite.waffen || {};
     const waffe = (x) =>

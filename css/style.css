@@ -351,3 +351,69 @@ textarea {
 /* ---------- Fähigkeiten ---------- */
 #faehigkeit-liste { display: flex; flex-direction: column; gap: 10px; }
 .knopf.matt { background: #5d6680; border-color: #8089a3; box-shadow: 0 5px 0 #3a4159; opacity: 0.9; }
+
+/* ---------- Version 10: Kampf oben, Ausrüstung unten (wie Forge Master) ---------- */
+#szene {
+  flex-direction: column; align-items: stretch; justify-content: space-between;
+  padding: 8px 10px 10px; gap: 6px; min-height: 230px;
+}
+#kampf-kopf, .arena, #szene-knoepfe { position: relative; z-index: 1; }
+#kampf-kopf { text-align: center; }
+#stufe-text { font-size: 22px; }
+#spieler-level { font-size: 13px; }
+.arena { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.arena .kaempfer { flex: 0 0 104px; }
+#gegner-gruppe { flex: 1 1 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 4px 6px; min-width: 0; }
+.gegner { width: 62px; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: opacity 0.2s; }
+.gegner.weg { opacity: 0.25; }
+.gegner.boss { width: 120px; }
+.gegner-name { font-size: 10px; text-align: center; line-height: 1.1; min-height: 22px; overflow-wrap: anywhere; color: #fff;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+.figur.gegner-figur { width: 40px; height: 52px; background: #4a3b55; border-radius: 50% 50% 28% 28%; }
+.figur.gegner-figur::after {
+  content: ""; position: absolute; left: 7px; right: 7px; top: 14px; height: 8px;
+  background: #fff; border: 2px solid var(--umriss); border-radius: 6px;
+}
+.figur.gegner-figur.elite { background: #7a2f6b; width: 46px; height: 58px; }
+.figur.gegner-figur.boss { width: 86px; height: 108px; background: #b3342e; }
+.balken.klein { height: 10px; border-width: 2px; }
+#szene-knoepfe { display: flex; gap: 8px; align-items: stretch; }
+#verdienen {
+  flex: 0 0 auto; flex-direction: row; gap: 6px; padding: 6px 12px; font-size: 15px; border-radius: 16px;
+  box-shadow: 0 5px 0 var(--umriss);
+}
+#boss-knopf { flex: 1 1 0; max-width: none; font-size: 13px; padding: 6px 8px; line-height: 1.15; }
+
+#ausruestung-bereich {
+  flex: 0 0 auto; background: #f4efe4; border-top: 4px solid var(--umriss); padding: 10px 10px 8px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+#ausruestung-raster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.kachel {
+  position: relative; aspect-ratio: 1 / 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  background: #c9ccd3; border: 3px solid var(--umriss); border-radius: 12px; padding: 2px; cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+.kachel.leer { background: #d9dce2; }
+.kachel.zu { opacity: 0.45; }
+.kachel.glanz { box-shadow: 0 0 12px 2px #ffd54a; }
+.kachel.aktiv { outline: 3px solid #fff; outline-offset: -6px; }
+.kachel-symbol { font-size: 22px; line-height: 1; }
+.kachel-name { font-size: 9px; line-height: 1.05; text-align: center; overflow-wrap: anywhere; color: #fff;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }
+.kachel .sterne { font-size: 8px; letter-spacing: 0; text-shadow: 0 1px var(--umriss); }
+#amboss-reihe { display: flex; gap: 8px; align-items: center; }
+#amboss-knopf {
+  flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px; font-size: 17px; background: #f2b632; border: 4px solid var(--umriss); border-radius: 18px;
+  box-shadow: 0 5px 0 var(--umriss); cursor: pointer;
+  text-shadow: -2px 0 var(--umriss), 2px 0 var(--umriss), 0 -2px var(--umriss), 0 2px var(--umriss);
+}
+#amboss-knopf.matt { filter: grayscale(0.7); }
+#amboss-knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--umriss); }
+.amboss-bild { font-size: 26px; }
+#amboss-rechts { flex: 0 0 132px; display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
+#schmiede-stufe-knopf { padding: 8px 4px; font-size: 15px; }
+#schmiede-zeit { font-size: 11px; color: var(--umriss); text-align: center; }
+#upgrades { max-height: none; border-top: 0; padding: 0; }

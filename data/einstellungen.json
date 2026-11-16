@@ -14,17 +14,59 @@
   "kampf": {
     "grundSchaden": 2,
     "grundLeben": 20,
-    "sekundenProSchlag": 1
+    "sekundenProSchlag": 1,
+    "wellen": {
+      "proStufe": 3,
+      "startGegner": 1,
+      "mehrAlleStufen": 3,
+      "maxGegner": 5,
+      "staerkeFaktor": 1.12,
+      "beuteFaktor": 1.08,
+      "eliteAlleStufen": 5,
+      "heilungZwischen": 0.25
+    }
   },
   "level": {
-    "grundXp": 10,
-    "faktor": 1.25
+    "grundXp": 60,
+    "faktor": 1.15
   },
   "leiste": [
-    { "id": "kaempfen", "name": "Kämpfen", "symbol": "⚔", "nameZurueck": "Sammeln", "symbolZurueck": "⛏", "offen": true },
-    { "id": "waffen", "name": "Waffen", "symbol": "🛡", "fenster": "waffen-fenster", "offen": true },
-    { "id": "tiere", "name": "Tiere", "symbol": "🥚", "fenster": "tiere-fenster", "offen": true },
-    { "id": "farm", "name": "Farm", "symbol": "📈", "offen": false },
-    { "id": "menue", "name": "Menü", "symbol": "☰", "offen": true }
-  ]
+    {
+      "id": "upgrades",
+      "name": "Upgrades",
+      "symbol": "⬆",
+      "fenster": "upgrades-fenster",
+      "offen": true
+    },
+    {
+      "id": "waffen",
+      "name": "Schmiede",
+      "symbol": "🛡",
+      "fenster": "waffen-fenster",
+      "offen": true
+    },
+    {
+      "id": "tiere",
+      "name": "Tiere",
+      "symbol": "🥚",
+      "fenster": "tiere-fenster",
+      "offen": true
+    },
+    {
+      "id": "farm",
+      "name": "Farm",
+      "symbol": "📈",
+      "offen": false
+    },
+    {
+      "id": "menue",
+      "name": "Menü",
+      "symbol": "☰",
+      "offen": true
+    }
+  ],
+  "aufstieg": {
+    "levelJeZeitalter": 10,
+    "schmiedeJeZeitalter": 3
+  }
 }
