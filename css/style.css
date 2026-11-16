@@ -462,3 +462,21 @@ textarea {
 .wert-chart polyline.steigt { stroke: #4fc46a; }
 .wert-chart polyline.faellt { stroke: #e0564c; }
 .lager-zeile.zu { opacity: 0.5; }
+
+/* ---------- Seitenwechsel ---------- */
+#wechsel-animation {
+  position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+  font-size: 64px; background: rgba(10, 6, 20, 0.6); pointer-events: none;
+}
+#wechsel-animation.los { animation: wechsel 1s ease-in-out forwards; }
+@keyframes wechsel {
+  0% { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+  40% { opacity: 1; transform: scale(1.15) rotate(6deg); background: rgba(255, 255, 255, 0.55); }
+  100% { opacity: 0; transform: scale(1) rotate(0); }
+}
+body.boese #spiel { background: #1b1426; }
+body.boese .figur.spieler::after {
+  right: auto; left: 8px; top: -14px; bottom: auto; width: 40px; height: 34px;
+  background: #3a2550; border-radius: 50% 50% 20% 20%;
+}
+body.boese #ausruestung-bereich { background: #d9d0e4; }

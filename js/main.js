@@ -1,14 +1,14 @@
-import { zahl, btc, dauer } from "./format.js?v=17";
-import * as speicher from "./speicher.js?v=17";
-import { kampfSystem } from "./kampf.js?v=17";
-import { waffenSystem } from "./waffen.js?v=17";
-import { tierSystem } from "./tiere.js?v=17";
-import { dungeonSystem } from "./dungeons.js?v=17";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=17";
-import { bitcoinSystem } from "./bitcoin.js?v=17";
-import { techSystem } from "./tech.js?v=17";
-import { haushaltSystem } from "./haushalt.js?v=17";
-import { farmSystem } from "./farm.js?v=17";
+import { zahl, btc, dauer } from "./format.js?v=18";
+import * as speicher from "./speicher.js?v=18";
+import { kampfSystem } from "./kampf.js?v=18";
+import { waffenSystem } from "./waffen.js?v=18";
+import { tierSystem } from "./tiere.js?v=18";
+import { dungeonSystem } from "./dungeons.js?v=18";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=18";
+import { bitcoinSystem } from "./bitcoin.js?v=18";
+import { techSystem } from "./tech.js?v=18";
+import { haushaltSystem } from "./haushalt.js?v=18";
+import { farmSystem } from "./farm.js?v=18";
 
 const $ = (id) => document.getElementById(id);
 
@@ -195,12 +195,22 @@ function el(tag, klasse, text) {
   return e;
 }
 
+// Böse-Look (Grafik-Chat): gleiche Palette, dunkler und mit Violett/Schwarz gemischt.
+function mischen(hex, mit, anteil) {
+  const a = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+  const b = mit.match(/\w\w/g).map((x) => parseInt(x, 16));
+  return "#" + a.map((v, i) => Math.round(v * (1 - anteil) + b[i] * anteil).toString(16).padStart(2, "0")).join("");
+}
+
 function farbenSetzen() {
   const f = zeitalter().farben;
+  const boese = stand.aktiveSeite === "boese";
+  const ton = (c) => (boese ? mischen(c, "#2b1a3d", 0.5) : c);
   const stil = document.documentElement.style;
-  stil.setProperty("--haupt", f.haupt);
-  stil.setProperty("--zweit", f.zweit);
-  stil.setProperty("--akzent", f.akzent);
+  document.body.classList.toggle("boese", boese);
+  stil.setProperty("--haupt", ton(f.haupt));
+  stil.setProperty("--zweit", ton(f.zweit));
+  stil.setProperty("--akzent", ton(f.akzent));
   stil.setProperty("--symbol", f.symbol || "#6f7780");
   const au = stand.gemeinsam.figur.aussehen;
   const umhang = daten.haushalt.aussehen.find((a) => a.id === au.aktiv);
@@ -378,7 +388,9 @@ function leisteZeichnen() {
 
 function allesZeichnen() {
   farbenSetzen();
-  $("zeitalter-name").textContent = "Zeitalter " + zeitalter().nummer + ": " + zeitalter().name;
+  $("zeitalter-name").textContent =
+    (stand.aktiveSeite === "boese" ? "🦹 Dieb · " : "🛡 Beschützer · ") + "Zeitalter " + zeitalter().nummer + ": " + zeitalter().name;
+  $("seite-knopf").textContent = stand.aktiveSeite === "boese" ? "Zur Beschützer-Seite wechseln 🛡" : "Zur Dieb-Seite wechseln 🦹";
   $("verdienen-text").textContent = zeitalter().verdienKnopf;
   upgradesZeichnen();
   leisteZeichnen();
@@ -1079,6 +1091,40 @@ function farmZeichnen(neu) {
   }
 }
 
+// ---------- Seitenwechsel Gut/Böse (nur in der Zentrale = Menü, nie im Boss-Kampf) ----------
+
+function seiteWechseln() {
+  if (kampf.zustand().boss) return kurzMeldung("Mitten im Boss-Kampf geht das nicht.");
+  const ziel = stand.aktiveSeite === "gut" ? "boese" : "gut";
+  const zielName = ziel === "boese" ? "Dieb" : "Beschützer";
+  const neu = !stand.seiten[ziel];
+  if (
+    !confirm(
+      "Zur " + zielName + "-Seite wechseln? Deine jetzige Seite wird gespeichert und wartet auf dich." +
+        (neu ? " Die " + zielName + "-Seite startet beim ersten Mal von vorne." : " Die " + zielName + "-Seite macht dort weiter, wo sie aufgehört hat.")
+    )
+  )
+    return;
+  sichern();
+  if (neu) {
+    stand.seiten[ziel] = speicher.neueSeite(daten.einstellungen.startZeitalter);
+    speicher.pruefen(stand);
+  }
+  stand.aktiveSeite = ziel;
+  letzterTick = Date.now();
+  kampf.neuStarten();
+  fensterSchliessen("menue");
+  allesZeichnen();
+  sichern();
+  const anim = $("wechsel-animation");
+  anim.textContent = ziel === "boese" ? "🛡 ⚡ 🦹" : "🦹 ⚡ 🛡";
+  anim.hidden = false;
+  anim.classList.remove("los");
+  void anim.offsetWidth;
+  anim.classList.add("los");
+  setTimeout(() => (anim.hidden = true), 1100);
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
@@ -1310,6 +1356,7 @@ function knoepfeVerbinden() {
     e.target.value = "";
   });
   $("neu-anfangen").addEventListener("click", neuAnfangen);
+  $("seite-knopf").addEventListener("click", seiteWechseln);
   for (const knopf of document.querySelectorAll("[data-schliessen]")) {
     knopf.addEventListener("click", () => fensterSchliessen(knopf.dataset.schliessen));
   }

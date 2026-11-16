@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
 </head>
 <body>
   <div id="spiel">
@@ -90,7 +90,8 @@
       <button id="btc-knopf" class="knopf" type="button">Bitcoin und Händler</button>
       <button id="tech-knopf" class="knopf" type="button">Tech-Baum</button>
       <button id="haushalt-knopf" class="knopf" type="button">Haushalt und Firma</button>
-      <p class="hinweis">Seitenwechsel Gut/Böse kommt später.</p>
+      <button id="seite-knopf" class="knopf" type="button"></button>
+      <p class="hinweis">Beide Seiten spielen sich gleich, nur Gegner, Namen und Look sind anders. Jede Seite hat ihren eigenen Spielstand.</p>
       <button id="neu-anfangen" class="knopf rot" type="button">Neu anfangen</button>
       <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
     </div>
@@ -242,10 +243,11 @@
     </div>
   </div>
 
+  <div id="wechsel-animation" hidden></div>
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=17"></script>
+  <script type="module" src="js/main.js?v=18"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {
