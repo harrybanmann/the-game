@@ -1,10 +1,11 @@
-import { zahl, btc, dauer } from "./format.js?v=12";
-import * as speicher from "./speicher.js?v=12";
-import { kampfSystem } from "./kampf.js?v=12";
-import { waffenSystem } from "./waffen.js?v=12";
-import { tierSystem } from "./tiere.js?v=12";
-import { dungeonSystem } from "./dungeons.js?v=12";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=12";
+import { zahl, btc, dauer } from "./format.js?v=13";
+import * as speicher from "./speicher.js?v=13";
+import { kampfSystem } from "./kampf.js?v=13";
+import { waffenSystem } from "./waffen.js?v=13";
+import { tierSystem } from "./tiere.js?v=13";
+import { dungeonSystem } from "./dungeons.js?v=13";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=13";
+import { bitcoinSystem } from "./bitcoin.js?v=13";
 
 const $ = (id) => document.getElementById(id);
 
@@ -15,6 +16,7 @@ let waffen; // Schmiede und Waffen
 let tiere; // Tiere und Eier
 let dungeons; // Dungeons und Tickets
 let faehigkeiten; // Fähigkeiten
+let bitcoin; // Bitcoin und Händler
 let gewaehltesTier = null;
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
@@ -28,7 +30,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -37,6 +39,7 @@ async function datenLaden() {
     json("data/tiere.json"),
     json("data/dungeons.json"),
     json("data/faehigkeiten.json"),
+    json("data/bitcoin.json"),
   ]);
   return {
     einstellungen,
@@ -47,6 +50,7 @@ async function datenLaden() {
     tiere: tierDaten,
     dungeons: dungeonDaten,
     faehigkeiten: faehigkeitDaten,
+    bitcoin: btcDaten,
   };
 }
 
@@ -129,6 +133,8 @@ function tick() {
   }
 
   dungeons.schritt();
+  const zurueck = bitcoin.schritt(jetzt);
+  if (zurueck > 0 && !$("btc-fenster").hidden) btcZeichnen();
   if (waffen.schritt(jetzt)) {
     kurzMeldung("Schmiede ist jetzt Stufe " + seite().schmiede.stufe + "!");
     if (!$("waffen-fenster").hidden) waffenZeichnen();
@@ -175,7 +181,9 @@ function anzeigeAktualisieren() {
   $("zaehler-zahl").textContent = zahl(guthaben());
   $("zaehler-name").textContent = w.name;
   $("zaehler-btc").textContent = "≈ " + btc(guthaben() * w.btcProStueck) + " ₿";
-  $("pro-sekunde").textContent = zahl(proSekunde()) + " pro Sekunde · " + zahl(klickWert()) + " pro Tippen";
+  $("pro-sekunde").textContent =
+    zahl(proSekunde()) + " pro Sek. · " + zahl(klickWert()) + " pro Tippen · Dein ₿ " + btc(seite().btc.menge);
+  if (!$("btc-fenster").hidden) btcKnoepfe();
   for (const u of upgradesHier()) {
     const knopf = document.querySelector(`[data-upgrade="${u.id}"]`);
     if (!knopf) continue;
@@ -277,6 +285,8 @@ function rasterZeichnen() {
     }
     kachel.append(el("span", "kachel-symbol", symbol), el("span", "kachel-name", w ? w.name : offen ? name : "bald"));
     if (w) kachel.append(el("span", "sterne", sterne(w.sterne)));
+    const lv = bitcoin.stufe(art);
+    if (lv > 0) kachel.append(el("span", "kachel-lv", "Lv. " + lv));
     kachel.addEventListener("click", () => {
       if (!offen) return kurzMeldung(name + " kommt in einer späteren Version.");
       waffenZeichnen();
@@ -728,6 +738,58 @@ function faehigkeitenZeichnen() {
   }
 }
 
+// ---------- Bitcoin und Händler ----------
+
+const PLATZ_NAMEN = Object.fromEntries(PLAETZE.map(([art, name]) => [art, name]));
+
+function btcGeaendert() {
+  btcZeichnen();
+  rasterZeichnen();
+  anzeigeAktualisieren();
+  sichern();
+}
+
+function btcKnoepfe() {
+  const b = seite().btc;
+  $("btc-guthaben").textContent = "Dein ₿: " + btc(b.menge);
+  $("btc-kurs").textContent =
+    "Kurs: 1 " + waehrung().name + " = " + btc(waehrung().btcProStueck) + " ₿ · Händler-Kasse: " + btc(b.kasse) + " ₿";
+  for (const k of document.querySelectorAll("[data-btc-platz]")) {
+    const platz = k.dataset.btcPlatz;
+    k.disabled = bitcoin.voll(platz) || b.menge < bitcoin.preis(platz);
+  }
+}
+
+function btcZeichnen() {
+  const liste = $("haendler-liste");
+  liste.replaceChildren();
+  for (const h of bitcoin.haendler()) {
+    const karte = el("div", "dungeon" + (h.offen ? "" : " zu"));
+    karte.append(el("div", "dungeon-name", h.name), el("div", "hinweis", h.offen ? h.text : "Ab Zeitalter " + h.ab + "."));
+    if (h.offen) {
+      for (const platz of h.plaetze) {
+        const zeile = el("div", "lager-zeile");
+        const info = el("span", "lager-info");
+        const lv = bitcoin.stufe(platz);
+        info.append(
+          el("span", "lager-name", PLATZ_NAMEN[platz] + " · Lv. " + lv + "/100"),
+          el("span", "hinweis", "+" + Math.round((bitcoin.faktor(platz) - 1) * 100) + " % Werte")
+        );
+        const knopf = el("button", "knopf klein", bitcoin.voll(platz) ? "Max" : btc(bitcoin.preis(platz)) + " ₿");
+        knopf.type = "button";
+        knopf.dataset.btcPlatz = platz;
+        knopf.addEventListener("click", () => {
+          if (bitcoin.upgradeKaufen(platz)) btcGeaendert();
+        });
+        zeile.append(info, knopf);
+        karte.append(zeile);
+      }
+    }
+    liste.append(karte);
+  }
+  btcKnoepfe();
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
@@ -878,6 +940,22 @@ function knoepfeVerbinden() {
     dungeonsZeichnen();
     fensterZeigen("dungeon-fenster");
   });
+  $("btc-knopf").addEventListener("click", () => {
+    fensterSchliessen("menue");
+    btcZeichnen();
+    fensterZeigen("btc-fenster");
+  });
+  $("zaehler-btc").addEventListener("click", () => {
+    btcZeichnen();
+    fensterZeigen("btc-fenster");
+  });
+  for (const k of document.querySelectorAll("[data-btc-kauf]")) {
+    k.addEventListener("click", () => {
+      const menge = bitcoin.kaufen(Number(k.dataset.btcKauf));
+      kurzMeldung(menge > 0 ? "Gekauft: " + btc(menge) + " ₿" : "Nichts zum Kaufen da.");
+      btcGeaendert();
+    });
+  }
   $("faehigkeiten-knopf").addEventListener("click", () => {
     fensterSchliessen("menue");
     $("faehigkeit-ergebnis").textContent = "";
@@ -949,7 +1027,17 @@ async function start() {
     trank: () => daten.dungeons.heiltrank,
     faehigkeiten: () => faehigkeiten,
   });
+  bitcoin = bitcoinSystem({
+    daten: () => daten.bitcoin,
+    seite,
+    seitenName: () => stand.aktiveSeite,
+    zeitalterNummer: () => zeitalter().nummer,
+    kurs: () => waehrung().btcProStueck,
+    guthaben,
+    bezahlen,
+  });
   waffen = waffenSystem({
+    platzFaktor: (art) => bitcoin.faktor(art),
     daten: () => daten.waffen,
     seite,
     seitenName: () => stand.aktiveSeite,

@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
   <div id="spiel">
@@ -87,6 +87,7 @@
       <h3>Zentrale</h3>
       <button id="dungeons-knopf" class="knopf" type="button">Dungeons</button>
       <button id="faehigkeiten-knopf" class="knopf" type="button">Fähigkeiten</button>
+      <button id="btc-knopf" class="knopf" type="button">Bitcoin und Händler</button>
       <p class="hinweis">Seitenwechsel Gut/Böse, Haushalt und Tech-Baum kommen später.</p>
       <button id="neu-anfangen" class="knopf rot" type="button">Neu anfangen</button>
       <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
@@ -158,6 +159,23 @@
     </div>
   </div>
 
+  <div id="btc-fenster" class="fenster" hidden>
+    <div class="karte">
+      <h2>Bitcoin</h2>
+      <p id="btc-guthaben" class="gross-zahl"></p>
+      <p id="btc-kurs" class="hinweis"></p>
+      <div class="btc-kauf">
+        <button class="knopf klein" type="button" data-btc-kauf="0.25">25 % kaufen</button>
+        <button class="knopf klein" type="button" data-btc-kauf="0.5">50 % kaufen</button>
+        <button class="knopf klein" type="button" data-btc-kauf="1">Alles kaufen</button>
+      </div>
+      <p class="hinweis">Mit ₿ kaufst du bei den Händlern dauerhafte Upgrades (bis Lv. 100). Sie bleiben, auch wenn du die Waffe wechselst. Die Händler geben ₿ langsam zurück, indem sie dir Güter abkaufen.</p>
+      <h3>Händler</h3>
+      <div id="haendler-liste"></div>
+      <button class="knopf rot" type="button" data-schliessen="btc-fenster">Zurück</button>
+    </div>
+  </div>
+
   <div id="hinweis" class="fenster" hidden>
     <div class="karte mitte">
       <h2 id="hinweis-titel"></h2>
@@ -170,6 +188,15 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=12"></script>
+  <script type="module" src="js/main.js?v=13"></script>
+  <script>
+    // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
+    setTimeout(function () {
+      if (document.querySelector("#leiste .rund")) return;
+      var f = document.getElementById("lade-fehler");
+      f.innerHTML = 'Das Spiel ist nicht vollständig geladen.<br><button class="knopf" onclick="location.reload()">Neu laden</button>';
+      f.hidden = false;
+    }, 8000);
+  </script>
 </body>
 </html>

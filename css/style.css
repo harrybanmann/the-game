@@ -417,3 +417,12 @@ textarea {
 #schmiede-stufe-knopf { padding: 8px 4px; font-size: 15px; }
 #schmiede-zeit { font-size: 11px; color: var(--umriss); text-align: center; }
 #upgrades { max-height: none; border-top: 0; padding: 0; }
+
+/* ---------- Bitcoin ---------- */
+#zaehler-btc { cursor: pointer; }
+.btc-kauf { display: flex; gap: 6px; }
+.btc-kauf .knopf.klein { margin: 0; }
+#haendler-liste { display: flex; flex-direction: column; gap: 10px; }
+.dungeon.zu { opacity: 0.55; }
+.kachel-lv { position: absolute; top: 2px; left: 3px; font-size: 9px; color: #fff;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }

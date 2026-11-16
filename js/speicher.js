@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 8;
+export const VERSION = 9;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -19,6 +19,7 @@ export function neueSeite(startZeitalter) {
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
     lager: [],
     traenke: 0,
+    btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { letzterTag: "", tickets: {}, stufe: {} },
     tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
@@ -91,6 +92,18 @@ export function pruefen(stand) {
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
     seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    const bt = seite.btc || {};
+    const ups = {};
+    for (const [platz, n] of Object.entries(bt.upgrades || {})) {
+      const st = Math.floor(Number(n));
+      if (Number.isFinite(st) && st > 0) ups[platz] = st;
+    }
+    seite.btc = {
+      menge: Math.max(0, Number(bt.menge) || 0),
+      kasse: Math.max(0, Number(bt.kasse) || 0),
+      upgrades: ups,
+      letzterRueckfluss: Number.isFinite(bt.letzterRueckfluss) ? bt.letzterRueckfluss : 0,
+    };
     const fa = seite.faehigkeiten || {};
     const ganz = (x, min) => Math.max(min, Math.floor(Number(x)) || 0);
     const sammlung = (Array.isArray(fa.sammlung) ? fa.sammlung : [])

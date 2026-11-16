@@ -45,7 +45,8 @@ export function waffenSystem(api) {
     if (!vorlage) return null;
     const selten = d().seltenheiten[stueck.seltenheit] || d().seltenheiten[0];
     const sterne = stueck.sterne || 0;
-    const faktor = selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * (1 + sterne * d().sternBonus);
+    const faktor =
+      selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * (1 + sterne * d().sternBonus) * api.platzFaktor(vorlage.art);
     return {
       id: vorlage.id,
       art: vorlage.art,

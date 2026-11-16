@@ -1,0 +1,58 @@
+{
+  "_hinweis": "Harry: BTC ist Hauptwährung; Upgrades mit BTC dauerhaft, 100 Stufen, Waffe UND Ausrüstung; bei verschiedenen Händlern je Zeitalter; Händler geben BTC langsam zurück, indem sie Güter abkaufen; 21 Mio. feste Grenze; 1 Feuerstein = 1 Satoshi, jede Währung ×10. Händler-Namen, Preise und Bonus sind Vorschläge.",
+  "maxBtc": 21000000,
+  "upgrade": {
+    "maxStufe": 100,
+    "grundPreis": 5e-07,
+    "faktor": 1.2,
+    "bonusProStufe": 0.05
+  },
+  "rueckfluss": {
+    "anteilProStunde": 0.05
+  },
+  "haendler": [
+    {
+      "id": "schmied",
+      "ab": 1,
+      "name": {
+        "gut": "Schmied",
+        "boese": "Hehler"
+      },
+      "text": "Verbessert deine Waffen dauerhaft.",
+      "plaetze": [
+        "nah",
+        "fern"
+      ]
+    },
+    {
+      "id": "gerber",
+      "ab": 2,
+      "name": {
+        "gut": "Gerber",
+        "boese": "Lederdieb"
+      },
+      "text": "Verbessert deine Rüstung dauerhaft.",
+      "plaetze": [
+        "helm",
+        "handschuhe",
+        "ruestung",
+        "stiefel"
+      ]
+    },
+    {
+      "id": "goldschmied",
+      "ab": 3,
+      "name": {
+        "gut": "Goldschmied",
+        "boese": "Juwelendieb"
+      },
+      "text": "Verbessert Ringe, Amulett und Gürtel dauerhaft.",
+      "plaetze": [
+        "ring1",
+        "ring2",
+        "amulett",
+        "guertel"
+      ]
+    }
+  ]
+}
