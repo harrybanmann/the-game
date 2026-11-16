@@ -643,3 +643,32 @@ export function eiBild(farbe) {
     svg(64, 64, `<path d="M32,6 Q52,6 54,36 Q54,58 32,58 Q10,58 10,36 Q12,6 32,6 Z" fill="${farbe}" ${S}/><path d="M20,24 q4,-10 12,-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.7"/><circle cx="40" cy="38" r="5" fill="#fff" opacity="0.35"/><circle cx="26" cy="44" r="3.5" fill="#fff" opacity="0.35"/>`)
   );
 }
+
+// ---------- Weg, auf dem die Figuren laufen ----------
+// Erde in den frühen Zeitaltern, dann Pflaster, Asphalt und zuletzt eine Neon-Bahn.
+export function wegBild(zeitalter, seite) {
+  const nacht = seite === "boese";
+  return alsBild(["weg", zeitalter.id, nacht ? 1 : 0].join("|"), () => {
+    const n = zeitalter.nummer;
+    let t;
+    if (n <= 3) {
+      const c = n === 2 ? "#d9b46a" : n === 3 ? "#c99a5a" : "#b98a5e";
+      t = `<rect width="400" height="48" fill="${c}"/>`;
+      for (const [x, y, r] of [[30, 14, 5], [92, 34, 4], [150, 12, 3], [214, 30, 6], [280, 16, 4], [338, 36, 5], [372, 12, 3], [60, 40, 3]]) t += `<ellipse cx="${x}" cy="${y}" rx="${r * 1.6}" ry="${r}" fill="#000" opacity="0.14"/>`;
+      t += `<path d="M10,24 q20,-6 40,0 M180,40 q24,-6 48,0 M300,26 q20,-5 40,0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.3"/>`;
+    } else if (n <= 9) {
+      const c = n >= 7 ? "#b9b0a2" : "#cfc4ae";
+      t = `<rect width="400" height="48" fill="${c}"/>`;
+      for (let z = 0; z < 3; z++) for (let i = -1; i < 11; i++) t += `<rect x="${i * 40 + (z % 2) * 20 + 2}" y="${z * 16 + 2}" width="36" height="12" rx="5" fill="${(i + z) % 3 ? "#fff" : "#000"}" opacity="${(i + z) % 3 ? 0.22 : 0.1}"/>`;
+    } else if (n <= 11) {
+      t = `<rect width="400" height="48" fill="#4a4e57"/>`;
+      for (let i = 0; i < 7; i++) t += `<rect x="${i * 60 + 10}" y="21" width="34" height="6" rx="2" fill="#f1ead8" opacity="0.85"/>`;
+    } else {
+      t = `<rect width="400" height="48" fill="#14183a"/><path d="M0,8 H400 M0,40 H400" stroke="#1fe3e3" stroke-width="3"/>`;
+      for (let i = 0; i < 9; i++) t += `<path d="M${i * 48 + 10},24 l14,-8 v16 z" fill="#a24bff" opacity="0.7"/>`;
+    }
+    t += `<path d="M0,2 H400 M0,46 H400" stroke="${U}" stroke-width="5"/>`;
+    if (nacht && n !== 12) t += `<rect width="400" height="48" fill="#1a1030" opacity="0.4"/>`;
+    return svg(400, 48, t, 'preserveAspectRatio="none"');
+  });
+}

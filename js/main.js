@@ -1,16 +1,16 @@
-import { zahl, btc, dauer } from "./format.js?v=27";
-import * as speicher from "./speicher.js?v=27";
-import { kampfSystem } from "./kampf.js?v=27";
-import { waffenSystem } from "./waffen.js?v=27";
-import { tierSystem } from "./tiere.js?v=27";
-import { dungeonSystem } from "./dungeons.js?v=27";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=27";
-import { bitcoinSystem } from "./bitcoin.js?v=27";
-import { techSystem } from "./tech.js?v=27";
-import * as grafik from "./grafik.js?v=27";
-import { haushaltSystem } from "./haushalt.js?v=27";
-import { farmSystem } from "./farm.js?v=27";
-import { reittierSystem } from "./reittiere.js?v=27";
+import { zahl, btc, dauer } from "./format.js?v=28";
+import * as speicher from "./speicher.js?v=28";
+import { kampfSystem } from "./kampf.js?v=28";
+import { waffenSystem } from "./waffen.js?v=28";
+import { tierSystem } from "./tiere.js?v=28";
+import { dungeonSystem } from "./dungeons.js?v=28";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=28";
+import { bitcoinSystem } from "./bitcoin.js?v=28";
+import { techSystem } from "./tech.js?v=28";
+import * as grafik from "./grafik.js?v=28";
+import { haushaltSystem } from "./haushalt.js?v=28";
+import { farmSystem } from "./farm.js?v=28";
+import { reittierSystem } from "./reittiere.js?v=28";
 
 const $ = (id) => document.getElementById(id);
 
@@ -231,6 +231,7 @@ function farbenSetzen() {
   const spielerFarbe = umhang ? umhang.farbe : "#3c8fe0";
   stil.setProperty("--spieler", spielerFarbe);
   $("szene").style.backgroundImage = grafik.szeneBild(zeitalter(), stand.aktiveSeite);
+  $("weg").style.backgroundImage = grafik.wegBild(zeitalter(), stand.aktiveSeite);
   spielerBildSetzen();
   stil.setProperty("--geld-bild", grafik.waehrungBild(zeitalter()));
   $("gegner-gruppe").dataset.k = "";
@@ -324,8 +325,9 @@ function kampfZeichnen() {
   const s = seite();
   const trank = daten.dungeons.heiltrank;
   $("stufe-text").textContent = z.boss ? "Boss-Kampf" : "Stufe " + z.stufe + "-" + z.welle;
-  $("spieler-level").textContent = "Level " + s.level + " · " + Math.floor((100 * s.xp) / xpBedarf(s.level)) + " %" + (z.boss ? " · Tränke " + s.traenke + "/" + trank.max : "");
-  $("spieler-werte").textContent = "⚔ " + zahl(schaden("nah")) + " · ➶ " + zahl(schaden("fern"));
+  $("spieler-level").textContent =
+    "Level " + s.level + " · " + Math.floor((100 * s.xp) / xpBedarf(s.level)) + " % · ⚔ " + zahl(schaden("nah")) + " · ➶ " + zahl(schaden("fern")) +
+    (z.boss ? " · Tränke " + s.traenke + "/" + trank.max : "");
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
   $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
 

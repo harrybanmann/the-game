@@ -624,3 +624,12 @@ details summary { cursor: pointer; padding: 6px 0; }
 @keyframes schwung { 0% { rotate: -95deg; } 55% { rotate: 70deg; scale: 1.25; } 100% { rotate: 0deg; scale: 1; } }
 @keyframes spannen { 0% { translate: 0 0; scale: 1 1; } 40% { translate: -7px 0; scale: 0.8 1.1; } 100% { translate: 0 0; scale: 1 1; } }
 @keyframes spur { 0% { opacity: 0; rotate: -40deg; scale: 0.6; } 30% { opacity: 1; } 100% { opacity: 0; rotate: 30deg; scale: 1.15; } }
+
+/* ---------- Version 26: Weg, auf dem alle Figuren laufen ---------- */
+#weg { position: absolute; left: -14px; right: -14px; bottom: -6px; height: 46px; z-index: 0;
+  background: center / 100% 100% no-repeat; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18); }
+.arena { height: 170px; flex-basis: 170px; margin-bottom: 4px; }
+#spieler-box { bottom: 8px; gap: 2px; }
+#spieler-box .balken { width: 84px; }
+.gegner { margin-bottom: 8px; }
+#gegner-gruppe { z-index: 2; }

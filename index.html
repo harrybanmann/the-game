@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=27">
+  <link rel="stylesheet" href="css/style.css?v=28">
 </head>
 <body>
   <div id="spiel">
@@ -40,14 +40,14 @@
         <div id="spieler-level"></div>
       </div>
       <div class="arena" id="arena">
+        <div id="weg" aria-hidden="true"></div>
         <div class="kaempfer" id="spieler-box">
+          <div class="balken"><div id="spieler-balken" class="fuellung"></div><span id="spieler-leben"></span></div>
           <div class="reit-stapel">
             <div class="figur spieler" aria-hidden="true"></div>
             <div id="held-waffe" class="held-waffe" aria-hidden="true"></div>
             <div id="reittier-bild" class="reittier-bild" aria-hidden="true" hidden></div>
           </div>
-          <div class="balken"><div id="spieler-balken" class="fuellung"></div><span id="spieler-leben"></span></div>
-          <div id="spieler-werte" class="kaempfer-werte"></div>
         </div>
         <div id="gegner-gruppe"></div>
       </div>
@@ -261,7 +261,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=27"></script>
+  <script type="module" src="js/main.js?v=28"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {
