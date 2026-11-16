@@ -1,16 +1,16 @@
-import { zahl, btc, dauer } from "./format.js?v=25";
-import * as speicher from "./speicher.js?v=25";
-import { kampfSystem } from "./kampf.js?v=25";
-import { waffenSystem } from "./waffen.js?v=25";
-import { tierSystem } from "./tiere.js?v=25";
-import { dungeonSystem } from "./dungeons.js?v=25";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=25";
-import { bitcoinSystem } from "./bitcoin.js?v=25";
-import { techSystem } from "./tech.js?v=25";
-import * as grafik from "./grafik.js?v=25";
-import { haushaltSystem } from "./haushalt.js?v=25";
-import { farmSystem } from "./farm.js?v=25";
-import { reittierSystem } from "./reittiere.js?v=25";
+import { zahl, btc, dauer } from "./format.js?v=27";
+import * as speicher from "./speicher.js?v=27";
+import { kampfSystem } from "./kampf.js?v=27";
+import { waffenSystem } from "./waffen.js?v=27";
+import { tierSystem } from "./tiere.js?v=27";
+import { dungeonSystem } from "./dungeons.js?v=27";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=27";
+import { bitcoinSystem } from "./bitcoin.js?v=27";
+import { techSystem } from "./tech.js?v=27";
+import * as grafik from "./grafik.js?v=27";
+import { haushaltSystem } from "./haushalt.js?v=27";
+import { farmSystem } from "./farm.js?v=27";
+import { reittierSystem } from "./reittiere.js?v=27";
 
 const $ = (id) => document.getElementById(id);
 
@@ -231,9 +231,20 @@ function farbenSetzen() {
   const spielerFarbe = umhang ? umhang.farbe : "#3c8fe0";
   stil.setProperty("--spieler", spielerFarbe);
   $("szene").style.backgroundImage = grafik.szeneBild(zeitalter(), stand.aktiveSeite);
-  document.querySelector(".figur.spieler").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), spielerFarbe);
+  spielerBildSetzen();
   stil.setProperty("--geld-bild", grafik.waehrungBild(zeitalter()));
   $("gegner-gruppe").dataset.k = "";
+}
+
+// Die Figur trägt sichtbar, was angelegt ist (Helm, Rüstung, Handschuhe, Stiefel).
+function spielerBildSetzen() {
+  const tragen = {};
+  for (const p of ["helm", "ruestung", "handschuhe", "stiefel"]) {
+    const w = waffen.werte(waffen.hole(p), p);
+    if (w) tragen[p] = { zeitalter: zeitalterVon(w.zeitalter), farbe: w.seltenheit.farbe };
+  }
+  const farbe = getComputedStyle(document.documentElement).getPropertyValue("--spieler").trim() || "#3c8fe0";
+  document.querySelector(".figur.spieler").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, tragen);
 }
 
 function anzeigeAktualisieren() {
@@ -289,6 +300,25 @@ function geschoss(von, nach, gespiegelt) {
   setTimeout(() => g.remove(), 400);
 }
 
+// Der Held hält die Waffe in der Hand, die er gerade benutzt: Bogen beim Schießen, Nahkampf-Waffe beim Zuschlagen.
+function heldWaffe(art) {
+  const w = waffen.werte(waffen.hole(art), art);
+  const bild = $("held-waffe");
+  const k = art + "|" + (w ? w.id : "") + "|" + zeitalter().id;
+  if (bild.dataset.k === k) return;
+  bild.dataset.k = k;
+  bild.className = "held-waffe " + art;
+  bild.style.backgroundImage = grafik.stueckBild(art, w ? zeitalterVon(w.zeitalter) : zeitalter(), w ? w.id : "", false);
+}
+
+// Weißer Bogen am Gegner, wenn der Held mit der Nahkampf-Waffe trifft.
+function hiebSpur(box) {
+  if (!box) return;
+  const spur = el("span", "hieb-spur");
+  box.append(spur);
+  setTimeout(() => spur.remove(), 260);
+}
+
 function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
@@ -318,6 +348,7 @@ function kampfZeichnen() {
       gruppe.append(box);
     });
     lebenVorher = z.gegner.map((g) => g.leben);
+    heldWaffe("fern"); // neue Welle: Gegner sind weit weg, der Held nimmt den Bogen
   }
   const ort = (g) => 27 + Math.min(1.1, g.x) * 62; // Prozent der Arena-Breite
   z.gegner.forEach((g, i) => {
@@ -336,8 +367,16 @@ function kampfZeichnen() {
     for (const e of z.effekte) {
       const ziel = z.gegner[e.i];
       if (!ziel) continue;
-      if (e.art === "schuss") geschoss(16, ort(ziel), false);
-      else if (e.art === "schlag") wackeln(spielerFigur, "schlag");
+      if (e.art === "schuss") {
+        heldWaffe("fern");
+        wackeln($("held-waffe"), "spannen");
+        geschoss(20, ort(ziel), false);
+      } else if (e.art === "schlag") {
+        heldWaffe("nah");
+        wackeln(spielerFigur, "schlag");
+        wackeln($("held-waffe"), "schwung");
+        hiebSpur(gruppe.children[e.i]);
+      }
       else if (e.art === "gegnerSchuss") geschoss(ort(ziel), 14, true);
       else if (e.art === "gegnerSchlag") wackeln(gruppe.children[e.i].querySelector(".figur"), "hieb");
     }
@@ -431,6 +470,8 @@ function platzKachel(art, name, klick, gewaehlt) {
 }
 
 function rasterZeichnen() {
+  spielerBildSetzen();
+  $("held-waffe").dataset.k = "";
   const raster = $("ausruestung-raster");
   raster.replaceChildren();
   for (const [art, name] of PLAETZE)

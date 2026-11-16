@@ -34,13 +34,18 @@ function person(o) {
     t += `<rect x="74" y="64" width="26" height="10" rx="3" fill="#5a5f69" ${S3}/><rect x="76" y="72" width="8" height="12" rx="2" fill="#3a3f49" ${S3}/><circle cx="100" cy="69" r="3" fill="${o.akzent}"/>`;
   // Beine und Schuhe
   t += `<rect x="33" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/>`;
-  t += `<path d="M30,106 h20 v6 h-20 z M52,106 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
+  t += o.stiefel
+    ? `<path d="M30,98 h18 v14 h-18 z M52,98 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M30,100 h18 M52,100 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
+    : `<path d="M30,106 h20 v6 h-20 z M52,106 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
   // Körper
   t += `<rect x="26" y="52" width="48" height="42" rx="17" fill="${o.kleid}" ${S}/>`;
   if (o.fell) t += `<circle cx="38" cy="66" r="3.5" fill="${o.kleid2}"/><circle cx="58" cy="78" r="4" fill="${o.kleid2}"/><circle cx="62" cy="62" r="3" fill="${o.kleid2}"/><path d="M26,88 l6,7 l6,-6 l6,7 l6,-6 l6,7 l6,-6 l6,7 l6,-7" fill="none" ${S3}/>`;
   else t += `<rect x="27" y="76" width="46" height="8" fill="${o.kleid2}" ${S3}/><rect x="45" y="75" width="10" height="10" rx="2" fill="${o.akzent}" ${S3}/>`;
-  // Hände
-  t += `<circle cx="22" cy="74" r="8" fill="${haut}" ${S}/><circle cx="80" cy="74" r="8" fill="${haut}" ${S}/>`;
+  // Brustplatte der angelegten Rüstung
+  if (o.platte) t += `<path d="M32,56 h36 v12 q-18,14 -36,0 z" fill="${o.platte}" ${S3}/><path d="M50,56 v18" ${S3}/><circle cx="50" cy="62" r="3.5" fill="${o.platteRand || o.akzent}" ${S3}/><circle cx="29" cy="58" r="7" fill="${o.platte}" ${S3}/><circle cx="71" cy="58" r="7" fill="${o.platte}" ${S3}/>`;
+  // Hände (mit Handschuhen in deren Farbe)
+  t += `<circle cx="22" cy="74" r="8" fill="${o.handschuh || haut}" ${S}/><circle cx="80" cy="74" r="8" fill="${o.handschuh || haut}" ${S}/>`;
+  if (o.handschuh) t += `<path d="M15,69 h14 M73,69 h14" stroke="${o.handschuhRand || U}" stroke-width="3" stroke-linecap="round"/>`;
   // Kopf
   if (o.kopf === "kapuze") {
     t += `<path d="M20,44 Q18,4 50,4 Q82,4 80,44 Q80,54 50,56 Q20,54 20,44 Z" fill="${o.kapuze}" ${S}/><path d="M50,4 Q62,-4 70,8" fill="none" ${S}/>`;
@@ -140,18 +145,27 @@ const BOSSE = {
 };
 
 // Spieler: Gut = Beschützer mit Schild, Böse = Dieb mit Kapuze. farbe = gekaufter Umhang/Aussehen.
-export function spielerBild(seite, zeitalter, farbe) {
+// tragen: angelegte Rüstung je Platz { zeitalter, farbe (Seltenheit) } – Helm, Rüstung, Handschuhe und Stiefel
+// sind an der Figur zu sehen: Material in der Farbe ihres Zeitalters, Rand in der Farbe der Seltenheit.
+export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
   const f = zeitalter.farben;
-  return alsBild(["spieler", seite, farbe, zeitalter.id].join("|"), () =>
-    figurSvg(
+  const teil = (p) => (tragen[p] ? { m: material(tragen[p].zeitalter).metall, rand: tragen[p].farbe, frueh: tragen[p].zeitalter.nummer <= 2 } : null);
+  const helm = teil("helm"), ruestung = teil("ruestung"), handschuhe = teil("handschuhe"), stiefel = teil("stiefel");
+  const schluessel = ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe : "-")).join(",");
+  return alsBild(["spieler", seite, farbe, zeitalter.id, schluessel].join("|"), () => {
+    const o =
       seite === "boese"
-        ? person({ ...dieb(zeitalter, "normal", farbe), kleid: "#4a3566", kleid2: "#2b1a3d", umhang: farbe, boese: false })
-        : person({ ...waechter(zeitalter, "schwach", farbe), schild: f.zweit, umhang: f.akzent })
-    )
-  );
+        ? { ...dieb(zeitalter, "normal", farbe), kleid: "#4a3566", kleid2: "#2b1a3d", umhang: farbe, boese: false, waffe: null }
+        : { ...waechter(zeitalter, "schwach", farbe), schild: f.zweit, umhang: f.akzent };
+    if (helm) Object.assign(o, { kopf: "helm", helm: helm.frueh ? "#a8763a" : helm.m, akzent: helm.rand });
+    if (ruestung) Object.assign(o, { platte: ruestung.frueh ? "#a8763a" : ruestung.m, platteRand: ruestung.rand, fell: false });
+    if (handschuhe) Object.assign(o, { handschuh: handschuhe.frueh ? "#8a5a3a" : handschuhe.m, handschuhRand: handschuhe.rand });
+    if (stiefel) Object.assign(o, { stiefel: stiefel.frueh ? "#8a5a3a" : stiefel.m, stiefelRand: stiefel.rand });
+    const bild = person(o);
+    return figurSvg(bild);
+  });
 }
 
-// Gegner: auf der Gut-Seite Diebe (Kapuze, Maske), auf der Böse-Seite Wächter (Helm, Schild).
 // art: "nah" (Keule/Speer) oder "fern" (Bogen, später Blaster) – nie beides.
 export function gegnerBild(seite, zeitalter, typ, boss, art) {
   const f = zeitalter.farben;

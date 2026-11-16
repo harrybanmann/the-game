@@ -611,3 +611,16 @@ body.boese #ausruestung-bereich { background: #d9d0e4; }
 .ei.gross { width: 54px; height: 54px; animation: wippen 1s ease-in-out infinite; transform-origin: 50% 100%; }
 details summary { cursor: pointer; padding: 6px 0; }
 #lager.kachel-raster, #faehigkeit-liste.kachel-raster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-height: none; overflow: visible; }
+
+/* ---------- Version 24: Waffe in der Hand, Schwung und Bogen ---------- */
+.held-waffe { position: absolute; z-index: 3; right: -20px; top: 26px; width: 46px; height: 46px; pointer-events: none;
+  background: center / contain no-repeat; transform-origin: 22% 82%; }
+.held-waffe.fern { right: -24px; top: 30px; transform-origin: 30% 50%; }
+#spieler-box.reitet .held-waffe { top: 16px; right: -16px; }
+.held-waffe.schwung { animation: schwung 0.28s ease-out; }
+.held-waffe.spannen { animation: spannen 0.24s ease-out; }
+.hieb-spur { position: absolute; left: -6px; bottom: 6px; width: 46px; height: 60px; pointer-events: none; z-index: 6;
+  border-left: 7px solid #fff; border-radius: 50%; filter: drop-shadow(0 0 3px #fff); animation: spur 0.26s ease-out forwards; }
+@keyframes schwung { 0% { rotate: -95deg; } 55% { rotate: 70deg; scale: 1.25; } 100% { rotate: 0deg; scale: 1; } }
+@keyframes spannen { 0% { translate: 0 0; scale: 1 1; } 40% { translate: -7px 0; scale: 0.8 1.1; } 100% { translate: 0 0; scale: 1 1; } }
+@keyframes spur { 0% { opacity: 0; rotate: -40deg; scale: 0.6; } 30% { opacity: 1; } 100% { opacity: 0; rotate: 30deg; scale: 1.15; } }
