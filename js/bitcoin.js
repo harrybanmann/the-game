@@ -9,10 +9,15 @@ export function bitcoinSystem(api) {
   const stufe = (platz) => b().upgrades[platz] || 0;
   const preis = (platz) => d().upgrade.grundPreis * Math.pow(d().upgrade.faktor, stufe(platz));
   const verteilt = () => b().menge + b().kasse;
+  // Bitcoin kommt erst im letzten Zeitalter (Harry 16.11.2026). Bis dahin zahlt man mit der Währung des Zeitalters.
+  const btcOffen = () => !api.btcOffen || api.btcOffen();
+  const preisGeld = (platz) => Math.ceil(preis(platz) / api.kurs());
 
   return {
     stufe,
     preis,
+    preisGeld,
+    kannKaufen: (platz) => stufe(platz) < d().upgrade.maxStufe && (btcOffen() ? b().menge >= preis(platz) : api.guthaben() >= preisGeld(platz)),
     voll: (platz) => stufe(platz) >= d().upgrade.maxStufe,
     faktor: (platz) => 1 + stufe(platz) * d().upgrade.bonusProStufe,
     haendler() {
@@ -34,6 +39,11 @@ export function bitcoinSystem(api) {
     },
     upgradeKaufen(platz) {
       if (stufe(platz) >= d().upgrade.maxStufe) return false;
+      if (!btcOffen()) {
+        if (!api.bezahlen(preisGeld(platz))) return false;
+        b().upgrades[platz] = stufe(platz) + 1;
+        return true;
+      }
       const p = preis(platz);
       if (b().menge < p) return false;
       b().menge -= p;

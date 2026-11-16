@@ -56,7 +56,8 @@
     "dauerFaktor": 1.8,
     "autoSekunden": 2,
     "autoSchnellerJeStufe": 0.05,
-    "autoMinSekunden": 0.5
+    "autoMinSekunden": 0.5,
+    "verkaufAnteil": 0.1
   },
   "setBonusSchaden": 0.1,
   "ruestungSet": {
@@ -75,7 +76,8 @@
         "boese": "Keule"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "steinaxt",
@@ -86,7 +88,8 @@
         "boese": "Steinaxt"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "steinschleuder",
@@ -97,7 +100,8 @@
         "boese": "Steinschleuder"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "wurfspeer",
@@ -108,7 +112,8 @@
         "boese": "Wurfspeer"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "sichel",
@@ -119,7 +124,8 @@
         "boese": "Sichel"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "dreschflegel",
@@ -130,7 +136,8 @@
         "boese": "Dreschflegel"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "jagdbogen",
@@ -141,7 +148,8 @@
         "boese": "Jagdbogen"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "harpune",
@@ -152,7 +160,8 @@
         "boese": "Harpune"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "fellkappe",
@@ -251,7 +260,8 @@
         "boese": "Bronzeschwert"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "streitaxt",
@@ -262,7 +272,8 @@
         "boese": "Streitaxt"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "kompositbogen",
@@ -273,7 +284,8 @@
         "boese": "Kompositbogen"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "bronzespeer",
@@ -284,7 +296,8 @@
         "boese": "Bronzespeer"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "bronzehelm",
@@ -339,7 +352,8 @@
         "boese": "Kurzschwert"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "labrys",
@@ -350,7 +364,8 @@
         "boese": "Doppelaxt"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "skythenbogen",
@@ -361,7 +376,8 @@
         "boese": "Reiterbogen"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "bleischleuder",
@@ -372,7 +388,8 @@
         "boese": "Bleischleuder"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "hoplitenhelm",
@@ -559,7 +576,8 @@
         "boese": "Gladius"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "rom-w1",
@@ -570,7 +588,8 @@
         "boese": "Pugio"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "rom-w2",
@@ -581,7 +600,8 @@
         "boese": "Pilum"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "rom-w3",
@@ -592,7 +612,8 @@
         "boese": "Handballiste"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "rom-r0",
@@ -680,7 +701,8 @@
         "boese": "Langschwert"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "mittelalter-w1",
@@ -691,7 +713,8 @@
         "boese": "Streitkolben"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "mittelalter-w2",
@@ -702,7 +725,8 @@
         "boese": "Langbogen"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "mittelalter-w3",
@@ -713,7 +737,8 @@
         "boese": "Armbrust"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "mittelalter-r0",
@@ -801,7 +826,8 @@
         "boese": "Degen"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "banken-w1",
@@ -812,7 +838,8 @@
         "boese": "Hellebarde"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "banken-w2",
@@ -823,7 +850,8 @@
         "boese": "Handrohr"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "banken-w3",
@@ -834,7 +862,8 @@
         "boese": "Wurfmesser"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "banken-r0",
@@ -922,7 +951,8 @@
         "boese": "Säbel"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "entdeckungen-w1",
@@ -933,7 +963,8 @@
         "boese": "Entermesser"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "entdeckungen-w2",
@@ -944,7 +975,8 @@
         "boese": "Muskete"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "entdeckungen-w3",
@@ -955,7 +987,8 @@
         "boese": "Steinschlosspistole"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "entdeckungen-r0",
@@ -1043,7 +1076,8 @@
         "boese": "Stockdegen"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "aktien-w1",
@@ -1054,7 +1088,8 @@
         "boese": "Spazierstock"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "aktien-w2",
@@ -1065,7 +1100,8 @@
         "boese": "Duellpistole"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "aktien-w3",
@@ -1076,7 +1112,8 @@
         "boese": "Büchse"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "aktien-r0",
@@ -1164,7 +1201,8 @@
         "boese": "Schraubenschlüssel"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "industrie-w1",
@@ -1175,7 +1213,8 @@
         "boese": "Brecheisen"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "industrie-w2",
@@ -1186,7 +1225,8 @@
         "boese": "Revolver"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "industrie-w3",
@@ -1197,7 +1237,8 @@
         "boese": "Dampfgewehr"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "industrie-r0",
@@ -1285,7 +1326,8 @@
         "boese": "Schlagstock"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "fiat-w1",
@@ -1296,7 +1338,8 @@
         "boese": "Elektroschocker"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "fiat-w2",
@@ -1307,7 +1350,8 @@
         "boese": "Netzwerfer"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "fiat-w3",
@@ -1318,7 +1362,8 @@
         "boese": "Farbpistole"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "fiat-r0",
@@ -1406,7 +1451,8 @@
         "boese": "Plasmaklinge"
       },
       "schaden": 2,
-      "leben": 15
+      "leben": 15,
+      "hand": "schild"
     },
     {
       "id": "digital-w1",
@@ -1417,7 +1463,8 @@
         "boese": "Daten-Peitsche"
       },
       "schaden": 3,
-      "leben": 10
+      "leben": 10,
+      "hand": "zweihand"
     },
     {
       "id": "digital-w2",
@@ -1428,7 +1475,8 @@
         "boese": "Laser-Blaster"
       },
       "schaden": 4,
-      "leben": 5
+      "leben": 5,
+      "hand": "bogen"
     },
     {
       "id": "digital-w3",
@@ -1439,7 +1487,8 @@
         "boese": "Kampfdrohne"
       },
       "schaden": 5,
-      "leben": 0
+      "leben": 0,
+      "hand": "wurf"
     },
     {
       "id": "digital-r0",
@@ -1519,5 +1568,78 @@
       "leben": 12
     }
   ],
-  "schmuckSet": 0.1
+  "schmuckSet": 0.1,
+  "_hinweis2": "Harry 16.11.2026: nur noch EINE Waffe. hand: schild = Einhand mit Schild, zweihand = trifft alle Gegner in Reichweite, bogen/wurf = Fernkampf. zusatzWerte: feste Beträge, kommen mit späteren Zeitaltern dazu, bessere Qualität = mehr. Zeitalter, Plätze und Beträge sind Vorschläge.",
+  "zweihandReichweite": 0.2,
+  "zusatzWerte": [
+    {
+      "id": "block",
+      "name": "Block",
+      "abZeitalter": 3,
+      "plaetze": [
+        "schild",
+        "helm",
+        "ruestung"
+      ],
+      "grund": 0.02,
+      "jeSeltenheit": 0.01,
+      "max": 0.5,
+      "text": "Chance, einen Treffer ganz abzuwehren"
+    },
+    {
+      "id": "tempo",
+      "name": "Angriffstempo",
+      "abZeitalter": 5,
+      "plaetze": [
+        "handschuhe",
+        "bogen",
+        "wurf"
+      ],
+      "grund": 0.03,
+      "jeSeltenheit": 0.015,
+      "max": 1,
+      "text": "Du greifst schneller an"
+    },
+    {
+      "id": "krit",
+      "name": "Kritischer Treffer",
+      "abZeitalter": 7,
+      "plaetze": [
+        "zweihand",
+        "ring",
+        "amulett"
+      ],
+      "grund": 0.02,
+      "jeSeltenheit": 0.01,
+      "max": 0.5,
+      "text": "Chance auf doppelten Schaden"
+    },
+    {
+      "id": "raub",
+      "name": "Lebensraub",
+      "abZeitalter": 9,
+      "plaetze": [
+        "guertel",
+        "amulett"
+      ],
+      "grund": 0.01,
+      "jeSeltenheit": 0.005,
+      "max": 0.2,
+      "text": "Ein Teil deines Schadens heilt dich"
+    },
+    {
+      "id": "ausweichen",
+      "name": "Ausweichen",
+      "abZeitalter": 11,
+      "plaetze": [
+        "stiefel",
+        "guertel"
+      ],
+      "grund": 0.02,
+      "jeSeltenheit": 0.01,
+      "max": 0.4,
+      "text": "Chance, einem Treffer auszuweichen"
+    }
+  ],
+  "zweihandNebenschaden": 0.5
 }

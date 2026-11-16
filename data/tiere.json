@@ -11,6 +11,7 @@
     "boss": 2.5
   },
   "eierLagerMax": 20,
+  "brutPlaetzeMax": 5,
   "sternBonus": 0.25,
   "maxSterne": 5,
   "schluepfSekunden": [

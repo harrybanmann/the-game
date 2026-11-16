@@ -2,7 +2,8 @@
 // Seltenheit wird gewürfelt, ein besseres Stück wird angelegt, der Rest kommt ins Lager.
 // 3 gleiche Stücke (gleiche Sorte, Seltenheit, Sternzahl) werden zu 1 Stück mit +1 Stern.
 
-const WAFFEN_PLAETZE = ["nah", "fern"];
+// Harry 16.11.2026: nur noch EINE Waffe. Sie bestimmt, ob der Held Nah- oder Fernkämpfer ist.
+const WAFFEN_PLAETZE = ["waffe"];
 export const RUESTUNG_PLAETZE = ["helm", "handschuhe", "ruestung", "stiefel"];
 const SCHMUCK_PLAETZE = ["ring1", "ring2", "amulett", "guertel"];
 
@@ -41,8 +42,10 @@ export function waffenSystem(api) {
   }
 
   // Ringe haben zwei Plätze: der neue kommt auf den freien oder den schwächeren.
+  const istWaffenArt = (art) => art === "nah" || art === "fern";
   function zielPlatz(stueck) {
     const art = vorlageVon(stueck).art;
+    if (istWaffenArt(art)) return "waffe";
     if (art !== "ring") return art;
     const a = werte(hole("ring1"), "ring1");
     const b = werte(hole("ring2"), "ring2");
@@ -50,13 +53,25 @@ export function waffenSystem(api) {
     if (!b) return "ring2";
     return a.staerke <= b.staerke ? "ring1" : "ring2";
   }
-  const plaetzeFuer = (stueck) => (vorlageVon(stueck).art === "ring" ? ["ring1", "ring2"] : [vorlageVon(stueck).art]);
+  const plaetzeFuer = (stueck) => {
+    const art = vorlageVon(stueck).art;
+    return art === "ring" ? ["ring1", "ring2"] : [istWaffenArt(art) ? "waffe" : art];
+  };
+
+  // Zusatzwerte (Block, Tempo …): fester Betrag je Wert, bessere Qualität = mehr. Kommen mit späteren Zeitaltern dazu.
+  function zusatzVon(vorlage, seltenheit) {
+    const nr = api.zeitalterNummerVon(vorlage.zeitalter);
+    const merkmal = vorlage.hand || vorlage.art;
+    return (d().zusatzWerte || [])
+      .filter((z) => nr >= z.abZeitalter && z.plaetze.includes(merkmal))
+      .map((z) => ({ id: z.id, name: z.name, text: z.text, wert: z.grund + z.jeSeltenheit * seltenheit }));
+  }
 
   function werte(stueck, platz) {
     if (!stueck) return null;
     const vorlage = vorlageVon(stueck);
     if (!vorlage) return null;
-    platz = platz || (vorlage.art === "ring" ? "ring1" : vorlage.art);
+    platz = platz || (vorlage.art === "ring" ? "ring1" : istWaffenArt(vorlage.art) ? "waffe" : vorlage.art);
     const selten = d().seltenheiten[stueck.seltenheit] || d().seltenheiten[0];
     const sterne = stueck.sterne || 0;
     const faktor =
@@ -64,6 +79,8 @@ export function waffenSystem(api) {
     return {
       id: vorlage.id,
       art: vorlage.art,
+      hand: vorlage.hand || null,
+      zusatz: zusatzVon(vorlage, stueck.seltenheit),
       zeitalter: vorlage.zeitalter,
       name: vorlage.name[api.seitenName()] || vorlage.name.gut,
       seltenheit: selten,
@@ -74,13 +91,12 @@ export function waffenSystem(api) {
     };
   }
 
-  function aktiveArt() {
-    const w = s().waffen;
-    if (w[w.aktiv]) return w.aktiv;
-    if (w.nah) return "nah";
-    if (w.fern) return "fern";
-    return w.aktiv;
-  }
+  // Kampfstil: "nah", "fern" oder null (egal). Bei festem Stil werden Waffen der anderen Art nie angelegt.
+  const stil = () => s().waffen.stil || null;
+  const passtZumStil = (stueck) => {
+    const art = vorlageVon(stueck).art;
+    return !istWaffenArt(art) || !stil() || art === stil();
+  };
 
   function insLager(stueck) {
     const eintrag = s().lager.find((x) => gleich(x, stueck));
@@ -97,20 +113,34 @@ export function waffenSystem(api) {
     return genommen;
   }
 
+  // Sterne und Lager gibt es erst spät (Harry 16.11.2026). Vorher wird alles, was man nicht trägt, sofort verkauft.
+  const sterneOffen = () => !api.sterneOffen || api.sterneOffen();
+  const verkaufsWert = (stueck) => {
+    const selten = d().seltenheiten[stueck.seltenheit] || d().seltenheiten[0];
+    return Math.max(1, Math.round(d().schmiede.kosten * (d().schmiede.verkaufAnteil || 0) * selten.faktor * (1 + (stueck.sterne || 0))));
+  };
+  let verkauft = 0; // Erlös seit dem letzten Schmieden (für die Meldung)
+  function ablegen(stueck) {
+    if (sterneOffen()) return insLager(stueck);
+    const wert = verkaufsWert(stueck);
+    verkauft += wert;
+    api.gutschreiben(wert);
+  }
+
   function anlegen(stueck, platz) {
     const art = platz || zielPlatz(stueck);
     const alt = hole(art);
     setze(art, nur(stueck));
-    if (alt) insLager(alt);
+    if (alt) ablegen(alt);
   }
 
-  // Legt ein neues Stück an, wenn es besser ist, sonst ins Lager. Gibt zurück, ob es angelegt wurde.
+  // Legt ein neues Stück an, wenn es besser ist, sonst ins Lager (oder verkauft es). Gibt zurück, ob es angelegt wurde.
   function einsortieren(stueck) {
     const platz = zielPlatz(stueck);
     const alt = werte(hole(platz), platz);
-    const besser = !alt || werte(stueck, platz).staerke > alt.staerke;
+    const besser = passtZumStil(stueck) && (!alt || werte(stueck, platz).staerke > alt.staerke || (alt.art !== vorlageVon(stueck).art && !!stil()));
     if (besser) anlegen(stueck);
-    else insLager(stueck);
+    else ablegen(stueck);
     return besser;
   }
 
@@ -121,7 +151,7 @@ export function waffenSystem(api) {
     return (eintrag ? eintrag.anzahl : 0) + plaetzeFuer(stueck).filter((p) => gleich(hole(p), stueck)).length;
   }
 
-  const mergbar = (stueck) => (stueck.sterne || 0) < d().maxSterne && anzahlGleich(stueck) >= 3;
+  const mergbar = (stueck) => sterneOffen() && (stueck.sterne || 0) < d().maxSterne && anzahlGleich(stueck) >= 3;
   const schmiedeKosten = () => d().schmiede.kosten;
   const stufeVoll = () => s().schmiede.stufe >= d().schmiede.maxStufe;
   const stufeKosten = () => Math.ceil(d().schmiede.stufenKosten * Math.pow(d().schmiede.stufenFaktor, s().schmiede.stufe));
@@ -134,27 +164,34 @@ export function waffenSystem(api) {
     chancen,
     werte,
     hole,
-    aktiveArt,
+    stil,
+    stilSetzen(art) {
+      s().waffen.stil = art === "nah" || art === "fern" ? art : null;
+    },
     schmiedeKosten,
     stufeVoll,
     stufeKosten,
     bonus() {
-      const nah = werte(hole("nah"), "nah");
-      const fern = werte(hole("fern"), "fern");
-      // Beide Waffen zählen: Fernkampf, solange Gegner weit weg sind, dann Nahkampf. Leben geben beide.
+      const waffe = werte(hole("waffe"), "waffe");
       const bonus = {
-        schaden: 0,
-        schadenNah: nah ? nah.schaden : 0,
-        schadenFern: fern ? fern.schaden : 0,
-        leben: (nah ? nah.leben : 0) + (fern ? fern.leben : 0),
-        set: nah && fern && nah.zeitalter === fern.zeitalter ? d().setBonusSchaden : 0,
+        schaden: waffe ? waffe.schaden : 0,
+        leben: waffe ? waffe.leben : 0,
+        kampfArt: waffe ? waffe.art : "nah", // ohne Waffe kämpft der Held mit den Fäusten
+        hand: waffe ? waffe.hand : null,
+        set: 0,
         ruestungTeile: 0,
         lebenProzent: 0,
+        zusatz: {},
       };
+      const dazu = (x) => {
+        for (const z of x.zusatz) bonus.zusatz[z.id] = (bonus.zusatz[z.id] || 0) + z.wert;
+      };
+      if (waffe) dazu(waffe);
       const jeZeitalter = {};
       for (const art of RUESTUNG_PLAETZE) {
         const r = werte(hole(art), art);
         if (!r) continue;
+        dazu(r);
         bonus.schaden += r.schaden;
         bonus.leben += r.leben;
         jeZeitalter[r.zeitalter] = (jeZeitalter[r.zeitalter] || 0) + 1;
@@ -164,9 +201,11 @@ export function waffenSystem(api) {
       const schmuck = SCHMUCK_PLAETZE.map((p) => werte(hole(p), p));
       for (const x of schmuck) {
         if (!x) continue;
+        dazu(x);
         bonus.schaden += x.schaden;
         bonus.leben += x.leben;
       }
+      for (const z of d().zusatzWerte || []) bonus.zusatz[z.id] = Math.min(z.max, bonus.zusatz[z.id] || 0);
       const [r1, r2, am] = schmuck;
       bonus.schmuckSet = r1 && r2 && am && r1.zeitalter === r2.zeitalter && r2.zeitalter === am.zeitalter ? d().schmuckSet : 0;
       for (const [teile, prozent] of Object.entries(d().ruestungSet)) {
@@ -174,17 +213,15 @@ export function waffenSystem(api) {
       }
       return bonus;
     },
-    aktivSetzen(art) {
-      if (s().waffen[art]) s().waffen.aktiv = art;
-    },
     schmieden() {
       const auswahl = d().waffen.filter((w) => w.zeitalter === api.zeitalterId());
       if (!auswahl.length || !api.bezahlen(schmiedeKosten())) return null;
       const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];
       const neu = { id: vorlage.id, seltenheit: wuerfeln(), sterne: 0 };
+      verkauft = 0;
       const besser = einsortieren(neu);
       s().schmiede.geschmiedet += 1;
-      return { neu: werte(neu), besser };
+      return { neu: werte(neu), besser, verkauft };
     },
     // Für Dungeon-Belohnungen: wie Schmieden, aber ohne Kosten.
     schmiedenGratis() {
@@ -192,8 +229,9 @@ export function waffenSystem(api) {
       if (!auswahl.length) return null;
       const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];
       const neu = { id: vorlage.id, seltenheit: wuerfeln(), sterne: 0 };
+      verkauft = 0;
       const besser = einsortieren(neu);
-      return { neu: werte(neu), besser };
+      return { neu: werte(neu), besser, verkauft };
     },
     stufeDauer,
     autoSekunden,

@@ -633,3 +633,226 @@ details summary { cursor: pointer; padding: 6px 0; }
 #spieler-box .balken { width: 84px; }
 .gegner { margin-bottom: 8px; }
 #gegner-gruppe { z-index: 2; }
+
+/* ---------- V27: Brutplätze und sichtbare Eier ---------- */
+#brut-plaetze { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.nest { width: 64px; display: flex; flex-direction: column; align-items: center; padding: 6px 2px 4px; border-radius: 12px; background: rgba(255,255,255,0.12); border: 2px solid rgba(0,0,0,0.35); }
+.nest.leer { opacity: 0.45; }
+.nest .ei.gross { width: 44px; height: 44px; }
+.nest.leer .ei.gross { animation: none; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; width: 34px; height: 40px; margin: 2px 0; }
+.nest-zeit { font-size: 12px; min-height: 15px; }
+[hidden] { display: none !important; }
+.ei-beute { position: absolute; bottom: 14%; width: 26px; height: 26px; margin-left: -13px; background: center / contain no-repeat; z-index: 6; pointer-events: none; animation: ei-fall 1.7s ease-in forwards; }
+@keyframes ei-fall {
+  0% { transform: translateY(-34px) scale(0.4); opacity: 0; }
+  15% { transform: translateY(0) scale(1.15); opacity: 1; }
+  25% { transform: translateY(-10px) scale(1); }
+  35% { transform: translateY(0) scale(1); }
+  70% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(70px) scale(0.5); opacity: 0; }
+}
+
+/* ---------- V27: eine Waffe, Held läuft, Bogen, Fähigkeiten-Effekte ---------- */
+#spieler-box { transition: left 0.26s linear; }
+#spieler-box.laeuft .figur.spieler { animation: laufen 0.36s ease-in-out infinite; }
+#spieler-box.laeuft .reittier-bild { animation: laufen 0.36s ease-in-out infinite; }
+.held-waffe.bogen { right: -22px; top: 30px; width: 50px; height: 50px; transform-origin: 30% 50%; }
+.held-waffe.loslassen { animation: loslassen 0.2s ease-out; }
+.held-waffe.wurf { animation: wurf 0.24s ease-out; }
+@keyframes loslassen { 0% { translate: -3px 0; } 40% { translate: 5px 0; scale: 1.08 0.94; } 100% { translate: 0 0; scale: 1 1; } }
+@keyframes wurf { 0% { rotate: -70deg; translate: -8px -6px; } 60% { rotate: 20deg; translate: 8px 0; } 100% { rotate: 0deg; translate: 0 0; } }
+.geschoss.gross { width: 44px; height: 30px; bottom: 62px; filter: drop-shadow(0 0 6px #ffb347); }
+.hieb-spur.gelb { border-left-color: #ffd54a; filter: drop-shadow(0 0 4px #ffd54a); }
+.schadenszahl.krit { font-size: 22px; }
+.schadenszahl.wort { font-size: 14px; translate: -50% 0; white-space: nowrap; }
+.blitz { position: absolute; left: 50%; bottom: 10px; width: 70px; height: 70px; margin-left: -35px; border-radius: 50%; pointer-events: none; z-index: 6;
+  animation: blitz 0.5s ease-out forwards; border: 5px solid #fff; }
+.blitz.feuer { border-color: #ffb347; background: radial-gradient(circle, rgba(255,213,74,0.8), rgba(242,118,30,0.3) 60%, transparent 70%); }
+.blitz.heilung { border-color: #6fe08a; background: radial-gradient(circle, rgba(111,224,138,0.5), transparent 70%); }
+.blitz.staerke { border-color: #ff8a4a; }
+.blitz.schutz { border-color: #7fb8ff; }
+@keyframes blitz { 0% { scale: 0.3; opacity: 0.9; } 100% { scale: 1.4; opacity: 0; } }
+/* Solange Verstärkung oder Schutz läuft, leuchtet der Held */
+#spieler-box.staerke .figur.spieler { filter: drop-shadow(0 0 7px #ff7a3a) drop-shadow(0 0 3px #ffd54a); }
+#spieler-box.schutz .reit-stapel::after { content: ""; position: absolute; inset: -6px -12px -2px; border-radius: 50%; border: 4px solid rgba(127,184,255,0.9);
+  background: rgba(127,184,255,0.18); z-index: 5; pointer-events: none; }
+.werte-reihe { display: flex; flex-wrap: wrap; gap: 5px; flex: 1 1 100%; }
+.wert-marke { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 10px; background: rgba(0,0,0,0.28); font-size: 13px; color: #fff; }
+.wert-bild { width: 16px; height: 16px; background: center / contain no-repeat; }
+.stil-reihe { display: flex; gap: 6px; margin: 6px 0; }
+.stil-reihe .knopf.klein { flex: 1 1 0; margin: 0; padding: 7px 4px; font-size: 12px; }
+
+/* ================= V27: alles kleiner, Symbole statt Text, Info-Fenster ================= */
+/* --- Kopfzeile: drei kleine Felder (Held mit Stärke, Zeitalter, Geld) --- */
+#kopf { display: flex; align-items: center; justify-content: space-between; gap: 6px; text-align: left;
+  padding: calc(env(safe-area-inset-top) + 6px) 8px 6px; border-bottom-width: 3px;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+.chip { display: inline-flex; align-items: center; gap: 5px; min-width: 0; height: 34px; padding: 2px 10px 2px 4px; color: #fff; font: inherit; font-size: 15px;
+  background: rgba(0, 0, 0, 0.4); border: 3px solid var(--umriss); border-radius: 999px; cursor: pointer; text-shadow: inherit; }
+.chip.mitte { padding: 2px 10px; font-size: 12px; background: rgba(0, 0, 0, 0.22); height: 26px; }
+.chip-bild { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--umriss); background: #f4efe4 50% 8% / 165% no-repeat; }
+.chip-spalte { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+#chip-staerke { font-size: 14px; }
+.xp-balken { position: relative; width: 60px; height: 11px; background: #121829; border: 2px solid var(--umriss); border-radius: 999px; overflow: hidden; }
+#chip-xp { position: absolute; left: 0; top: 0; bottom: 0; background: #4a9cf0; }
+#chip-level { position: absolute; inset: 0; font-size: 8px; line-height: 8px; text-align: center; text-shadow: 0 1px var(--umriss); }
+.chip .stein.klein { width: 24px; height: 24px; }
+.chip-stapel { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+#zaehler-zahl { font-size: 17px; }
+.chip.btc { height: 22px; padding: 0 8px; font-size: 12px; color: var(--btc); }
+
+/* --- Kampf --- */
+#szene { padding: 4px 8px 12px; gap: 2px; min-height: 196px; }
+#stufe-text { font-size: 16px; }
+#wellen-punkte { display: flex; justify-content: center; align-items: center; gap: 5px; height: 12px; }
+.punkt { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); border: 2px solid var(--umriss); }
+.punkt.fertig { background: #4fc46a; }
+.punkt.jetzt { background: #fff; width: 9px; height: 9px; }
+.arena { height: 126px; flex: 0 0 126px; }
+#weg { height: 36px; }
+#spieler-box { width: 70px; bottom: 6px; }
+#spieler-box .balken { width: 60px; height: 13px; border-width: 2px; }
+#spieler-box .balken span { font-size: 9px; line-height: 9px; text-shadow: 0 1px var(--umriss); }
+.figur.spieler { width: 60px; height: 74px; }
+#spieler-box.reitet .figur.spieler { width: 50px; height: 62px; }
+.reittier-bild { width: 70px; height: 54px; margin-top: -30px; }
+.figur.gegner-figur { width: 40px; height: 50px; }
+.figur.gegner-figur.elite { width: 46px; height: 57px; }
+.figur.gegner-figur.boss { width: 80px; height: 99px; }
+.gegner { width: 48px; margin-bottom: 6px; }
+.gegner.boss { width: 96px; }
+.gegner .balken.klein { width: 34px; height: 8px; }
+.gegner.boss .balken.klein { width: 70px; height: 10px; }
+.held-waffe { width: 34px; height: 34px; right: -13px; top: 18px; }
+.held-waffe.fern, .held-waffe.bogen { width: 36px; height: 36px; right: -15px; top: 20px; }
+#spieler-box.reitet .held-waffe { top: 10px; right: -10px; }
+.geschoss { bottom: 50px; width: 24px; height: 11px; margin-left: -12px; }
+.geschoss.gross { width: 36px; height: 24px; bottom: 44px; }
+.hieb-spur { width: 34px; height: 44px; border-left-width: 6px; }
+.schadenszahl { font-size: 13px; }
+.gegner.boss .schadenszahl, .arena .kaempfer .schadenszahl { font-size: 15px; }
+.blitz { width: 54px; height: 54px; margin-left: -27px; border-width: 4px; }
+.ei-beute { bottom: 10%; width: 22px; height: 22px; margin-left: -11px; }
+
+/* --- Knöpfe unter dem Kampf: Sammeln links, Fähigkeiten in der Mitte, Boss rechts --- */
+#szene-knoepfe { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rund-knopf, #verdienen, #boss-knopf { position: relative; flex: 0 0 44px; width: 44px; height: 44px; max-width: none; padding: 0; gap: 0;
+  display: flex; flex-direction: row; align-items: center; justify-content: center; color: #fff; font: inherit; font-size: 11px; line-height: 1;
+  border: 3px solid var(--umriss); border-radius: 50%; box-shadow: 0 4px 0 var(--umriss); cursor: pointer; }
+#verdienen { background: var(--akzent); }
+#verdienen .stein.klein { width: 28px; height: 28px; }
+#boss-knopf { background: #5d6680; }
+#boss-knopf.bereit { background: #d6483f; animation: pulsieren 0.9s ease-in-out infinite; }
+#boss-bild { width: 26px; height: 26px; background: center / contain no-repeat; }
+#verdienen-text, #boss-text { position: absolute; left: 50%; bottom: -10px; transform: translateX(-50%); font-size: 11px; white-space: nowrap;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+.rund-knopf:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--umriss); }
+@keyframes pulsieren { 0%, 100% { scale: 1; } 50% { scale: 1.12; } }
+#faehigkeit-leiste { flex: 1 1 0; display: flex; justify-content: center; gap: 6px; min-height: 30px; }
+.faehigkeit-punkt { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--umriss); background: center / 68% no-repeat; box-shadow: 0 2px 0 var(--umriss); }
+
+/* --- Ausrüstung und Schmiede --- */
+#ausruestung-bereich { padding: 8px 30px 8px; gap: 8px; border-top-width: 3px; }
+#ausruestung-raster { gap: 5px; }
+.kachel { border-width: 2.5px; border-radius: 10px; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); }
+.kachel.matt { filter: grayscale(0.75) brightness(0.9); }
+#amboss-reihe { gap: 10px; justify-content: center; }
+#auto-knopf { flex: 0 0 44px; width: 44px; height: 44px; align-self: center; padding: 0; font-size: 10px; line-height: 1.05;
+  border-width: 3px; border-radius: 50%; box-shadow: 0 3px 0 var(--umriss); }
+#amboss-knopf { flex: 0 1 140px; gap: 6px; padding: 4px 10px; font-size: 15px; border-width: 3px; border-radius: 14px; box-shadow: 0 4px 0 var(--umriss);
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+.amboss-bild { width: 34px; height: 34px; flex: 0 0 34px; }
+#amboss-text::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 3px; vertical-align: -3px; background: var(--geld-bild) center / contain no-repeat; }
+#schmiede-stufe-knopf { flex: 0 0 86px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 4px; color: #fff; font: inherit; font-size: 13px;
+  background: var(--knopf); border: 3px solid var(--umriss); border-radius: 12px; box-shadow: 0 4px 0 var(--umriss); cursor: pointer;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+#schmiede-stufe-knopf:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--umriss); }
+#schmiede-zeit { font-size: 10px; color: #fff; }
+
+/* --- Leiste unten --- */
+#leiste { padding: 6px 6px calc(env(safe-area-inset-bottom) + 6px); border-top-width: 3px; }
+.rund { width: 56px; gap: 2px; }
+.rund-symbol { width: 40px; height: 40px; border-width: 3px; box-shadow: 0 3px 0 var(--umriss); }
+.rund-name { font-size: 10px; text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+#reiter { padding: 6px 8px 5px; border-top-width: 3px; }
+.reiter-knopf { padding: 6px 2px; font-size: 12px; border-width: 2.5px; }
+.reiter-knopf.an { font-size: 13px; margin: -3px 0; }
+#kurzmeldung { bottom: 104px; padding: 6px 14px; font-size: 13px; border-width: 2.5px; }
+
+/* --- Seiten: kleinere Schrift, Kacheln --- */
+h2 { font-size: 20px; text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+h3 { font-size: 15px; margin-top: 2px; }
+.hinweis { font-size: 13px; }
+.knopf { padding: 9px; font-size: 15px; border-radius: 12px; border-width: 2.5px; box-shadow: 0 4px 0 var(--knopf-schatten); }
+.knopf.rot { box-shadow: 0 4px 0 #8c2620; }
+.knopf.klein { font-size: 13px; }
+.fenster.seite .karte { padding: 10px 26px 14px; gap: 8px; }
+.kachel-raster.vier { grid-template-columns: repeat(4, 1fr); }
+.kachel-raster.drei { grid-template-columns: repeat(3, 1fr); padding: 0 24px; gap: 10px; }
+#dungeon-liste, #haendler-liste, #upgrades { display: grid; }
+.kachel-name { bottom: 3px; font-size: 10px; }
+.kachel .sterne + .kachel-name, .kachel .kachel-name + .sterne { bottom: 3px; }
+.kachel .sterne { bottom: 0; }
+.kachel-lv { font-size: 9px; }
+.zahl-chip { padding: 3px 10px; font-size: 14px; background: rgba(0, 0, 0, 0.35); border-radius: 999px; white-space: nowrap; }
+.zahl-chip:empty { display: none; }
+.titel-zeile h2 { text-align: left; }
+.ergebnis { font-size: 13px; }
+
+/* --- Info-Fenster --- */
+#info { z-index: 12; }
+.info-karte { position: relative; max-width: 290px; padding: 14px 14px 12px; gap: 8px; align-items: center; overflow: visible; border-width: 3px; border-radius: 18px; }
+#info-zu { position: absolute; top: -13px; right: -13px; width: 34px; height: 34px; padding: 0; border-radius: 50%; color: #fff; font-size: 22px; line-height: 1;
+  background: #d6483f; border: 3px solid var(--umriss); box-shadow: 0 3px 0 var(--umriss); cursor: pointer; }
+#info-bild { width: 70px; height: 70px; border: 3px solid var(--umriss); border-radius: 14px; background: center / 74% no-repeat; }
+#info-bild.rund { border-radius: 50%; }
+#info-titel { font-size: 18px; }
+#info-inhalt { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#info-inhalt .werte-reihe { justify-content: center; flex: 0 0 auto; }
+#info-inhalt .stil-reihe { width: 100%; margin: 0; }
+#info-knoepfe { width: 100%; display: flex; flex-direction: column; gap: 7px; }
+#info-knoepfe:empty { display: none; }
+
+/* --- Tech-Baum: wächst von oben nach unten --- */
+#tech-reiter { display: flex; justify-content: center; gap: 12px; }
+.ast-knopf { width: 42px; height: 42px; padding: 0; border-radius: 50%; border: 3px solid var(--umriss); cursor: pointer;
+  background: #3b4a66 center / 60% no-repeat; box-shadow: 0 3px 0 var(--umriss); }
+.ast-knopf.an { background-color: var(--knopf); scale: 1.15; }
+.ast-knopf.zu { filter: grayscale(0.5) brightness(0.8); }
+.tech-ast-name { text-align: center; font-size: 13px; opacity: 0.85; }
+#tech-ebenen { gap: 4px; }
+.tech-baum { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 4px 0 24px; }
+.tech-baum::before { content: ""; position: absolute; top: 24px; bottom: 60px; left: 50%; width: 4px; margin-left: -2px; background: #8f9bbd; border-radius: 2px; }
+.tech-zeile { position: relative; z-index: 1; display: flex; justify-content: center; gap: 118px; }
+.tech-zeile.zwei::before { content: ""; position: absolute; z-index: -1; top: 24px; left: 50%; width: 170px; margin-left: -85px; height: 4px; background: #8f9bbd; border-radius: 2px; }
+.tech-knoten { display: flex; flex-direction: column; align-items: center; gap: 2px; width: auto; min-height: 0; padding: 0; color: #fff; font: inherit;
+  background: none; border: 0; border-radius: 0; cursor: pointer; }
+.tech-knoten.voll { border: 0; }
+.tech-rund { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--umriss); background: #c98a5e center / 60% no-repeat; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.4); }
+.tech-knoten.voll .tech-rund { background-color: #4fc46a; }
+.tech-knoten.zu .tech-rund { background-color: #5d6680; filter: grayscale(0.8) brightness(0.8); }
+.tech-knoten.laeuft .tech-rund { outline: 3px solid #ffd54a; animation: pulsieren 1s ease-in-out infinite; }
+.tech-stand { font-size: 12px; text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 2px var(--umriss); }
+.nest { width: 56px; }
+/* Der Weg liegt unten in der Szene, die Knöpfe sitzen in den unteren Ecken darüber */
+#szene { justify-content: flex-start; padding-bottom: 0; }
+.arena { margin-top: auto; margin-bottom: 30px; }
+#szene-knoepfe { position: absolute; left: 8px; right: 8px; bottom: 14px; z-index: 5; pointer-events: none; }
+#szene-knoepfe > button { pointer-events: auto; }
+#weg { bottom: -8px; }
+/* Der Held wird oft getroffen: nur ein kurzes Zucken statt weißem Aufblitzen */
+#spieler-box .figur.getroffen, #spieler-box .figur.spieler.schlag.getroffen { animation: wippen 1.8s ease-in-out infinite, zucken 0.16s ease-out; }
+#spieler-box.laeuft .figur.getroffen { animation: laufen 0.36s ease-in-out infinite, zucken 0.16s ease-out; }
+@keyframes zucken { 0% { filter: brightness(1.35) sepia(0.4) hue-rotate(-30deg); translate: -3px 0; } 100% { filter: none; translate: 0 0; } }
+/* Fähigkeiten: kleine runde Bilder oben links in der Szene */
+#faehigkeit-leiste { position: absolute; left: 0; top: 0; flex: none; flex-direction: column; justify-content: flex-start; gap: 4px; min-height: 0; }
+.faehigkeit-punkt { width: 26px; height: 26px; border-width: 2.5px; }
+.faehigkeit-punkt.los { animation: pulsieren 0.4s ease-out; }
+.platzhalter { flex: 1 1 0; }
+/* Sammeln und Boss sitzen oben in den Ecken der Szene, die Fähigkeiten als Reihe unter den Wellen-Punkten */
+#szene-knoepfe { top: 4px; bottom: auto; }
+#faehigkeit-leiste { position: static; flex-direction: row; justify-content: center; margin-top: 3px; }
+.arena { margin-bottom: 18px; }
+.tech-baum::before { bottom: 84px; }
+/* Kurze Meldungen oben unter der Kopfzeile, damit sie keinen Knopf verdecken */
+#kurzmeldung { top: calc(env(safe-area-inset-top) + 50px); bottom: auto; pointer-events: none; }

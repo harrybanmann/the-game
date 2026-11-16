@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 15;
+export const VERSION = 17;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -15,7 +15,7 @@ export function neueSeite(startZeitalter) {
     xp: 0,
     kampf: { index: 0, rate: 0, stufe: 1, welle: 1 },
     schmiede: { stufe: 0, geschmiedet: 0, ausbauBis: null },
-    waffen: { nah: null, fern: null, aktiv: "nah" },
+    waffen: { waffe: null, stil: null },
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
     schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
     lager: [],
@@ -27,7 +27,7 @@ export function neueSeite(startZeitalter) {
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { letzterTag: "", tickets: {}, stufe: {} },
-    tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
+    tiere: { eier: [], brueten: [], sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
     reittiere: { sammlung: [], naechsteNr: 1, aktiv: null },
   };
 }
@@ -87,7 +87,10 @@ export function pruefen(stand) {
             sterne: Math.max(0, Math.floor(Number(x.sterne)) || 0),
           }
         : null;
-    seite.waffen = { nah: waffe(w.nah), fern: waffe(w.fern), aktiv: w.aktiv === "fern" ? "fern" : "nah" };
+    // Früher zwei Waffen (nah und fern), jetzt eine: die seltenere bleibt angelegt, die andere geht ins Lager.
+    const alteWaffen = [waffe(w.nah), waffe(w.fern)].filter(Boolean).sort((a, b) => b.seltenheit - a.seltenheit || b.sterne - a.sterne);
+    const uebrig = waffe(w.waffe) ? alteWaffen : alteWaffen.slice(1);
+    seite.waffen = { waffe: waffe(w.waffe) || alteWaffen[0] || null, stil: w.stil === "nah" || w.stil === "fern" ? w.stil : null };
     const r = seite.ruestung || {};
     seite.ruestung = { helm: waffe(r.helm), handschuhe: waffe(r.handschuhe), ruestung: waffe(r.ruestung), stiefel: waffe(r.stiefel) };
     const sm = seite.schmuck || {};
@@ -99,6 +102,7 @@ export function pruefen(stand) {
         return stueck && anzahl > 0 ? { ...stueck, anzahl } : null;
       })
       .filter(Boolean);
+    for (const alt of uebrig) seite.lager.push({ ...alt, anzahl: 1 });
     seite.tiere = tierePruefen(seite.tiere);
     const rt = seite.reittiere || {};
     const rtListe = (Array.isArray(rt.sammlung) ? rt.sammlung : [])
@@ -153,6 +157,10 @@ export function pruefen(stand) {
       const st = Math.floor(Number(n));
       if (Number.isFinite(st) && st > 0) ups[platz] = st;
     }
+    // Händler-Stufen der alten Plätze nah/fern gelten jetzt für die eine Waffe (die höhere zählt).
+    if (ups.nah || ups.fern) ups.waffe = Math.max(ups.waffe || 0, ups.nah || 0, ups.fern || 0);
+    delete ups.nah;
+    delete ups.fern;
     seite.btc = {
       menge: Math.max(0, Number(bt.menge) || 0),
       kasse: Math.max(0, Number(bt.kasse) || 0),
@@ -230,10 +238,14 @@ function tierePruefen(roh) {
     .filter((x) => x && typeof x.id === "string" && Number.isFinite(x.nr))
     .map((x) => ({ nr: x.nr, id: x.id, seltenheit: stufe(x.seltenheit), sterne: stufe(x.sterne) }));
   const nummern = new Set(sammlung.map((x) => x.nr));
-  const brutEi = t.brut ? ei(t.brut.ei) : null;
+  // Früher gab es nur einen Brutkasten (brut), jetzt mehrere Plätze (brueten).
+  const roheBrut = (Array.isArray(t.brueten) ? t.brueten : []).concat(t.brut ? [t.brut] : []);
+  const brueten = roheBrut
+    .map((b) => (b && ei(b.ei) && Number.isFinite(b.fertigUm) ? { ei: ei(b.ei), fertigUm: b.fertigUm } : null))
+    .filter(Boolean);
   return {
     eier: (Array.isArray(t.eier) ? t.eier : []).map(ei).filter(Boolean),
-    brut: brutEi && Number.isFinite(t.brut.fertigUm) ? { ei: brutEi, fertigUm: t.brut.fertigUm } : null,
+    brueten,
     sammlung,
     naechsteNr: Math.max(1, stufe(t.naechsteNr), ...sammlung.map((x) => x.nr + 1)),
     kaempfer: nummern.has(t.kaempfer) ? t.kaempfer : null,

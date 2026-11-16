@@ -14,7 +14,10 @@ export function haushaltSystem(api) {
     return Math.min(max, 0.1 + (h().schulden / tagesRechnung) * 0.2);
   }
 
+  const offen = (name) => !api.offen || api.offen(name);
+
   function zinsProTag() {
+    if (!offen("bank")) return 0; // Zinsen gibt es erst mit der Bank
     let z = 0;
     for (const s of d().zinsStufen) if (api.guthaben() >= s.ab) z = s.proTag;
     return z > 0 ? z + api.tech("sparzins") : 0;
@@ -60,12 +63,13 @@ export function haushaltSystem(api) {
       const rechnung = rechnungProStunde() * (sek / 3600);
       if (api.guthaben() >= rechnung) api.bezahlen(rechnung);
       else {
-        h().schulden += rechnung - api.guthaben();
+        // Schulden gibt es erst mit der Bank. Vorher zahlt man nur, was da ist.
+        if (offen("bank")) h().schulden += rechnung - api.guthaben();
         api.bezahlen(api.guthaben());
       }
     },
     firmaAusbauen() {
-      if (h().firma >= d().firma.maxStufe || !api.bezahlen(firmaKosten())) return false;
+      if (!offen("firma") || h().firma >= d().firma.maxStufe || !api.bezahlen(firmaKosten())) return false;
       h().firma += 1;
       return true;
     },

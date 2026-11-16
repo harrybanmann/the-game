@@ -19,7 +19,7 @@ const svg = (breite, hoehe, inhalt, extra = "") =>
 // o: { haut, kleid, kleid2, kopf: "haare"|"kapuze"|"helm"|"krone"|"flammen", maske, schild, waffe: "keule"|"speer"|null, akzent, gross }
 function person(o) {
   const haut = o.haut || HAUT[0];
-  let t = `<ellipse cx="50" cy="114" rx="30" ry="5" fill="#000" opacity="0.22"/>`;
+  let t = o.sitzt ? "" : `<ellipse cx="50" cy="114" rx="30" ry="5" fill="#000" opacity="0.22"/>`;
   if (o.aura) t += `<circle cx="50" cy="60" r="52" fill="${o.akzent}" opacity="0.28"/>`;
   // Umhang hinten
   if (o.umhang) t += `<path d="M24,58 Q8,96 20,108 L44,100 Z" fill="${o.umhang}" ${S}/>`;
@@ -32,11 +32,18 @@ function person(o) {
     t += `<path d="M84,44 Q104,72 84,100" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M84,44 Q104,72 84,100" fill="none" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M84,44 V100" stroke="${U}" stroke-width="2.5"/>`;
   if (o.waffe === "blaster")
     t += `<rect x="74" y="64" width="26" height="10" rx="3" fill="#5a5f69" ${S3}/><rect x="76" y="72" width="8" height="12" rx="2" fill="#3a3f49" ${S3}/><circle cx="100" cy="69" r="3" fill="${o.akzent}"/>`;
-  // Beine und Schuhe
-  t += `<rect x="33" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/>`;
-  t += o.stiefel
-    ? `<path d="M30,98 h18 v14 h-18 z M52,98 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M30,100 h18 M52,100 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
-    : `<path d="M30,106 h20 v6 h-20 z M52,106 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
+  // Beine und Schuhe. Im Sattel: Oberschenkel nach vorn, Unterschenkel hängt herunter (man sieht das vordere Bein).
+  if (o.sitzt) {
+    t += `<rect x="40" y="84" width="34" height="15" rx="7" fill="${o.kleid2}" ${S}/><rect x="60" y="88" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/>`;
+    t += o.stiefel
+      ? `<path d="M58,104 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M58,106 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
+      : `<path d="M58,112 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
+  } else {
+    t += `<rect x="33" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/>`;
+    t += o.stiefel
+      ? `<path d="M30,98 h18 v14 h-18 z M52,98 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M30,100 h18 M52,100 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
+      : `<path d="M30,106 h20 v6 h-20 z M52,106 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
+  }
   // Körper
   t += `<rect x="26" y="52" width="48" height="42" rx="17" fill="${o.kleid}" ${S}/>`;
   if (o.fell) t += `<circle cx="38" cy="66" r="3.5" fill="${o.kleid2}"/><circle cx="58" cy="78" r="4" fill="${o.kleid2}"/><circle cx="62" cy="62" r="3" fill="${o.kleid2}"/><path d="M26,88 l6,7 l6,-6 l6,7 l6,-6 l6,7 l6,-6 l6,7 l6,-7" fill="none" ${S3}/>`;
@@ -151,12 +158,17 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
   const f = zeitalter.farben;
   const teil = (p) => (tragen[p] ? { m: material(tragen[p].zeitalter).metall, rand: tragen[p].farbe, frueh: tragen[p].zeitalter.nummer <= 2 } : null);
   const helm = teil("helm"), ruestung = teil("ruestung"), handschuhe = teil("handschuhe"), stiefel = teil("stiefel");
-  const schluessel = ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe : "-")).join(",");
+  const schluessel =
+    ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe : "-")).join(",") +
+    (tragen.schild ? "S" : "") + (tragen.sitzt ? "R" : "") + (tragen.aura || "");
   return alsBild(["spieler", seite, farbe, zeitalter.id, schluessel].join("|"), () => {
     const o =
       seite === "boese"
-        ? { ...dieb(zeitalter, "normal", farbe), kleid: "#4a3566", kleid2: "#2b1a3d", umhang: farbe, boese: false, waffe: null }
-        : { ...waechter(zeitalter, "schwach", farbe), schild: f.zweit, umhang: f.akzent };
+        ? { ...dieb(zeitalter, "normal", farbe), kleid: "#4a3566", kleid2: "#2b1a3d", umhang: farbe, boese: false, waffe: null, schild: tragen.schild ? "#3a2d44" : null }
+        : { ...waechter(zeitalter, "schwach", farbe), schild: tragen.schild ? f.zweit : null, umhang: f.akzent };
+    // Den Schild gibt es nur zur Einhand-Waffe. Im Sattel sitzt die Figur. Sehr gute Ausrüstung leuchtet.
+    if (tragen.sitzt) o.sitzt = true;
+    if (tragen.aura) Object.assign(o, { aura: true, akzent: tragen.aura });
     if (helm) Object.assign(o, { kopf: "helm", helm: helm.frueh ? "#a8763a" : helm.m, akzent: helm.rand });
     if (ruestung) Object.assign(o, { platte: ruestung.frueh ? "#a8763a" : ruestung.m, platteRand: ruestung.rand, fell: false });
     if (handschuhe) Object.assign(o, { handschuh: handschuhe.frueh ? "#8a5a3a" : handschuhe.m, handschuhRand: handschuhe.rand });
@@ -164,6 +176,31 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
     const bild = person(o);
     return figurSvg(bild);
   });
+}
+
+// Der Bogen in der Hand des Helden in drei Stufen: 0 = entspannt (Pfeil ist weg), 1 = halb gespannt, 2 = voll gespannt.
+export function bogenBild(zeitalter, stufe) {
+  return alsBild(["bogen", zeitalter.id, stufe].join("|"), () => {
+    const m = material(zeitalter);
+    const zug = [0, 9, 18][stufe] || 0;
+    const bauch = 52 - zug * 0.35;
+    let t = `<path d="M22,6 Q${bauch},32 22,58" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M22,6 Q${bauch},32 22,58" fill="none" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/>`;
+    t += `<path d="M22,6 L${22 - zug},32 L22,58" fill="none" stroke="${U}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    if (stufe > 0) t += `<line x1="${22 - zug}" y1="32" x2="${54 - zug}" y2="32" stroke="${U}" stroke-width="3.5" stroke-linecap="round"/><path d="M${60 - zug},32 L${50 - zug},26 V38 Z" fill="${m.metall}" ${S3}/>`;
+    return svg(64, 64, t);
+  });
+}
+
+// Was durch die Luft fliegt: Pfeil, Speer, Stein, Feuerball, Kugel.
+const GESCHOSSE = {
+  speer: () => `<path d="M2,32 H46" stroke="${U}" stroke-width="10" stroke-linecap="round"/><path d="M2,32 H46" stroke="#9a6a3c" stroke-width="5" stroke-linecap="round"/><path d="M63,32 L42,20 V44 Z" fill="#d5dbe2" ${S3}/>`,
+  stein: () => `<path d="M18,30 Q20,14 36,16 Q50,18 48,34 Q46,48 30,48 Q16,46 18,30 Z" fill="#9aa3ad" ${S}/><path d="M28,24 q6,-4 12,0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.6"/>`,
+  feuer: () => `<path d="M2,32 Q16,14 34,12 Q58,12 60,32 Q58,52 34,52 Q16,50 2,32 Z" fill="#f2761e" ${S}/><path d="M18,32 Q26,22 40,22 Q52,24 52,32 Q52,42 40,42 Q26,42 18,32 Z" fill="#ffd54a"/>`,
+  kugel: () => `<circle cx="40" cy="32" r="9" fill="#3a3f49" ${S3}/><path d="M6,32 H26" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>`,
+};
+export function geschossBild(art) {
+  if (!GESCHOSSE[art]) return symbolBild("pfeil");
+  return alsBild("geschoss|" + art, () => svg(64, 64, GESCHOSSE[art]()));
 }
 
 // art: "nah" (Keule/Speer) oder "fern" (Bogen, später Blaster) – nie beides.
@@ -584,10 +621,39 @@ const SYMBOLE = {
   dungeons: () => `<path d="M12,58 V28 Q12,6 32,6 Q52,6 52,28 V58 Z" fill="#9a6a3c" ${S}/><path d="M32,6 V58 M12,34 H52" ${S3} fill="none"/><circle cx="40" cy="40" r="3.5" fill="#f2c230" ${S3}/>`,
   held: () => `<circle cx="32" cy="22" r="14" fill="${W}" ${S}/><path d="M8,58 Q8,38 32,38 Q56,38 56,58 Z" fill="${W}" ${S}/>`,
   geld: () => `<circle cx="32" cy="32" r="25" fill="#f7931a" ${S}/><text x="32" y="45" font-size="36" font-weight="900" font-family="Arial, sans-serif" text-anchor="middle" fill="#fff">₿</text>`,
+  muenze: () => `<circle cx="32" cy="32" r="25" fill="#f2c230" ${S}/><circle cx="32" cy="32" r="16" fill="none" stroke="${U}" stroke-width="3" opacity="0.45"/><path d="M26,24 h8 q8,0 8,8 q0,8 -8,8 h-8 z" fill="#fff" opacity="0.55"/>`,
+  schwert: () => `<g transform="rotate(40 32 32)"><path d="M27,2 L37,2 L37,40 L27,40 Z" fill="#d5dbe2" ${S3}/><path d="M32,-6 L37,2 L27,2 Z" fill="#d5dbe2" ${S3}/><rect x="20" y="40" width="24" height="6" rx="3" fill="#f2c230" ${S3}/><rect x="29" y="46" width="6" height="12" rx="3" fill="#9a6a3c" ${S3}/></g>`,
+  herz: () => `<path d="M32,56 Q4,36 10,18 Q18,4 32,18 Q46,4 54,18 Q60,36 32,56 Z" fill="#e8475a" ${S}/>`,
+  bogen: () => `<path d="M18,8 Q52,32 18,56" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M18,8 Q52,32 18,56" fill="none" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><line x1="18" y1="8" x2="18" y2="56" stroke="${U}" stroke-width="2.5"/>`,
+  schloss: () => `<path d="M20,30 V20 Q20,8 32,8 Q44,8 44,20 V30" fill="none" stroke="${U}" stroke-width="11" stroke-linecap="round"/><path d="M20,30 V20 Q20,8 32,8 Q44,8 44,20 V30" fill="none" stroke="#c6cdd4" stroke-width="5" stroke-linecap="round"/><rect x="12" y="28" width="40" height="30" rx="7" fill="#f2c230" ${S}/><circle cx="32" cy="41" r="4.5" fill="${U}"/><path d="M32,42 v8" ${S3}/>`,
+  uhr: () => `<circle cx="32" cy="32" r="24" fill="#f4efe2" ${S}/><path d="M32,16 V32 L44,38" fill="none" ${S}/>`,
+  krone: () => `<path d="M8,48 L6,16 L20,30 L32,10 L44,30 L58,16 L56,48 Z" fill="#f2c230" ${S}/><rect x="8" y="46" width="48" height="9" rx="3" fill="#e8475a" ${S3}/><circle cx="32" cy="34" r="4.5" fill="#e8475a" ${S3}/>`,
+  ticket: () => `<path d="M6,18 H58 V28 Q52,32 58,36 V46 H6 V36 Q12,32 6,28 Z" fill="#f2c230" ${S}/><path d="M24,20 V44" stroke="${U}" stroke-width="3" stroke-dasharray="4 4"/><path d="M38,26 l3,6 l6,1 l-4,4 l1,6 l-6,-3 l-6,3 l1,-6 l-4,-4 l6,-1 z" fill="#fff" opacity="0.8"/>`,
+  ei: () => `<path d="M32,6 Q52,6 54,36 Q54,58 32,58 Q10,58 10,36 Q12,6 32,6 Z" fill="#f4efe2" ${S}/><circle cx="26" cy="28" r="5" fill="#d9c9a0"/><circle cx="40" cy="40" r="6" fill="#d9c9a0"/><circle cx="28" cy="46" r="3.5" fill="#d9c9a0"/>`,
+  stern: () => `<path d="M32,4 L40,24 L60,26 L44,40 L50,60 L32,48 L14,60 L20,40 L4,26 L24,24 Z" fill="#ffd54a" ${S}/>`,
+  schatz: () => `<path d="M8,28 Q8,12 32,12 Q56,12 56,28 Z" fill="#9a6a3c" ${S}/><rect x="8" y="28" width="48" height="26" rx="4" fill="#7a4b26" ${S}/><rect x="27" y="24" width="10" height="14" rx="3" fill="#f2c230" ${S3}/><path d="M8,40 H56" stroke="#f2c230" stroke-width="4"/>`,
+  tippen: () => `<path d="M24,58 Q12,48 12,38 Q12,32 18,32 L22,36 V12 Q22,7 27,7 Q32,7 32,12 V26 Q34,22 38,24 Q41,25 41,29 Q44,26 47,28 Q50,30 50,34 V44 Q50,54 42,58 Z" fill="#f3c9a0" ${S}/>`,
+  tech: () => `<path d="M26,6 H38 V24 L52,50 Q54,58 46,58 H18 Q10,58 12,50 L26,24 Z" fill="#dff1f6" ${S}/><path d="M19,42 H45 L50,51 Q51,55 46,55 H18 Q13,55 14,51 Z" fill="#4fc46a"/><rect x="22" y="4" width="20" height="7" rx="3" fill="#c6cdd4" ${S3}/>`,
+  plus: () => `<path d="M32,10 V54 M10,32 H54" stroke="${U}" stroke-width="18" stroke-linecap="round"/><path d="M32,10 V54 M10,32 H54" stroke="#6fe08a" stroke-width="9" stroke-linecap="round"/>`,
+  nest: () => `<path d="M6,36 Q32,62 58,36 Q46,44 32,44 Q18,44 6,36 Z" fill="#9a6a3c" ${S}/><path d="M32,10 Q44,10 45,28 Q45,40 32,40 Q19,40 19,28 Q20,10 32,10 Z" fill="#f4efe2" ${S}/>`,
+  beutel: () => `<path d="M22,18 Q8,34 12,48 Q16,58 32,58 Q48,58 52,48 Q56,34 42,18 Z" fill="#b98a3e" ${S}/><path d="M22,18 Q32,10 42,18" fill="none" ${S}/><path d="M20,10 L26,18 H38 L44,10 Q32,4 20,10 Z" fill="#b98a3e" ${S}/><circle cx="32" cy="40" r="8" fill="#f2c230" ${S3}/>`,
   zu: () => `<path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="${U}" stroke-width="16" stroke-linecap="round"/><path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>`,
   pfeil: () => `<path d="M2,32 H44" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M2,32 H44" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M62,32 L44,22 V42 Z" fill="#d5dbe2" ${S3}/>`,
   amboss: () => `<path d="M4,30 H40 Q48,30 50,36 H38 V42 Q38,46 42,50 V56 H12 V50 Q16,46 16,42 Q6,40 4,30 Z" fill="#8a94a3" ${S}/><g transform="rotate(30 44 18)"><rect x="41" y="14" width="6" height="30" rx="3" fill="#9a6a3c" ${S3}/><rect x="32" y="4" width="24" height="14" rx="4" fill="#d5dbe2" ${S}/></g>`,
 };
+// Symbol für eine Tech-Wirkung (mehrere Wirkungen teilen sich ein Bild).
+const TECH_BILD = {
+  produktion: "beutel", beute: "muenze", offline: "uhr", rabatt: "upgrades", brutplatz: "nest", tempo: "tech",
+  schaden: "schwert", leben: "herz", tickets: "ticket", fpunkte: "stern", techpunkte: "tech", bossEi: "krone", schluepfen: "ei", eier: "ei", supporter: "tiere",
+  tradingGewinn: "farm", rechenleistung: "geld", farmRabatt: "upgrades", offlineMining: "uhr", energie: "stern",
+  gehalt: "beutel", schuldenBremse: "schloss", rechnungen: "muenze", aussehen: "held", sparzins: "plus",
+};
+export const techBild = (effektId) => symbolBild(TECH_BILD[effektId] || "tech");
+const UPGRADE_BILD = { klick: "tippen", proSekunde: "beutel", schaden: "schwert", leben: "herz" };
+export const upgradeBild = (wirkung) => symbolBild(UPGRADE_BILD[wirkung] || "upgrades");
+const DUNGEON_BILD = { eier: "ei", ausruestung: "amboss", schatz: "schatz" };
+export const dungeonBild = (art) => symbolBild(DUNGEON_BILD[art] || "dungeons");
+
 export function symbolBild(id) {
   return SYMBOLE[id] ? alsBild("symbol|" + id, () => svg(64, 64, SYMBOLE[id]())) : null;
 }

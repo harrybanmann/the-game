@@ -1,10 +1,10 @@
 // Automatischer Kampf in Wellen: Jede Stufe hat mehrere Wellen, jede Welle mehrere Gegner.
 // Je höher die Stufe, desto mehr und stärkere Gegner. Boss per Knopf (mit Aufstiegs-Bedingungen).
 // Verlieren kostet nichts: Die Stufe beginnt wieder bei Welle 1.
-// Ablauf (Harry 16.11.2026): Gegner laufen von rechts heran. Solange keiner nah ist, schießt der Held
-// mit der Fernkampf-Waffe, danach schlägt er mit der Nahkampf-Waffe. Jeder Gegner ist entweder
-// Nahkämpfer (läuft heran, schlägt) oder Fernkämpfer (bleibt auf Abstand, schießt), nie beides.
-// x = Abstand zum Helden: 1 = rechter Rand, 0 = direkt beim Helden.
+// Ablauf (Harry 16.11.2026): Gegner laufen von rechts heran. Der Held trägt EINE Waffe:
+// Nahkämpfer laufen den Gegnern entgegen und schlagen zu, Fernkämpfer bleiben stehen und schießen.
+// Jeder Gegner ist entweder Nahkämpfer (läuft heran, schlägt) oder Fernkämpfer (bleibt auf Abstand, schießt), nie beides.
+// x = Ort auf dem Weg: 0 = Startplatz des Helden, 1 = rechter Rand. heldX = wo der Held gerade steht.
 
 export function kampfSystem(api) {
   let gegner = []; // aktuelle Welle
@@ -22,6 +22,8 @@ export function kampfSystem(api) {
   let kampfZeit = 0;
   let tierUhr = 0;
   let spielerUhr = 0;
+  let heldX = 0;
+  let heldLaeuft = false;
   let effekte = []; // nur für die Anzeige: Schüsse und Schläge seit dem letzten Zeichnen
 
   const k = () => api.seite().kampf;
@@ -120,13 +122,33 @@ export function kampfSystem(api) {
   }
 
   const naechster = () => lebende().reduce((a, g) => (!a || g.x < a.x ? g : a), null);
+  const merken = (e) => {
+    if (effekte.length < 40) effekte.push(e);
+  };
 
-  function treffen(menge, wie) {
-    const ziel = naechster();
-    if (!ziel) return;
+  // was: optionaler Name für die Anzeige (z. B. die Art der Fähigkeit). ziel: bestimmter Gegner, sonst der nächste.
+  function treffen(menge, wie, ziel, was) {
+    ziel = ziel || naechster();
+    if (!ziel) return 0;
+    const vorher = Math.max(0, ziel.leben);
     ziel.leben -= menge;
-    if (wie && effekte.length < 30) effekte.push({ art: wie, i: gegner.indexOf(ziel) });
+    if (wie) merken({ art: wie, i: gegner.indexOf(ziel), was });
     if (ziel.leben <= 0) besiegt(ziel);
+    return Math.min(vorher, menge);
+  }
+
+  // Ein Angriff des Helden mit seiner Waffe: kritische Treffer, Lebensraub, Zweihänder trifft alle in Reichweite.
+  function heldAngriff(art, faktor) {
+    const w = api.kampfWerte();
+    const ziele = art === "nah" && w.hand === "zweihand" ? lebende().filter((g) => g.x - heldX <= w.zweihandReichweite) : [naechster()];
+    const krit = Math.random() < w.krit;
+    let gemacht = 0;
+    ziele.forEach((ziel, n) => {
+      // Der Zweihänder trifft die weiteren Gegner nur mit einem Teil des Schadens.
+      const anteil = n === 0 ? 1 : w.zweihandNebenschaden;
+      gemacht += treffen(api.schaden() * faktor * anteil * (krit ? 2 : 1), n === 0 ? (art === "nah" ? "schlag" : "schuss") : "mitSchlag", ziel, krit ? "krit" : "");
+    });
+    if (w.raub > 0 && gemacht > 0) spielerLeben = Math.min(api.maxLeben(), spielerLeben + gemacht * w.raub);
   }
 
   function bossZug(dt) {
@@ -148,7 +170,22 @@ export function kampfSystem(api) {
     const schlag = api.schlagZeit();
     const l = api.lauf();
     kampfZeit += dt;
-    for (const g of lebende()) if (g.x > g.halt) g.x = Math.max(g.halt, g.x - l.tempo * dt);
+    const w = api.kampfWerte();
+    // Held: Nahkämpfer läuft dem nächsten sichtbaren Gegner entgegen, sonst geht er zum Startplatz zurück.
+    const vorn = naechster();
+    const sichtbar = vorn && vorn.x <= 1.02;
+    let zielX = 0;
+    if (w.art === "nah" && sichtbar) zielX = Math.min(l.heldMax, Math.max(0, vorn.x - l.nahReichweite));
+    const altX = heldX;
+    if (heldX < zielX) heldX = Math.min(zielX, heldX + l.heldTempo * dt);
+    else if (heldX > zielX && !sichtbar) heldX = Math.max(zielX, heldX - l.heldZurueck * dt);
+    heldLaeuft = Math.abs(heldX - altX) > 1e-6;
+    // Gegner: Nahkämpfer laufen bis vor den Helden, Fernkämpfer bleiben auf Abstand stehen.
+    for (const g of lebende()) {
+      const halt = g.art === "fern" ? g.halt : heldX + g.halt;
+      g.laeuft = g.x > halt + 1e-6;
+      if (g.laeuft) g.x = Math.max(halt, g.x - l.tempo * dt);
+    }
     if (bossKampf && gegner[0] && gegner[0].leben > 0) bossZug(dt);
     const schild = () => (kampfZeit < bossSchildBis ? 0.5 : 1);
     // Kämpfer-Tier greift alle paar Sekunden selbst an (mehr Sterne = mehr Schaden).
@@ -162,33 +199,38 @@ export function kampfSystem(api) {
     }
     const fae = api.faehigkeiten();
     fae.schritt(dt, {
-      treffen: (m) => treffen(m, "zauber"),
-      heilen: (anteil) => {
+      treffen: (m, was) => treffen(m, "zauber", null, was),
+      heilen: (anteil, was) => {
         const max = api.maxLeben();
         spielerLeben = Math.min(max, spielerLeben + max * anteil);
+        merken({ art: "heldZauber", was });
       },
+      zeigen: (was) => merken({ art: "heldZauber", was }),
     });
     if (!lebende().length) return welleGeschafft(), true;
-    // Held: Reittiere machen ihn schneller. Fernkampf, solange kein Gegner nah ist, sonst Nahkampf.
+    // Held: Reittier und Ausrüstung machen ihn schneller. Die Uhr läuft immer, zugeschlagen wird nur in Reichweite.
     const abstand = schlag / (1 + api.tempo());
-    spielerUhr += dt;
-    if (spielerUhr >= abstand) {
-      spielerUhr -= abstand;
+    const ziel = naechster();
+    const inReichweite = w.art === "nah" ? ziel.x - heldX <= l.nahReichweite + 0.005 : ziel.x <= 1.02;
+    spielerUhr = Math.min(abstand, spielerUhr + dt);
+    if (spielerUhr >= abstand && inReichweite) {
+      spielerUhr = 0;
       if (aussetzen > 0) aussetzen -= 1;
-      else {
-        const art = naechster().x <= l.nahWeite ? "nah" : "fern";
-        treffen(api.schaden(art) * fae.schadenFaktor() * schild(), art === "nah" ? "schlag" : "schuss");
-      }
+      else heldAngriff(w.art, fae.schadenFaktor() * schild());
     }
     if (!lebende().length) return welleGeschafft(), true;
     const wut = kampfZeit < bossWutBis ? 1 + (gegner[0].faehigkeiten.find((f) => f.art === "wut") || { wert: 0 }).wert : 1;
     for (const g of lebende()) {
-      if (g.x > g.halt + 1e-6) continue; // noch unterwegs
+      if (g.laeuft) continue; // noch unterwegs
       g.uhr += dt;
       if (g.uhr < schlag) continue;
       g.uhr -= schlag;
-      spielerLeben -= g.schaden * fae.schutzFaktor() * (g.boss ? wut : 1);
-      if (effekte.length < 30) effekte.push({ art: g.art === "fern" ? "gegnerSchuss" : "gegnerSchlag", i: gegner.indexOf(g) });
+      const i = gegner.indexOf(g);
+      merken({ art: g.art === "fern" ? "gegnerSchuss" : "gegnerSchlag", i });
+      // Block und Ausweichen wehren den Treffer ganz ab.
+      if (Math.random() < w.block) merken({ art: "block" });
+      else if (Math.random() < w.ausweichen) merken({ art: "ausweichen" });
+      else spielerLeben -= g.schaden * fae.schutzFaktor() * (g.boss ? wut : 1);
     }
     if (spielerLeben <= 0) return niederlage(), true;
     // Heiltrank: nur im Boss-Kampf, automatisch unter der Schwelle.
@@ -219,6 +261,7 @@ export function kampfSystem(api) {
       takt = 0;
       traenkeDabei = Math.min(api.seite().traenke, api.trank().bossMax);
       gegner = [machGegner(boss, "boss", 1, 1, true, "nah", 1, api.lauf().bossHalt)];
+      heldX = 0;
       spielerUhr = 0;
       effekte = [];
       bossKampf = true;
@@ -234,6 +277,7 @@ export function kampfSystem(api) {
     },
     neuStarten() {
       takt = 0;
+      heldX = 0;
       welleStellen("voll");
     },
     zustand() {
@@ -246,6 +290,10 @@ export function kampfSystem(api) {
         stufe: k().stufe,
         welle: k().welle,
         wellenProStufe: w().proStufe,
+        heldX,
+        heldLaeuft,
+        heldArt: api.kampfWerte().art,
+        ladung: Math.min(1, spielerUhr / (api.schlagZeit() / (1 + api.tempo()))),
         spielerLeben: Math.min(max, Math.max(0, spielerLeben)),
         maxLeben: max,
         traenkeDabei: bossKampf ? traenkeDabei : null,

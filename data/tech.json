@@ -47,10 +47,10 @@
           "wert": 0.02
         },
         {
-          "id": "lager",
-          "name": "Mehr Lagerplatz",
-          "text": "+2 Plätze im Eier-Lager",
-          "wert": 2
+          "id": "brutplatz",
+          "name": "Brutplatz",
+          "text": "5 Stufen = +1 Brutplatz (höchstens 5 Plätze)",
+          "wert": 0.2
         },
         {
           "id": "tempo",

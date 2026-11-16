@@ -48,9 +48,12 @@ export function tierSystem(api) {
     return zeiten[Math.min(seltenheit, zeiten.length - 1)] * 1000 * api.schluepfFaktor();
   };
 
+  // Brutplätze: am Anfang einer, weitere im Tech-Baum (Harry 16.11.2026).
+  const brutPlaetze = () => Math.max(1, Math.min(d().brutPlaetzeMax || 1, api.brutPlaetze ? api.brutPlaetze() : 1));
+
   function starten(basis) {
     const ei = t().eier.shift();
-    t().brut = { ei, fertigUm: basis + schluepfZeit(ei.seltenheit) };
+    t().brueten.push({ ei, fertigUm: basis + schluepfZeit(ei.seltenheit) });
   }
 
   function schluepfen(ei) {
@@ -87,6 +90,7 @@ export function tierSystem(api) {
     plaetzeAbLevel: () => d().plaetzeAbLevel,
     // Würfelt nach einem Sieg, ob ein Ei fällt. typ: schwach, normal, elite oder boss.
     eiWurf(typ) {
+      if (api.offen && !api.offen()) return null;
       if (Math.random() >= (d().eiChance[typ] || 0) * api.eiChanceFaktor()) return null;
       if (t().eier.length >= d().eierLagerMax + api.lagerPlus()) return null;
       const ratio = typ === "boss" ? d().eiRatio.boss : d().eiRatio.normal;
@@ -104,28 +108,26 @@ export function tierSystem(api) {
     // Brutkasten weiterlaufen lassen; gibt die neu geschlüpften Tiere zurück.
     schritt(jetzt) {
       const neu = [];
+      const b = t();
       let grenze = 50;
       while (grenze-- > 0) {
-        const b = t();
-        if (b.brut) {
-          if (jetzt < b.brut.fertigUm) break;
-          const fertig = b.brut.fertigUm;
-          neu.push(schluepfen(b.brut.ei));
-          b.brut = null;
-          if (b.eier.length) starten(fertig);
-        } else if (b.eier.length) {
+        const i = b.brueten.findIndex((x) => jetzt >= x.fertigUm);
+        if (i >= 0) {
+          const fertig = b.brueten.splice(i, 1)[0];
+          neu.push(schluepfen(fertig.ei));
+          if (b.eier.length) starten(fertig.fertigUm);
+        } else if (b.eier.length && b.brueten.length < brutPlaetze()) {
           starten(jetzt);
         } else break;
       }
       return neu;
     },
-    brutInfo(jetzt) {
-      const b = t().brut;
-      if (!b) return null;
-      return {
-        seltenheit: api.seltenheiten()[b.ei.seltenheit],
+    brutPlaetze,
+    brutListe(jetzt) {
+      return t().brueten.map((b) => ({
+        seltenheit: api.seltenheiten()[b.ei.seltenheit] || api.seltenheiten()[0],
         restSekunden: Math.max(0, (b.fertigUm - jetzt) / 1000),
-      };
+      }));
     },
     bonus() {
       const k = werte(finde(t().kaempfer));
@@ -153,12 +155,14 @@ export function tierSystem(api) {
     },
     herausnehmen: ausTeam,
     mergbar(nr) {
+      if (api.sterneOffen && !api.sterneOffen()) return false;
       return gleiche(nr).length >= 2 && (finde(nr).sterne || 0) < d().maxSterne;
     },
     // 3 gleiche Tiere (Art, Seltenheit, Sternzahl) werden zu 1 Tier mit +1 Stern.
     mergen(nr) {
       const tier = finde(nr);
       const andere = gleiche(nr);
+      if (api.sterneOffen && !api.sterneOffen()) return false;
       if (!tier || andere.length < 2 || (tier.sterne || 0) >= d().maxSterne) return false;
       const imTeam = (x) => (t().kaempfer === x.nr || t().supporter.includes(x.nr) ? 1 : 0);
       const weg = andere.sort((a, b) => imTeam(a) - imTeam(b)).slice(0, 2);

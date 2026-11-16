@@ -18,10 +18,9 @@
         "gut": "Schmied",
         "boese": "Hehler"
       },
-      "text": "Verbessert deine Waffen dauerhaft.",
+      "text": "Verbessert deine Waffe dauerhaft.",
       "plaetze": [
-        "nah",
-        "fern"
+        "waffe"
       ]
     },
     {

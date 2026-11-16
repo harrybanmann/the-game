@@ -63,10 +63,12 @@ export function reittierSystem(api) {
       if (finde(nr)) r().aktiv = nr;
     },
     mergbar(nr) {
+      if (api.sterneOffen && !api.sterneOffen()) return false;
       const tier = finde(nr);
       return !!tier && gleiche(tier).length >= 2 && (tier.sterne || 0) < d().maxSterne;
     },
     mergen(nr) {
+      if (api.sterneOffen && !api.sterneOffen()) return false;
       const tier = finde(nr);
       if (!tier || gleiche(tier).length < 2 || (tier.sterne || 0) >= d().maxSterne) return false;
       const war = r().aktiv;

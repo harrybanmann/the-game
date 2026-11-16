@@ -88,10 +88,12 @@ export function faehigkeitenSystem(api) {
     },
     // 3 gleiche = +1 Stern: die Fähigkeit selbst plus 2 Kopien.
     mergbar: (id) => {
+      if (api.sterneOffen && !api.sterneOffen()) return false;
       const e = finde(id);
       return !!e && e.kopien >= 2 && e.sterne < d().maxSterne;
     },
     mergen(id) {
+      if (api.sterneOffen && !api.sterneOffen()) return false;
       const e = finde(id);
       if (!e || e.kopien < 2 || e.sterne >= d().maxSterne) return false;
       e.kopien -= 2;
@@ -133,17 +135,21 @@ export function faehigkeitenSystem(api) {
         if (uhren[id] < v.abklingen) continue;
         uhren[id] = 0;
         const k = staerke(e);
-        if (v.art === "schaden") kampf.treffen(api.grundSchaden() * v.wert * k);
-        else if (v.art === "heilung") kampf.heilen(v.wert * k);
+        if (v.art === "schaden") kampf.treffen(api.grundSchaden() * v.wert * k, v.id);
+        else if (v.art === "heilung") kampf.heilen(v.wert * k, "heilung");
         else if (v.art === "staerke") {
           staerkeBis = zeit + v.dauer;
           staerkeWert = v.wert * k;
+          kampf.zeigen("staerke");
         } else if (v.art === "schutz") {
           schutzBis = zeit + v.dauer;
           schutzWert = Math.min(0.9, v.wert * k);
+          kampf.zeigen("schutz");
         }
       }
     },
+    // Für die Anzeige: läuft gerade eine Verstärkung oder ein Schutz?
+    aktiv: () => ({ staerke: zeit < staerkeBis, schutz: zeit < schutzBis }),
     schadenFaktor: () => (zeit < staerkeBis ? 1 + staerkeWert : 1),
     schutzFaktor: () => (zeit < schutzBis ? 1 - schutzWert : 1),
   };

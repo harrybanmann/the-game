@@ -26,7 +26,7 @@
       "heilungZwischen": 0.25
     },
     "lauf": {
-      "_hinweis": "Abstand 1 = rechter Rand, 0 = beim Helden. tempo = Strecke pro Sekunde. Vorschlag.",
+      "_hinweis": "Abstand 1 = rechter Rand, 0 = Startplatz des Helden. tempo = Strecke pro Sekunde. Vorschlag.",
       "tempo": 0.45,
       "startAbstand": 0.12,
       "nahHalt": 0.04,
@@ -34,51 +34,76 @@
       "fernHalt": 0.55,
       "fernAbstand": 0.1,
       "bossHalt": 0.1,
-      "nahWeite": 0.42
+      "heldTempo": 0.3,
+      "heldZurueck": 0.7,
+      "heldMax": 0.5,
+      "nahReichweite": 0.08
     }
   },
   "level": {
     "grundXp": 60,
     "faktor": 1.15
   },
-  "leiste": [
-    {
-      "id": "upgrades",
-      "name": "Upgrades",
-      "symbol": "⬆",
-      "fenster": "upgrades-fenster",
-      "offen": true
-    },
-    {
-      "id": "waffen",
-      "name": "Schmiede",
-      "symbol": "🛡",
-      "fenster": "waffen-fenster",
-      "offen": true
-    },
-    {
-      "id": "tiere",
-      "name": "Tiere",
-      "symbol": "🥚",
-      "fenster": "tiere-fenster",
-      "offen": true
-    },
-    {
-      "id": "farm",
-      "name": "Farm",
-      "symbol": "📈",
-      "fenster": "farm-fenster",
-      "offen": true
-    },
-    {
-      "id": "menue",
-      "name": "Menü",
-      "symbol": "☰",
-      "offen": true
-    }
-  ],
   "aufstieg": {
     "levelJeZeitalter": 10,
     "schmiedeJeZeitalter": 3
+  },
+  "freischalten": {
+    "_hinweis": "Harry 16.11.2026: Inhalte kommen nach und nach, historisch passend. Zeitalter und Level sind Vorschläge des Bau-Chats.",
+    "dungeons": {
+      "level": 4,
+      "name": "Dungeons",
+      "text": "Mit Tickets kämpfst du um Belohnungen."
+    },
+    "faehigkeiten": {
+      "level": 7,
+      "name": "Fähigkeiten",
+      "text": "Sie lösen im Kampf von selbst aus. Punkte dafür gibt es in den Dungeons."
+    },
+    "tiere": {
+      "zeitalter": 2,
+      "name": "Haustiere",
+      "text": "Gegner lassen jetzt Eier fallen. Aus Eiern schlüpfen Tiere, die dir helfen."
+    },
+    "tech": {
+      "zeitalter": 3,
+      "name": "Tech-Baum",
+      "text": "Forsche mit Tech-Punkten aus den Dungeons."
+    },
+    "reittiere": {
+      "zeitalter": 3,
+      "name": "Reittiere",
+      "text": "Aus Eiern schlüpft jetzt manchmal ein Reittier. Es macht dich schneller."
+    },
+    "haushalt": {
+      "zeitalter": 5,
+      "name": "Haushalt",
+      "text": "Dein Job bringt Gehalt, Rechnungen gehen von selbst ab."
+    },
+    "bank": {
+      "zeitalter": 7,
+      "name": "Bank",
+      "text": "Erspartes bringt Zinsen. Unbezahlte Rechnungen werden Schulden."
+    },
+    "firma": {
+      "zeitalter": 8,
+      "name": "Firma",
+      "text": "Gründe eine Firma, sie bringt laufend Geld."
+    },
+    "trading": {
+      "zeitalter": 9,
+      "name": "Trading",
+      "text": "Setze auf steigende oder fallende Kurse."
+    },
+    "sterne": {
+      "zeitalter": 10,
+      "name": "Sterne",
+      "text": "3 gleiche Stücke, Tiere oder Fähigkeiten werden zu einem mit +1 Stern."
+    },
+    "bitcoin": {
+      "zeitalter": 12,
+      "name": "Bitcoin",
+      "text": "Kaufe und schürfe Bitcoin. Händler nehmen ab jetzt Bitcoin."
+    }
   }
 }

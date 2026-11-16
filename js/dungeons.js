@@ -40,8 +40,11 @@ export function dungeonSystem(api) {
   function belohnen(art, stufe) {
     const meilenstein = stufe % d().meilensteinAlle === 0;
     const teile = [];
-    teile.push(api.punkteGeben(stufe, meilenstein) + " Fähigkeitspunkte");
-    teile.push(api.techPunkteGeben(stufe, meilenstein) + " Tech-Punkte");
+    // Punkte werden immer gutgeschrieben, aber erst genannt, wenn das System freigeschaltet ist.
+    const fp = api.punkteGeben(stufe, meilenstein);
+    const tp = api.techPunkteGeben(stufe, meilenstein);
+    if (!api.offen || api.offen("faehigkeiten")) teile.push(fp + " Fähigkeitspunkte");
+    if (!api.offen || api.offen("tech")) teile.push(tp + " Tech-Punkte");
     if (art === "eier") {
       const ratio = Math.max(d().ei.ratioEnde, d().ei.ratioStart - d().ei.ratioProStufe * (stufe - 1));
       teile.push("Ei (" + api.eiGeben(ratio, 0).name + ")");
