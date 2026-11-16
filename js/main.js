@@ -1,14 +1,15 @@
-import { zahl, btc, dauer } from "./format.js?v=22";
-import * as speicher from "./speicher.js?v=22";
-import { kampfSystem } from "./kampf.js?v=22";
-import { waffenSystem } from "./waffen.js?v=22";
-import { tierSystem } from "./tiere.js?v=22";
-import { dungeonSystem } from "./dungeons.js?v=22";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=22";
-import { bitcoinSystem } from "./bitcoin.js?v=22";
-import { techSystem } from "./tech.js?v=22";
-import { haushaltSystem } from "./haushalt.js?v=22";
-import { farmSystem } from "./farm.js?v=22";
+import { zahl, btc, dauer } from "./format.js?v=24";
+import * as speicher from "./speicher.js?v=24";
+import { kampfSystem } from "./kampf.js?v=24";
+import { waffenSystem } from "./waffen.js?v=24";
+import { tierSystem } from "./tiere.js?v=24";
+import { dungeonSystem } from "./dungeons.js?v=24";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=24";
+import { bitcoinSystem } from "./bitcoin.js?v=24";
+import { techSystem } from "./tech.js?v=24";
+import * as grafik from "./grafik.js?v=24";
+import { haushaltSystem } from "./haushalt.js?v=24";
+import { farmSystem } from "./farm.js?v=24";
 
 const $ = (id) => document.getElementById(id);
 
@@ -204,6 +205,7 @@ function mischen(hex, mit, anteil) {
 }
 
 function farbenSetzen() {
+  grafik.stueckeMelden(daten.waffen.waffen);
   const f = zeitalter().farben;
   const boese = stand.aktiveSeite === "boese";
   const ton = (c) => (boese ? mischen(c, "#2b1a3d", 0.5) : c);
@@ -215,7 +217,12 @@ function farbenSetzen() {
   stil.setProperty("--symbol", f.symbol || "#6f7780");
   const au = stand.gemeinsam.figur.aussehen;
   const umhang = daten.haushalt.aussehen.find((a) => a.id === au.aktiv);
-  stil.setProperty("--spieler", umhang ? umhang.farbe : "#3c8fe0");
+  const spielerFarbe = umhang ? umhang.farbe : "#3c8fe0";
+  stil.setProperty("--spieler", spielerFarbe);
+  $("szene").style.backgroundImage = grafik.szeneBild(zeitalter(), stand.aktiveSeite);
+  document.querySelector(".figur.spieler").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), spielerFarbe);
+  stil.setProperty("--geld-bild", grafik.waehrungBild(zeitalter()));
+  $("gegner-gruppe").dataset.k = "";
 }
 
 function anzeigeAktualisieren() {
@@ -238,6 +245,27 @@ function anzeigeAktualisieren() {
   if (!$("tiere-fenster").hidden) brutZeichnen();
 }
 
+let lebenVorher = [];
+let spielerLebenVorher = 0;
+
+function wackeln(element, klasse) {
+  element.classList.remove(klasse);
+  void element.offsetWidth;
+  element.classList.add(klasse);
+}
+
+// Treffer: Figur blitzt kurz auf, die Schadenszahl steigt hoch.
+function treffer(box, menge, farbe) {
+  if (document.hidden) return;
+  wackeln(box.querySelector(".figur"), "getroffen");
+  if (box.querySelectorAll(".schadenszahl").length >= 3) return;
+  const zahlEl = el("span", "schadenszahl", "-" + zahl(Math.max(1, Math.round(menge))));
+  zahlEl.style.color = farbe;
+  zahlEl.style.left = 30 + Math.random() * 40 + "%";
+  box.append(zahlEl);
+  setTimeout(() => zahlEl.remove(), 700);
+}
+
 function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
@@ -249,18 +277,39 @@ function kampfZeichnen() {
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
   $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
 
+  // Figuren bleiben stehen und werden nur aktualisiert, damit Bewegungen und Treffer-Effekte laufen können.
   const gruppe = $("gegner-gruppe");
-  gruppe.replaceChildren();
-  for (const g of z.gegner) {
-    const box = el("div", "gegner" + (g.leben <= 0 ? " weg" : "") + (g.boss ? " boss" : ""));
-    const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
-    const balken = el("div", "balken klein");
-    const fuell = el("div", "fuellung rot");
-    fuell.style.width = (100 * Math.max(0, g.leben)) / g.maxLeben + "%";
-    balken.append(fuell);
-    box.append(el("div", "gegner-name", g.name), figur, balken);
-    gruppe.append(box);
+  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + (g.boss ? "/B" : "")).join("|");
+  if (gruppe.dataset.k !== schluessel) {
+    gruppe.dataset.k = schluessel;
+    gruppe.replaceChildren();
+    for (const g of z.gegner) {
+      const box = el("div", "gegner" + (g.boss ? " boss" : ""));
+      const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
+      figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss);
+      const balken = el("div", "balken klein");
+      balken.append(el("div", "fuellung rot"));
+      box.append(el("div", "gegner-name", g.name), figur, balken);
+      gruppe.append(box);
+    }
+    lebenVorher = z.gegner.map((g) => g.leben);
   }
+  let getroffen = false;
+  z.gegner.forEach((g, i) => {
+    const box = gruppe.children[i];
+    box.classList.toggle("weg", g.leben <= 0);
+    box.querySelector(".fuellung").style.width = (100 * Math.max(0, g.leben)) / g.maxLeben + "%";
+    const weniger = lebenVorher[i] - g.leben;
+    if (weniger > 0.001) {
+      getroffen = true;
+      treffer(box, weniger, "#fff");
+    }
+    lebenVorher[i] = g.leben;
+  });
+  const spielerBox = document.querySelector(".arena .kaempfer");
+  if (getroffen) wackeln(spielerBox.querySelector(".figur"), "schlag");
+  if (spielerLebenVorher - z.spielerLeben > 0.001 && spielerLebenVorher <= z.maxLeben) treffer(spielerBox, spielerLebenVorher - z.spielerLeben, "#ff6b5e");
+  spielerLebenVorher = z.spielerLeben;
 
   const knopf = $("boss-knopf");
   const fehlt = aufstiegFehlt();
@@ -325,7 +374,10 @@ function rasterZeichnen() {
       if (w.seltenheit.glanz) kachel.classList.add("glanz");
       if ((art === "nah" || art === "fern") && art === aktiv) kachel.classList.add("aktiv");
     }
-    kachel.append(el("span", "kachel-symbol", symbol), el("span", "kachel-name", w ? w.name : offen ? name : "bald"));
+    const bild = el("span", "kachel-bild");
+    const za = w ? daten.zeitalter.find((x) => x.id === w.zeitalter) || zeitalter() : zeitalter();
+    bild.style.backgroundImage = grafik.stueckBild(art, za, w ? w.id : "", !w);
+    kachel.append(bild, el("span", "kachel-name", w ? w.name : offen ? name : "bald"));
     if (w) kachel.append(el("span", "sterne", sterne(w.sterne)));
     const lv = bitcoin.stufe(art);
     if (lv > 0) kachel.append(el("span", "kachel-lv", "Lv. " + lv));
@@ -339,6 +391,8 @@ function rasterZeichnen() {
 }
 
 function ambossZeichnen() {
+  const ambossBild = document.querySelector(".amboss-bild");
+  if (!ambossBild.style.backgroundImage) ambossBild.style.backgroundImage = grafik.symbolBild("amboss");
   autoZeichnen();
   $("amboss-text").textContent = "Schmieden · " + zahl(waffen.schmiedeKosten()) + " " + waehrung().name;
   $("amboss-knopf").classList.toggle("matt", guthaben() < waffen.schmiedeKosten());
@@ -376,7 +430,11 @@ function leisteZeichnen() {
   for (const k of daten.einstellungen.leiste) {
     const knopf = el("button", "rund" + (k.offen ? "" : " gesperrt"));
     knopf.type = "button";
-    knopf.append(el("span", "rund-symbol", k.symbol), el("span", "rund-name", k.name));
+    const rund = el("span", "rund-symbol");
+    const bild = grafik.symbolBild(k.id);
+    if (bild) rund.style.backgroundImage = bild;
+    else rund.textContent = k.symbol;
+    knopf.append(rund, el("span", "rund-name", k.name));
     knopf.addEventListener("click", () => {
       if (k.id === "menue") fensterZeigen("menue");
       else if (k.fenster) {
@@ -488,6 +546,10 @@ function lagerZeichnen() {
   }
   for (const e of liste.slice(0, 40)) {
     const zeile = el("div", "lager-zeile");
+    const bild = el("span", "lager-bild");
+    bild.style.backgroundImage = grafik.stueckBild(e.art, daten.zeitalter.find((x) => x.id === e.zeitalter) || zeitalter(), e.id, false);
+    bild.style.backgroundColor = e.seltenheit.farbe;
+    zeile.append(bild);
     const name = el("span", "lager-name", e.name + " ×" + e.anzahl);
     name.style.color = e.seltenheit.farbe;
     const info = el("span", "lager-info");
@@ -611,6 +673,7 @@ function schmieden(auto) {
   text.textContent =
     r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – ausgerüstet!" : " – ins Lager gelegt.");
   text.style.color = r.neu.seltenheit.farbe;
+  wackeln(document.querySelector(".amboss-bild"), "haemmern");
   // Beim Auto-Schmieden nur melden, wenn etwas Besseres angelegt wurde.
   if ($("waffen-fenster").hidden && (!auto || r.besser)) kurzMeldung(text.textContent);
   waffenZeichnen();
@@ -646,7 +709,9 @@ function tierKachel(w, marke) {
   if (marke) kachel.append(el("span", "tier-marke", marke));
   const selten = el("span", "tier-selten", w.seltenheit.name);
   selten.style.color = w.seltenheit.farbe;
-  kachel.append(el("span", "tier-name", w.name), selten, el("span", "sterne", sterne(w.sterne)));
+  const bild = el("span", "tier-bild");
+  bild.style.backgroundImage = grafik.tierBild(w.id);
+  kachel.append(bild, el("span", "tier-name", w.name), selten, el("span", "sterne", sterne(w.sterne)));
   kachel.addEventListener("click", () => {
     gewaehltesTier = gewaehltesTier === w.nr ? null : w.nr;
     tiereZeichnen();

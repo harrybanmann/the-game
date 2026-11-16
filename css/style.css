@@ -488,3 +488,53 @@ body.boese .figur.spieler::after {
   background: #3a2550; border-radius: 50% 50% 20% 20%;
 }
 body.boese #ausruestung-bereich { background: #d9d0e4; }
+
+/* ---------- Version 22: gezeichnete Bilder (js/grafik.js) ---------- */
+#szene { background-size: cover; background-position: center bottom; background-repeat: no-repeat; }
+#szene .sonne, #szene .berg, #szene .boden { display: none; }
+.figur, .figur.spieler, .figur.gegner-figur, .figur.gegner-figur.elite, .figur.gegner-figur.boss {
+  border: 0; border-radius: 0; background-color: transparent;
+  background-size: contain; background-repeat: no-repeat; background-position: center bottom;
+}
+.figur.spieler::after, body.boese .figur.spieler::after, .figur.gegner-figur::after { content: none; }
+.figur.spieler { width: 84px; height: 104px; }
+.figur.gegner-figur { width: 52px; height: 64px; }
+.figur.gegner-figur.elite { width: 60px; height: 74px; }
+.figur.gegner-figur.boss { width: 104px; height: 128px; }
+.kachel-bild { width: 62%; aspect-ratio: 1; background-size: contain; background-repeat: no-repeat; background-position: center; }
+#kampf-kopf, .kaempfer-name, .kaempfer-werte { color: #fff;
+  text-shadow: -2px 0 var(--umriss), 2px 0 var(--umriss), 0 -2px var(--umriss), 0 2px var(--umriss); }
+
+/* ---------- Version 23: Bilder für alles, Bewegung und Treffer ---------- */
+.stein, .stein.klein, .stein.gross {
+  background: var(--geld-bild) center / contain no-repeat; border: 0; border-radius: 0; box-shadow: none;
+}
+.stein.klein { width: 36px; height: 36px; }
+.rund-symbol { background-size: 62%; background-repeat: no-repeat; background-position: center; }
+.amboss-bild { width: 38px; height: 38px; flex: 0 0 38px; transform-origin: 70% 80%;
+  background: center / contain no-repeat; }
+.amboss-bild.haemmern { animation: haemmern 0.28s ease-out; }
+.lager-bild { flex: 0 0 40px; width: 40px; height: 40px; border: 3px solid var(--umriss); border-radius: 10px;
+  background-size: 78%; background-repeat: no-repeat; background-position: center; }
+.tier { min-height: 96px; }
+.tier-bild { width: 46px; height: 44px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.gegner, .arena .kaempfer { position: relative; }
+.figur { animation: wippen 1.8s ease-in-out infinite; transform-origin: 50% 100%; }
+.gegner:nth-child(2n) .figur { animation-delay: -0.6s; }
+.gegner:nth-child(3n) .figur { animation-delay: -1.1s; }
+.figur.getroffen { animation: wippen 1.8s ease-in-out infinite, getroffen 0.25s ease-out; }
+.figur.spieler.schlag { animation: wippen 1.8s ease-in-out infinite, schlag 0.22s ease-out; }
+.figur.spieler.schlag.getroffen { animation: wippen 1.8s ease-in-out infinite, getroffen 0.25s ease-out; }
+.gegner.weg .figur { animation: none; transform: rotate(80deg) translateY(6px); transition: transform 0.25s; }
+.schadenszahl {
+  position: absolute; top: 18%; transform: translateX(-50%); pointer-events: none; z-index: 3;
+  font-size: 15px; text-shadow: -2px 0 var(--umriss), 2px 0 var(--umriss), 0 -2px var(--umriss), 0 2px var(--umriss);
+  animation: hoch 0.7s ease-out forwards;
+}
+.gegner.boss .schadenszahl, .arena .kaempfer .schadenszahl { font-size: 19px; }
+@keyframes wippen { 0%, 100% { scale: 1 1; } 50% { scale: 1.03 0.96; } }
+@keyframes getroffen { 0% { filter: brightness(3) saturate(0); translate: 5px 0; } 100% { filter: none; translate: 0 0; } }
+@keyframes schlag { 0% { translate: 0 0; } 45% { translate: 14px -4px; rotate: 6deg; } 100% { translate: 0 0; } }
+@keyframes hoch { 0% { opacity: 0; translate: 0 6px; } 20% { opacity: 1; } 100% { opacity: 0; translate: 0 -30px; } }
+@keyframes haemmern { 0% { rotate: 0deg; } 40% { rotate: -22deg; } 100% { rotate: 0deg; } }
+@media (prefers-reduced-motion: reduce) { .figur { animation: none; } }
