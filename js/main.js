@@ -1,11 +1,11 @@
-import { zahl, btc, dauer } from "./format.js?v=13";
-import * as speicher from "./speicher.js?v=13";
-import { kampfSystem } from "./kampf.js?v=13";
-import { waffenSystem } from "./waffen.js?v=13";
-import { tierSystem } from "./tiere.js?v=13";
-import { dungeonSystem } from "./dungeons.js?v=13";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=13";
-import { bitcoinSystem } from "./bitcoin.js?v=13";
+import { zahl, btc, dauer } from "./format.js?v=14";
+import * as speicher from "./speicher.js?v=14";
+import { kampfSystem } from "./kampf.js?v=14";
+import { waffenSystem } from "./waffen.js?v=14";
+import { tierSystem } from "./tiere.js?v=14";
+import { dungeonSystem } from "./dungeons.js?v=14";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=14";
+import { bitcoinSystem } from "./bitcoin.js?v=14";
 
 const $ = (id) => document.getElementById(id);
 
@@ -78,13 +78,13 @@ function schaden() {
   const b = waffen.bonus();
   const tb = tiere.bonus();
   const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
-  return grund * (1 + b.set) * (1 + tb.schadenProzent);
+  return grund * (1 + b.set) * (1 + tb.schadenProzent) * (1 + b.schmuckSet);
 }
 function maxLeben() {
   const tb = tiere.bonus();
   const b = waffen.bonus();
   const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + b.leben + tb.leben;
-  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent);
+  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet);
 }
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
@@ -273,8 +273,8 @@ function rasterZeichnen() {
   raster.replaceChildren();
   const aktiv = waffen.aktiveArt();
   for (const [art, name, symbol] of PLAETZE) {
-    const offen = ["nah", "fern", "helm", "handschuhe", "ruestung", "stiefel"].includes(art);
-    const w = offen ? waffen.werte(waffen.hole(art)) : null;
+    const offen = true;
+    const w = waffen.werte(waffen.hole(art), art);
     const kachel = el("button", "kachel" + (w ? "" : " leer") + (offen ? "" : " zu"));
     kachel.type = "button";
     kachel.title = name;
@@ -407,7 +407,7 @@ function waffenKarte(art, titel) {
 }
 
 function ruestungKarte(art, titel) {
-  const w = waffen.werte(waffen.hole(art));
+  const w = waffen.werte(waffen.hole(art), art);
   const karte = el("div", "waffe klein");
   karte.append(el("div", "waffe-art", titel));
   if (!w) {
@@ -419,7 +419,7 @@ function ruestungKarte(art, titel) {
   karte.append(
     el("div", "waffe-name", w.name),
     el("div", "sterne", sterne(w.sterne)),
-    el("div", "waffe-werte", "+" + zahl(w.leben) + " Leben")
+    el("div", "waffe-werte", (w.schaden > 0 ? "+" + zahl(w.schaden) + " Schaden · " : "") + "+" + zahl(w.leben) + " Leben")
   );
   return karte;
 }
@@ -497,6 +497,17 @@ function waffenZeichnen() {
   );
   lagerZeichnen();
   const b = waffen.bonus();
+  const sm = Math.round(daten.waffen.schmuckSet * 100);
+  $("schmuck-plaetze").replaceChildren(
+    ruestungKarte("ring1", "Ring"),
+    ruestungKarte("ring2", "Ring"),
+    ruestungKarte("amulett", "Amulett"),
+    ruestungKarte("guertel", "Gürtel")
+  );
+  $("schmuck-set").textContent =
+    b.schmuckSet > 0
+      ? "Schmuck-Set aktiv: +" + sm + " % auf alle Werte."
+      : "Schmuck-Set: 2 Ringe + Amulett aus einem Zeitalter geben +" + sm + " % auf alle Werte.";
   $("ruestung-set").textContent =
     "Rüstungs-Set: " + b.ruestungTeile + " von 4 Teilen aus einem Zeitalter (2 Teile +5 % Leben, 4 Teile +15 % Leben)" +
     (b.lebenProzent > 0 ? " – aktiv: +" + prozent(b.lebenProzent) + " Leben." : ".");

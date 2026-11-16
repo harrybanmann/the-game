@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 9;
+export const VERSION = 10;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -17,6 +17,7 @@ export function neueSeite(startZeitalter) {
     schmiede: { stufe: 0, geschmiedet: 0, ausbauBis: null },
     waffen: { nah: null, fern: null, aktiv: "nah" },
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
+    schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
     lager: [],
     traenke: 0,
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
@@ -83,6 +84,8 @@ export function pruefen(stand) {
     seite.waffen = { nah: waffe(w.nah), fern: waffe(w.fern), aktiv: w.aktiv === "fern" ? "fern" : "nah" };
     const r = seite.ruestung || {};
     seite.ruestung = { helm: waffe(r.helm), handschuhe: waffe(r.handschuhe), ruestung: waffe(r.ruestung), stiefel: waffe(r.stiefel) };
+    const sm = seite.schmuck || {};
+    seite.schmuck = { ring1: waffe(sm.ring1), ring2: waffe(sm.ring2), amulett: waffe(sm.amulett), guertel: waffe(sm.guertel) };
     seite.lager = (Array.isArray(seite.lager) ? seite.lager : [])
       .map((x) => {
         const stueck = waffe(x);

@@ -414,6 +414,139 @@
       },
       "schaden": 0,
       "leben": 8
+    },
+    {
+      "id": "knochenring",
+      "zeitalter": "steinzeit",
+      "art": "ring",
+      "name": {
+        "gut": "Knochenring",
+        "boese": "Knochenring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "zahnkette",
+      "zeitalter": "steinzeit",
+      "art": "amulett",
+      "name": {
+        "gut": "Zahnkette",
+        "boese": "Zahnkette"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "lianenguertel",
+      "zeitalter": "steinzeit",
+      "art": "guertel",
+      "name": {
+        "gut": "Lianengürtel",
+        "boese": "Lianengürtel"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "muschelring",
+      "zeitalter": "muscheln",
+      "art": "ring",
+      "name": {
+        "gut": "Muschelring",
+        "boese": "Muschelring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "muschelkette",
+      "zeitalter": "muscheln",
+      "art": "amulett",
+      "name": {
+        "gut": "Muschelkette",
+        "boese": "Muschelkette"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "strohguertel",
+      "zeitalter": "muscheln",
+      "art": "guertel",
+      "name": {
+        "gut": "Strohgürtel",
+        "boese": "Strohgürtel"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "bronzering",
+      "zeitalter": "bronzezeit",
+      "art": "ring",
+      "name": {
+        "gut": "Bronzering",
+        "boese": "Bronzering"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "lapisamulett",
+      "zeitalter": "bronzezeit",
+      "art": "amulett",
+      "name": {
+        "gut": "Lapis-Amulett",
+        "boese": "Lapis-Amulett"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "ledergurt",
+      "zeitalter": "bronzezeit",
+      "art": "guertel",
+      "name": {
+        "gut": "Ledergurt",
+        "boese": "Ledergurt"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "elektronring",
+      "zeitalter": "muenzen",
+      "art": "ring",
+      "name": {
+        "gut": "Elektronring",
+        "boese": "Elektronring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "muenzamulett",
+      "zeitalter": "muenzen",
+      "art": "amulett",
+      "name": {
+        "gut": "Münz-Amulett",
+        "boese": "Münz-Amulett"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "goldguertel",
+      "zeitalter": "muenzen",
+      "art": "guertel",
+      "name": {
+        "gut": "Goldgürtel",
+        "boese": "Goldgürtel"
+      },
+      "schaden": 0,
+      "leben": 12
     }
-  ]
+  ],
+  "schmuckSet": 0.1
 }

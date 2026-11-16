@@ -426,3 +426,4 @@ textarea {
 .dungeon.zu { opacity: 0.55; }
 .kachel-lv { position: absolute; top: 2px; left: 3px; font-size: 9px; color: #fff;
   text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }
+#schmuck-plaetze { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }

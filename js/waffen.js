@@ -4,15 +4,16 @@
 
 const WAFFEN_PLAETZE = ["nah", "fern"];
 export const RUESTUNG_PLAETZE = ["helm", "handschuhe", "ruestung", "stiefel"];
+const SCHMUCK_PLAETZE = ["ring1", "ring2", "amulett", "guertel"];
 
 export function waffenSystem(api) {
   const d = () => api.daten();
   const s = () => api.seite();
   const istWaffe = (art) => WAFFEN_PLAETZE.includes(art);
-  const hole = (art) => (istWaffe(art) ? s().waffen[art] : s().ruestung[art]);
+  const fach = (art) => (istWaffe(art) ? s().waffen : SCHMUCK_PLAETZE.includes(art) ? s().schmuck : s().ruestung);
+  const hole = (art) => fach(art)[art] || null;
   const setze = (art, stueck) => {
-    if (istWaffe(art)) s().waffen[art] = stueck;
-    else s().ruestung[art] = stueck;
+    fach(art)[art] = stueck;
   };
   const vorlageVon = (stueck) => d().waffen.find((w) => w.id === stueck.id);
   const nur = (x) => ({ id: x.id, seltenheit: x.seltenheit, sterne: x.sterne || 0 });
@@ -39,14 +40,27 @@ export function waffenSystem(api) {
     return 0;
   }
 
-  function werte(stueck) {
+  // Ringe haben zwei Plätze: der neue kommt auf den freien oder den schwächeren.
+  function zielPlatz(stueck) {
+    const art = vorlageVon(stueck).art;
+    if (art !== "ring") return art;
+    const a = werte(hole("ring1"), "ring1");
+    const b = werte(hole("ring2"), "ring2");
+    if (!a) return "ring1";
+    if (!b) return "ring2";
+    return a.staerke <= b.staerke ? "ring1" : "ring2";
+  }
+  const plaetzeFuer = (stueck) => (vorlageVon(stueck).art === "ring" ? ["ring1", "ring2"] : [vorlageVon(stueck).art]);
+
+  function werte(stueck, platz) {
     if (!stueck) return null;
     const vorlage = vorlageVon(stueck);
     if (!vorlage) return null;
+    platz = platz || (vorlage.art === "ring" ? "ring1" : vorlage.art);
     const selten = d().seltenheiten[stueck.seltenheit] || d().seltenheiten[0];
     const sterne = stueck.sterne || 0;
     const faktor =
-      selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * (1 + sterne * d().sternBonus) * api.platzFaktor(vorlage.art);
+      selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * (1 + sterne * d().sternBonus) * api.platzFaktor(platz);
     return {
       id: vorlage.id,
       art: vorlage.art,
@@ -83,8 +97,8 @@ export function waffenSystem(api) {
     return genommen;
   }
 
-  function anlegen(stueck) {
-    const art = vorlageVon(stueck).art;
+  function anlegen(stueck, platz) {
+    const art = platz || zielPlatz(stueck);
     const alt = hole(art);
     setze(art, nur(stueck));
     if (alt) insLager(alt);
@@ -92,8 +106,9 @@ export function waffenSystem(api) {
 
   // Legt ein neues Stück an, wenn es besser ist, sonst ins Lager. Gibt zurück, ob es angelegt wurde.
   function einsortieren(stueck) {
-    const alt = werte(hole(vorlageVon(stueck).art));
-    const besser = !alt || werte(stueck).staerke > alt.staerke;
+    const platz = zielPlatz(stueck);
+    const alt = werte(hole(platz), platz);
+    const besser = !alt || werte(stueck, platz).staerke > alt.staerke;
     if (besser) anlegen(stueck);
     else insLager(stueck);
     return besser;
@@ -103,7 +118,7 @@ export function waffenSystem(api) {
     const vorlage = vorlageVon(stueck);
     if (!vorlage) return 0;
     const eintrag = s().lager.find((x) => gleich(x, stueck));
-    return (eintrag ? eintrag.anzahl : 0) + (gleich(hole(vorlage.art), stueck) ? 1 : 0);
+    return (eintrag ? eintrag.anzahl : 0) + plaetzeFuer(stueck).filter((p) => gleich(hole(p), stueck)).length;
   }
 
   const mergbar = (stueck) => (stueck.sterne || 0) < d().maxSterne && anzahlGleich(stueck) >= 3;
@@ -121,9 +136,9 @@ export function waffenSystem(api) {
     stufeVoll,
     stufeKosten,
     bonus() {
-      const aktiv = werte(hole(aktiveArt()));
-      const nah = werte(hole("nah"));
-      const fern = werte(hole("fern"));
+      const aktiv = werte(hole(aktiveArt()), aktiveArt());
+      const nah = werte(hole("nah"), "nah");
+      const fern = werte(hole("fern"), "fern");
       const bonus = {
         schaden: aktiv ? aktiv.schaden : 0,
         leben: aktiv ? aktiv.leben : 0,
@@ -133,13 +148,22 @@ export function waffenSystem(api) {
       };
       const jeZeitalter = {};
       for (const art of RUESTUNG_PLAETZE) {
-        const r = werte(hole(art));
+        const r = werte(hole(art), art);
         if (!r) continue;
         bonus.schaden += r.schaden;
         bonus.leben += r.leben;
         jeZeitalter[r.zeitalter] = (jeZeitalter[r.zeitalter] || 0) + 1;
       }
       bonus.ruestungTeile = Math.max(0, ...Object.values(jeZeitalter));
+      // Schmuck zählt immer; 2 Ringe + Amulett aus einem Zeitalter = Schmuck-Set.
+      const schmuck = SCHMUCK_PLAETZE.map((p) => werte(hole(p), p));
+      for (const x of schmuck) {
+        if (!x) continue;
+        bonus.schaden += x.schaden;
+        bonus.leben += x.leben;
+      }
+      const [r1, r2, am] = schmuck;
+      bonus.schmuckSet = r1 && r2 && am && r1.zeitalter === r2.zeitalter && r2.zeitalter === am.zeitalter ? d().schmuckSet : 0;
       for (const [teile, prozent] of Object.entries(d().ruestungSet)) {
         if (bonus.ruestungTeile >= Number(teile)) bonus.lebenProzent = Math.max(bonus.lebenProzent, prozent);
       }
@@ -197,10 +221,12 @@ export function waffenSystem(api) {
     // 3 gleiche werden zu 1 Stück mit +1 Stern. Zuerst aus dem Lager, zur Not auch das angelegte.
     mergen(stueck) {
       if (!mergbar(stueck)) return null;
-      const art = vorlageVon(stueck).art;
-      const fehlt = 3 - ausLager(stueck, 3);
+      const angelegt = plaetzeFuer(stueck).filter((p) => gleich(hole(p), stueck));
+      let fehlt = 3 - ausLager(stueck, 3);
       const neu = { ...nur(stueck), sterne: (stueck.sterne || 0) + 1 };
-      if (fehlt > 0) setze(art, neu);
+      // Fehlende Stücke kommen von den angelegten Plätzen; der erste bekommt das neue Stück.
+      for (let i = 1; i < fehlt; i++) setze(angelegt[i], null);
+      if (fehlt > 0) setze(angelegt[0], neu);
       else einsortieren(neu);
       return werte(neu);
     },
