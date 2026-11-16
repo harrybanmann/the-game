@@ -1,12 +1,13 @@
-import { zahl, btc, dauer } from "./format.js?v=15";
-import * as speicher from "./speicher.js?v=15";
-import { kampfSystem } from "./kampf.js?v=15";
-import { waffenSystem } from "./waffen.js?v=15";
-import { tierSystem } from "./tiere.js?v=15";
-import { dungeonSystem } from "./dungeons.js?v=15";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=15";
-import { bitcoinSystem } from "./bitcoin.js?v=15";
-import { techSystem } from "./tech.js?v=15";
+import { zahl, btc, dauer } from "./format.js?v=16";
+import * as speicher from "./speicher.js?v=16";
+import { kampfSystem } from "./kampf.js?v=16";
+import { waffenSystem } from "./waffen.js?v=16";
+import { tierSystem } from "./tiere.js?v=16";
+import { dungeonSystem } from "./dungeons.js?v=16";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=16";
+import { bitcoinSystem } from "./bitcoin.js?v=16";
+import { techSystem } from "./tech.js?v=16";
+import { haushaltSystem } from "./haushalt.js?v=16";
 
 const $ = (id) => document.getElementById(id);
 
@@ -19,6 +20,7 @@ let dungeons; // Dungeons und Tickets
 let faehigkeiten; // Fähigkeiten
 let bitcoin; // Bitcoin und Händler
 let tech; // Tech-Baum
+let haushalt; // Haushalt und Firma
 let techAst = "produktion";
 let gewaehltesTier = null;
 let letzterTick = Date.now();
@@ -33,7 +35,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -44,6 +46,7 @@ async function datenLaden() {
     json("data/faehigkeiten.json"),
     json("data/bitcoin.json"),
     json("data/tech.json"),
+    json("data/haushalt.json"),
   ]);
   return {
     einstellungen,
@@ -56,6 +59,7 @@ async function datenLaden() {
     faehigkeiten: faehigkeitDaten,
     bitcoin: btcDaten,
     tech: techDaten,
+    haushalt: haushaltDaten,
   };
 }
 
@@ -98,6 +102,7 @@ const xpBedarf = (level) =>
 
 function gutschreiben(menge) {
   if (!(menge > 0)) return;
+  if (haushalt) menge = haushalt.einnahme(menge);
   const s = seite();
   s.waehrungen[waehrung().id] = guthaben() + menge;
   s.gesamtVerdient += menge;
@@ -139,6 +144,8 @@ function tick() {
   }
 
   dungeons.schritt();
+  haushalt.schritt(jetzt, Math.min(24, off.maxStunden + tech.wert("offline")) * 3600);
+  if (!$("haushalt-fenster").hidden) haushaltZeichnen();
   for (const name of tech.schritt(jetzt)) {
     kurzMeldung("Forschung fertig: " + name);
     if (!$("tech-fenster").hidden) techZeichnen();
@@ -186,6 +193,9 @@ function farbenSetzen() {
   stil.setProperty("--zweit", f.zweit);
   stil.setProperty("--akzent", f.akzent);
   stil.setProperty("--symbol", f.symbol || "#6f7780");
+  const au = stand.gemeinsam.figur.aussehen;
+  const umhang = daten.haushalt.aussehen.find((a) => a.id === au.aktiv);
+  stil.setProperty("--spieler", umhang ? umhang.farbe : "#3c8fe0");
 }
 
 function anzeigeAktualisieren() {
@@ -881,6 +891,54 @@ function techZeichnen() {
   techZeiten();
 }
 
+// ---------- Haushalt und Firma ----------
+
+function haushaltZeichnen() {
+  const h = seite().haushalt;
+  const j = haushalt.job();
+  const w = waehrung().name;
+  const firmaName = j.firma;
+  $("hh-job").textContent = "Job: " + j.job + " · +" + zahl(haushalt.gehaltProMinute()) + " " + w + " pro Minute";
+  $("hh-rechnung").textContent = "Rechnungen (" + j.rechnungen + "): −" + zahl(haushalt.rechnungProStunde()) + " " + w + " pro Stunde, automatisch";
+  const zins = haushalt.zinsProTag();
+  $("hh-zins").textContent =
+    zins > 0
+      ? "Sparzins: " + prozent(zins) + " pro Tag auf dein Guthaben"
+      : "Sparzins: ab " + zahl(daten.haushalt.zinsStufen[0].ab) + " " + w + " Guthaben gibt es Zinsen";
+  $("hh-schulden").textContent =
+    h.schulden > 0
+      ? "Schulden: " + zahl(h.schulden) + " " + w + " · Einnahmen gebremst um " + prozent(haushalt.bremse()) + " (zahlt sich automatisch ab)"
+      : "Keine Schulden.";
+  $("hh-firma").textContent =
+    h.firma === 0
+      ? "Firma: noch keine. Gründen kostet " + zahl(haushalt.firmaKosten()) + " " + w + "."
+      : firmaName + " · Stufe " + h.firma + " · +" + zahl(haushalt.firmaEinkommenProMinute()) + " " + w + " pro Minute";
+  const fk = $("hh-firma-knopf");
+  fk.textContent = haushalt.firmaVoll()
+    ? "Firma ist auf Maximum"
+    : (h.firma === 0 ? "Firma gründen (" : "Firma ausbauen (") + zahl(haushalt.firmaKosten()) + " " + w + ")";
+  fk.classList.toggle("matt", haushalt.firmaVoll() || guthaben() < haushalt.firmaKosten());
+  const box = $("hh-aussehen");
+  if (box.childElementCount !== daten.haushalt.aussehen.length || box.dataset.aktiv !== stand.gemeinsam.figur.aussehen.aktiv) {
+    box.replaceChildren();
+    box.dataset.aktiv = stand.gemeinsam.figur.aussehen.aktiv;
+    for (const a of haushalt.aussehenListe()) {
+      const hat = stand.gemeinsam.figur.aussehen.besitz.includes(a.id);
+      const aktiv = stand.gemeinsam.figur.aussehen.aktiv === a.id;
+      const k = el("button", "knopf klein", a.name + (aktiv ? " ✓" : hat ? "" : " · " + zahl(haushalt.aussehenPreis(a)) + " " + w));
+      k.type = "button";
+      k.style.background = a.farbe;
+      k.addEventListener("click", () => {
+        if (!haushalt.aussehenKaufen(a)) return kurzMeldung("Zu wenig " + w + ".");
+        farbenSetzen();
+        haushaltZeichnen();
+        sichern();
+      });
+      box.append(k);
+    }
+  }
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 function kampfEreignis(name, gegner) {
@@ -1035,6 +1093,20 @@ function knoepfeVerbinden() {
     dungeonsZeichnen();
     fensterZeigen("dungeon-fenster");
   });
+  $("haushalt-knopf").addEventListener("click", () => {
+    fensterSchliessen("menue");
+    haushaltZeichnen();
+    fensterZeigen("haushalt-fenster");
+  });
+  $("hh-firma-knopf").addEventListener("click", () => {
+    if (haushalt.firmaVoll()) return;
+    const neu = seite().haushalt.firma === 0;
+    if (!haushalt.firmaAusbauen()) return kurzMeldung("Zu wenig " + waehrung().name + ".");
+    kurzMeldung(neu ? "Firma gegründet! Der Tech-Ast Haushalt ist jetzt offen." : "Firma ausgebaut.");
+    haushaltZeichnen();
+    anzeigeAktualisieren();
+    sichern();
+  });
   $("tech-knopf").addEventListener("click", () => {
     fensterSchliessen("menue");
     techZeichnen();
@@ -1131,7 +1203,17 @@ async function start() {
     daten: () => daten.tech,
     seite,
     zeitalterNummer: () => zeitalter().nummer,
-    systemOffen: (name) => name === "immer" || name === "dungeons",
+    systemOffen: (name) => name === "immer" || name === "dungeons" || (name === "haushalt" && seite().haushalt.firma > 0),
+  });
+  haushalt = haushaltSystem({
+    daten: () => daten.haushalt,
+    seite,
+    zeitalterId: () => zeitalter().id,
+    tech: (id) => tech.wert(id),
+    guthaben,
+    gutschreiben,
+    bezahlen,
+    aussehen: () => stand.gemeinsam.figur.aussehen,
   });
   bitcoin = bitcoinSystem({
     daten: () => daten.bitcoin,

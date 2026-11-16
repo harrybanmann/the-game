@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 11;
+export const VERSION = 12;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -20,6 +20,7 @@ export function neueSeite(startZeitalter) {
     schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
     lager: [],
     traenke: 0,
+    haushalt: { schulden: 0, firma: 0, letzter: 0 },
     tech: { punkte: 0, stufen: {}, laeuft: {} },
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
@@ -96,6 +97,12 @@ export function pruefen(stand) {
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
     seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    const hh = seite.haushalt || {};
+    seite.haushalt = {
+      schulden: Math.max(0, Number(hh.schulden) || 0),
+      firma: Math.max(0, Math.floor(Number(hh.firma)) || 0),
+      letzter: Number.isFinite(hh.letzter) ? hh.letzter : 0,
+    };
     const te = seite.tech || {};
     const st = {};
     for (const [id, n] of Object.entries(te.stufen || {})) {
@@ -153,6 +160,15 @@ export function pruefen(stand) {
     }
   }
   if (!Number.isFinite(stand.zuletztGespeichert)) stand.zuletztGespeichert = Date.now();
+  const fig = stand.gemeinsam.figur || {};
+  const au = fig.aussehen || {};
+  stand.gemeinsam.figur = {
+    name: typeof fig.name === "string" ? fig.name : "",
+    aussehen: {
+      besitz: Array.isArray(au.besitz) && au.besitz.length ? au.besitz.filter((x) => typeof x === "string") : ["blau"],
+      aktiv: typeof au.aktiv === "string" ? au.aktiv : "blau",
+    },
+  };
   stand.version = VERSION; // ältere Spielstände sind jetzt ergänzt
   return null;
 }

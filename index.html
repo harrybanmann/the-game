@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=15">
+  <link rel="stylesheet" href="css/style.css?v=16">
 </head>
 <body>
   <div id="spiel">
@@ -89,7 +89,8 @@
       <button id="faehigkeiten-knopf" class="knopf" type="button">Fähigkeiten</button>
       <button id="btc-knopf" class="knopf" type="button">Bitcoin und Händler</button>
       <button id="tech-knopf" class="knopf" type="button">Tech-Baum</button>
-      <p class="hinweis">Seitenwechsel Gut/Böse und Haushalt kommen später.</p>
+      <button id="haushalt-knopf" class="knopf" type="button">Haushalt und Firma</button>
+      <p class="hinweis">Seitenwechsel Gut/Böse kommt später.</p>
       <button id="neu-anfangen" class="knopf rot" type="button">Neu anfangen</button>
       <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
     </div>
@@ -189,6 +190,23 @@
     </div>
   </div>
 
+  <div id="haushalt-fenster" class="fenster" hidden>
+    <div class="karte">
+      <h2>Haushalt</h2>
+      <p class="hinweis">Läuft von selbst: Gehalt kommt, Rechnungen werden abgebucht. Schulden bremsen nur, nichts geht verloren.</p>
+      <p id="hh-job" class="hinweis"></p>
+      <p id="hh-rechnung" class="hinweis"></p>
+      <p id="hh-zins" class="hinweis"></p>
+      <p id="hh-schulden" class="ergebnis"></p>
+      <h3>Firma</h3>
+      <p id="hh-firma" class="hinweis"></p>
+      <button id="hh-firma-knopf" class="knopf" type="button"></button>
+      <h3>Aussehen (nur Optik)</h3>
+      <div id="hh-aussehen" class="btc-kauf"></div>
+      <button class="knopf rot" type="button" data-schliessen="haushalt-fenster">Zurück</button>
+    </div>
+  </div>
+
   <div id="hinweis" class="fenster" hidden>
     <div class="karte mitte">
       <h2 id="hinweis-titel"></h2>
@@ -201,7 +219,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=15"></script>
+  <script type="module" src="js/main.js?v=16"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

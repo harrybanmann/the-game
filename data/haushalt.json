@@ -1,0 +1,82 @@
+{
+  "_hinweis": "Harry (Haushalt-Chat, 15.11.2026): läuft von selbst, Rechnungen automatisch; Start mit Job, Firma später; Schulden bremsen Einnahmen bis 30 %, nichts verloren, Abzahlung automatisch; Sparen bringt Zinsen in Stufen, im Tech-Baum erhöhbar; Rechnungen feste kleine Kosten; Aussehen freiwillig, nur Optik; pro Zeitalter eigener Job und eigene Rechnungen. Zahlen und Namen sind Vorschläge.",
+  "maxBremse": 0.3,
+  "tilgungAnteil": 0.5,
+  "zinsStufen": [
+    {
+      "ab": 1000,
+      "proTag": 0.01
+    },
+    {
+      "ab": 10000,
+      "proTag": 0.02
+    },
+    {
+      "ab": 100000,
+      "proTag": 0.03
+    }
+  ],
+  "firma": {
+    "gruenden": 500,
+    "ausbauGrund": 500,
+    "ausbauFaktor": 1.5,
+    "maxStufe": 20,
+    "einkommenJeStufeProMinute": 5
+  },
+  "jobs": {
+    "steinzeit": {
+      "job": "Jäger und Sammler",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Feuerholz",
+      "rechnungProStunde": 30,
+      "firma": "Feuerstein-Werkstatt"
+    },
+    "muscheln": {
+      "job": "Bauer",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Hütte",
+      "rechnungProStunde": 30,
+      "firma": "Muschel-Handel"
+    },
+    "bronzezeit": {
+      "job": "Karawanen-Händler",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Lehmhaus",
+      "rechnungProStunde": 30,
+      "firma": "Bronze-Gießerei"
+    },
+    "muenzen": {
+      "job": "Münzpräger",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Steinhaus",
+      "rechnungProStunde": 30,
+      "firma": "Münzprägerei"
+    }
+  },
+  "aussehen": [
+    {
+      "id": "blau",
+      "name": "Blauer Umhang",
+      "farbe": "#3c8fe0",
+      "preis": 0
+    },
+    {
+      "id": "gruen",
+      "name": "Grüner Umhang",
+      "farbe": "#4fc46a",
+      "preis": 300
+    },
+    {
+      "id": "rot",
+      "name": "Roter Umhang",
+      "farbe": "#e0564c",
+      "preis": 600
+    },
+    {
+      "id": "gold",
+      "name": "Goldener Umhang",
+      "farbe": "#f2b632",
+      "preis": 2000
+    }
+  ]
+}

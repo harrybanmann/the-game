@@ -151,7 +151,7 @@ button, textarea, input { font: inherit; color: inherit; }
   border: 4px solid var(--umriss);
   border-radius: 44% 44% 28% 28%;
 }
-.figur.spieler { background: var(--knopf); }
+.figur.spieler { background: var(--spieler, var(--knopf)); }
 .figur.spieler::after {
   content: ""; position: absolute; right: -16px; bottom: 8px;
   width: 34px; height: 40px;
@@ -445,3 +445,5 @@ textarea {
 .tech-stufe { font-size: 14px; color: #ffd54a; }
 .tech-text { font-size: 9px; line-height: 1.15; opacity: 0.85; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
 .tech-preis { font-size: 10px; background: rgba(255, 255, 255, 0.12); padding: 1px 5px; border-radius: 999px; }
+#hh-aussehen { flex-wrap: wrap; }
+#hh-aussehen .knopf.klein { width: auto; flex: 1 1 45%; }
