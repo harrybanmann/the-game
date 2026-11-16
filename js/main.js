@@ -1,17 +1,17 @@
-import { zahl, btc, dauer } from "./format.js?v=41";
-import * as speicher from "./speicher.js?v=41";
-import { kampfSystem } from "./kampf.js?v=41";
-import { waffenSystem } from "./waffen.js?v=41";
-import { tierSystem } from "./tiere.js?v=41";
-import { dungeonSystem } from "./dungeons.js?v=41";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=41";
-import { bitcoinSystem } from "./bitcoin.js?v=41";
-import { techSystem } from "./tech.js?v=41";
-import * as grafik from "./grafik.js?v=41";
-import { haushaltSystem } from "./haushalt.js?v=41";
-import { farmSystem } from "./farm.js?v=41";
-import { reittierSystem } from "./reittiere.js?v=41";
-import { setSystem } from "./sets.js?v=41";
+import { zahl, btc, dauer } from "./format.js?v=42";
+import * as speicher from "./speicher.js?v=42";
+import { kampfSystem } from "./kampf.js?v=42";
+import { waffenSystem } from "./waffen.js?v=42";
+import { tierSystem } from "./tiere.js?v=42";
+import { dungeonSystem } from "./dungeons.js?v=42";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=42";
+import { bitcoinSystem } from "./bitcoin.js?v=42";
+import { techSystem } from "./tech.js?v=42";
+import * as grafik from "./grafik.js?v=42";
+import { haushaltSystem } from "./haushalt.js?v=42";
+import { farmSystem } from "./farm.js?v=42";
+import { reittierSystem } from "./reittiere.js?v=42";
+import { setSystem } from "./sets.js?v=42";
 
 const $ = (id) => document.getElementById(id);
 
@@ -136,7 +136,13 @@ function schaden() {
   const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
   return grund * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden")) * (1 + setBonus().schaden);
 }
-const setBonus = () => (sets && frei("dungeons") ? sets.bonus() : { schaden: 0, leben: 0, setTeile: 0, setBonus: 0 });
+function setBonus() {
+  if (!sets || !frei("dungeons")) return { schaden: 0, leben: 0, setTeile: 0, setBonus: 0 };
+  const b = sets.bonus();
+  const f = 1 + tech.wert("setStaerke");
+  return { ...b, schaden: b.schaden * f, leben: b.leben * f };
+}
+const traenkeMax = () => daten.dungeons.heiltrank.max + tech.wert("traenkePlatz");
 // Die eine Waffe bestimmt den Kampfstil; die Zusatzwerte (Block, Tempo …) kommen von der ganzen Ausrüstung.
 function kampfWerte() {
   const b = waffen.bonus();
@@ -199,10 +205,11 @@ function tick() {
 
   if (sekunden >= off.abSekunden) {
     // Spiel war zu oder im Hintergrund: Formel statt Einzel-Schritte, mit Obergrenze.
-    const gezaehlt = Math.min(sekunden, Math.min(24, off.maxStunden + tech.wert("offline")) * 3600);
-    const menge = (proSekunde() + seite().kampf.rate) * gezaehlt * off.anteil;
+    const gezaehlt = Math.min(sekunden, offlineMaxStunden() * 3600);
+    const menge = (proSekunde() + seite().kampf.rate) * gezaehlt * offlineAnteil();
     gutschreiben(menge);
-    if (menge >= 1 && sekunden >= off.meldungAbSekunden) offlineMeldung(sekunden, gezaehlt, menge);
+    const beute = offlineBeute(gezaehlt);
+    if (sekunden >= off.meldungAbSekunden) offlineMeldung(sekunden, gezaehlt, menge, beute);
     sichern();
   } else {
     gutschreiben(proSekunde() * sekunden);
@@ -489,7 +496,7 @@ function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
   const trank = daten.dungeons.heiltrank;
-  $("stufe-text").textContent = z.boss ? "Boss · Tränke " + s.traenke + "/" + trank.max : "Stufe " + z.stufe;
+  $("stufe-text").textContent = z.boss ? "Boss · Tränke " + s.traenke + "/" + traenkeMax() : "Stufe " + z.stufe;
   // Punkte für die Wellen der Stufe: geschaffte sind gefüllt, die laufende ist größer.
   const punkte = $("wellen-punkte");
   const kp = z.boss ? "boss" : z.wellenProStufe + "|" + z.welle;
@@ -955,7 +962,10 @@ function geldInfo() {
   infoZeigen(() => ({
     titel: zahl(guthaben()) + " " + waehrung().name,
     bild: grafik.waehrungBild(zeitalter()),
-    zeilen: [marken([["+" + zahl(proSekunde()) + " pro Sek."], ["Kampf +" + zahl(seite().kampf.rate) + " pro Sek."]])],
+    zeilen: [
+      marken([["+" + zahl(proSekunde()) + " pro Sek."], ["Kampf +" + zahl(seite().kampf.rate) + " pro Sek."]]),
+      marken([["⏱ Offline zählen höchstens " + offlineMaxStunden() + " Std."], ["Ertrag " + Math.round(offlineAnteil() * 100) + " %"]]),
+    ],
   }));
 }
 
@@ -1707,7 +1717,7 @@ function techZeiten() {
   }
 }
 
-const AST_BILD = { produktion: "beutel", kampf: "schwert", handel: "farm", haushalt: "held" };
+const AST_BILD = { produktion: "beutel", kampf: "schwert", handel: "farm", haushalt: "held", sets: "schluessel" };
 
 // Der Baum wächst von oben nach unten: je Ebene ein Knoten in der Mitte, darunter zwei an den Seiten.
 function techZeichnen() {
@@ -2146,11 +2156,71 @@ function kurzMeldung(text) {
   meldungZeit = setTimeout(() => (m.hidden = true), 2500);
 }
 
-function offlineMeldung(wegSekunden, gezaehlt, menge) {
-  const off = daten.einstellungen.offline;
-  let text = "Du warst " + dauer(wegSekunden) + " weg.";
-  if (gezaehlt < wegSekunden) text += " Gezählt werden höchstens " + off.maxStunden + " Stunden.";
-  hinweis("Willkommen zurück!", text, "+" + zahl(menge) + " " + waehrung().name);
+// Offline (Harry 16.11.2026): Grenze und Anteil, beides im Tech-Baum erhöhbar.
+const offlineMaxStunden = () => Math.min(24, daten.einstellungen.offline.maxStunden + tech.wert("offline"));
+const offlineAnteil = () => Math.min(1, daten.einstellungen.offline.anteil + tech.wert("offlineBeute"));
+
+// Aus dem gemessenen Kampf-Tempo wird ausgerechnet, wie viele Gegner man in der Zeit besiegt hätte (im selben
+// Anteil wie das Geld). Daraus gibt es Erfahrung, Eier, Punkte und Schlüssel. Die Stufe bleibt stehen.
+function offlineBeute(sekunden) {
+  const r = seite().kampf.raten || {};
+  const anteil = offlineAnteil();
+  const b = daten.einstellungen.beute;
+  const typen = ["schwach", "normal", "elite"];
+  // Erwartungswert ganzzahlig machen: Ganzes sicher, Rest als Wurf.
+  const ganz = (x) => Math.floor(x) + (Math.random() < x - Math.floor(x) ? 1 : 0);
+  const erwartet = (chance, plus) => typen.reduce((s, t) => s + (r[t] || 0) * sekunden * anteil * (chance[t] || 0), 0) * (1 + plus);
+  const ergebnis = { siege: Math.round(typen.reduce((s, t) => s + (r[t] || 0), 0) * sekunden * anteil), xp: 0, eier: 0, fpunkte: 0, techpunkte: 0, schluessel: 0 };
+  const levelVorher = seite().level;
+  ergebnis.xp = Math.round((r.xp || 0) * sekunden * anteil);
+  if (ergebnis.xp > 0) xpGeben(ergebnis.xp);
+  ergebnis.level = seite().level - levelVorher;
+  if (frei("tiere")) {
+    const platz = Math.max(0, daten.tiere.eierLagerMax - seite().tiere.eier.length);
+    ergebnis.eier = Math.min(platz, ganz(erwartet(daten.tiere.eiChance, tech.wert("eier"))));
+    for (let i = 0; i < ergebnis.eier; i++) tiere.eiGeben(daten.tiere.eiRatio.normal, 0);
+  }
+  if (frei("faehigkeiten")) {
+    ergebnis.fpunkte = ganz(erwartet(b.fpunkte.chance, tech.wert("fpunkte")));
+    seite().faehigkeiten.punkte += ergebnis.fpunkte;
+  }
+  if (frei("tech")) {
+    ergebnis.techpunkte = ganz(erwartet(b.techpunkte.chance, tech.wert("techpunkte")));
+    stand.gemeinsam.tech.punkte += ergebnis.techpunkte;
+  }
+  if (frei("dungeons")) {
+    const vorher = dungeons.schluessel();
+    dungeons.schluesselGeben(ganz(erwartet(b.schluessel.chance, tech.wert("tickets"))));
+    ergebnis.schluessel = dungeons.schluessel() - vorher;
+  }
+  return ergebnis;
+}
+
+// Willkommen-Fenster: wie lange weg, wie viel davon zählt, und jede Belohnung als Symbol mit Zahl.
+function offlineMeldung(wegSekunden, gezaehlt, menge, beute) {
+  infoZeigen(() => {
+    const zeilen = [
+      marken([["⏱ Weg: " + dauer(wegSekunden)]]),
+      marken([["Gezählt: " + dauer(gezaehlt) + " von höchstens " + offlineMaxStunden() + " Std."], ["Ertrag " + Math.round(offlineAnteil() * 100) + " %"]]),
+    ];
+    const liste = el("div", "beute-liste");
+    const eintrag = (bild, text) => {
+      const e = el("span", "beute-eintrag");
+      const b = el("span", "wert-bild gross");
+      b.style.backgroundImage = bild;
+      e.append(b, el("span", null, text));
+      liste.append(e);
+    };
+    eintrag(grafik.waehrungBild(zeitalter()), "+" + zahl(menge) + " " + waehrung().name);
+    if (beute.xp > 0) eintrag(grafik.symbolBild("stern"), "+" + zahl(beute.xp) + " Erfahrung" + (beute.level > 0 ? " (+" + beute.level + " Level)" : ""));
+    if (beute.eier > 0) eintrag(grafik.symbolBild("ei"), "+" + beute.eier + (beute.eier === 1 ? " Ei" : " Eier"));
+    if (beute.fpunkte > 0) eintrag(grafik.symbolBild("stern"), "+" + beute.fpunkte + " Fähigkeitspunkte");
+    if (beute.techpunkte > 0) eintrag(grafik.symbolBild("tech"), "+" + beute.techpunkte + " Tech-Punkte");
+    if (beute.schluessel > 0) eintrag(grafik.symbolBild("schluessel"), "+" + beute.schluessel + " Schlüssel");
+    zeilen.push(liste);
+    if (beute.siege > 0) zeilen.push(el("div", "hinweis", "Etwa " + zahl(beute.siege) + " Gegner besiegt. Die Stufe bleibt, bis du wieder spielst."));
+    return { titel: "Willkommen zurück!", bild: grafik.symbolBild("uhr"), rund: true, zeilen, knoepfe: [{ text: "Weiter", zu: true, aktion: () => {} }] };
+  });
 }
 
 function hinweis(titel, text, menge) {
@@ -2468,7 +2538,9 @@ async function start() {
       const typen = (daten.gegner[zId] || gegnerDaten()).typen;
       return { leben: typen.elite.leben, schaden: typen.elite.schaden };
     },
-    setTeilGeben: (zId, ratio) => sets.geben(zId, ratio),
+    setTeilGeben: (zId, ratio) => sets.geben(zId, Math.max(1.3, ratio * (1 - Math.min(0.5, tech.wert("setSelten"))))),
+    schluesselPlus: () => tech.wert("schluesselPlatz"),
+    traenkeMax,
   });
   knoepfeVerbinden();
   allesZeichnen();

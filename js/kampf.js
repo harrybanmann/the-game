@@ -13,6 +13,7 @@ export function kampfSystem(api) {
   let takt = 0;
   let seitWelle = 0;
   let beuteWelle = 0;
+  let siegeWelle = { schwach: 0, normal: 0, elite: 0, xp: 0 }; // für die Offline-Beute
   let traenkeDabei = 0;
   // Boss-Fähigkeiten (lösen automatisch aus, im Kampf als Hinweis sichtbar) und Tier-Angriff.
   let bossUhren = {};
@@ -83,6 +84,7 @@ export function kampfSystem(api) {
     else spielerLeben = Math.min(max, spielerLeben + max * c.heilungZwischen);
     seitWelle = 0;
     beuteWelle = 0;
+    siegeWelle = { schwach: 0, normal: 0, elite: 0, xp: 0 };
     api.faehigkeiten().kampfStart();
   }
 
@@ -92,6 +94,8 @@ export function kampfSystem(api) {
     api.gutschreiben(g.beute);
     api.xpGeben(g.xp);
     beuteWelle += g.beute;
+    if (!g.boss && siegeWelle[g.typ] !== undefined) siegeWelle[g.typ] += 1;
+    if (!g.boss) siegeWelle.xp += g.xp;
     api.ereignis("sieg", g);
   }
 
@@ -106,6 +110,13 @@ export function kampfSystem(api) {
     // Geglätteter Ertrag pro Sekunde, wird für die Offline-Berechnung gebraucht.
     const jetzt = beuteWelle / Math.max(1, seitWelle);
     k().rate = k().rate > 0 ? k().rate * 0.7 + jetzt * 0.3 : jetzt;
+    // Gemessene Siege und Erfahrung pro Sekunde je Gegnerart, geglättet: daraus wird die Offline-Beute gewürfelt.
+    const r = k().raten || {};
+    for (const [art, n] of Object.entries(siegeWelle)) {
+      const neu = n / Math.max(1, seitWelle);
+      r[art] = r[art] > 0 ? r[art] * 0.7 + neu * 0.3 : neu;
+    }
+    k().raten = r;
     k().welle += 1;
     if (k().welle > w().proStufe) {
       k().welle = 1;

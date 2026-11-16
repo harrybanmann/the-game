@@ -194,6 +194,44 @@
           "wert": 0.001
         }
       ]
+    },
+    {
+      "id": "sets",
+      "name": "Dungeons und Offline",
+      "offen": "dungeons",
+      "effekte": [
+        {
+          "id": "schluesselPlatz",
+          "name": "Schlüsselbund",
+          "text": "+2 Plätze für Dungeon-Schlüssel",
+          "wert": 2
+        },
+        {
+          "id": "setSelten",
+          "name": "Bessere Set-Teile",
+          "text": "Seltenere Set-Teile aus Dungeons (+3 %)",
+          "wert": 0.03
+        },
+        {
+          "id": "setStaerke",
+          "name": "Stärkere Sets",
+          "text": "+5 % auf alle Set-Werte",
+          "wert": 0.05
+        },
+        {
+          "id": "traenkePlatz",
+          "name": "Trankgürtel",
+          "text": "+1 Platz für Heiltränke",
+          "wert": 1
+        },
+        {
+          "id": "offlineBeute",
+          "name": "Offline-Beute",
+          "text": "+5 Prozentpunkte Offline-Ertrag (Geld und Beute)",
+          "wert": 0.05
+        }
+      ]
     }
-  ]
+  ],
+  "_hinweis2": "Harry 16.11.2026: Tech-Baum an das Neue anpassen. Neuer Ast 'Dungeons und Offline' hinten angehängt (bestehende Äste unverändert, sonst würden gespeicherte Knoten ihre Wirkung tauschen). Wirkungen und Zahlen sind Vorschläge."
 }

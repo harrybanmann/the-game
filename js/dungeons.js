@@ -27,7 +27,7 @@ export function dungeonSystem(api) {
     const anzahl = 1 + (meilenstein ? d().set.meilensteinTeile : 0);
     for (let i = 0; i < anzahl; i++) teile.push(api.setTeilGeben(zId, ratio));
     const vorher = api.seite().traenke;
-    api.seite().traenke = Math.min(d().heiltrank.max, vorher + d().traenkeJeSieg);
+    api.seite().traenke = Math.min(api.traenkeMax ? api.traenkeMax() : d().heiltrank.max, vorher + d().traenkeJeSieg);
     return { teile, traenke: api.seite().traenke - vorher };
   }
 
@@ -35,7 +35,7 @@ export function dungeonSystem(api) {
     stufe,
     schluessel: () => s().schluessel,
     schluesselGeben(n) {
-      s().schluessel = Math.min(d().schluesselMax, s().schluessel + n);
+      s().schluessel = Math.min(d().schluesselMax + (api.schluesselPlus ? api.schluesselPlus() : 0), s().schluessel + n);
     },
     // Ergebnis: { text, teile } – teile sind die gewonnenen Set-Teile (für die Anzeige).
     kaempfen(zId) {

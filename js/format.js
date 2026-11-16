@@ -24,11 +24,13 @@ export function btc(wert) {
   return n.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
 }
 
+// Zeit sekundengenau (Harry 16.11.2026), z. B. "1 Std. 27 Min. 05 Sek." oder "3 Min. 09 Sek.".
 export function dauer(sekunden) {
   const s = Math.max(0, Math.floor(sekunden));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  if (h > 0) return `${h} Std. ${m} Min.`;
-  if (m > 0) return `${m} Min.`;
-  return `${s} Sek.`;
+  const sek = String(s % 60).padStart(2, "0");
+  if (h > 0) return `${h} Std. ${String(m).padStart(2, "0")} Min. ${sek} Sek.`;
+  if (m > 0) return `${m} Min. ${sek} Sek.`;
+  return `${s % 60} Sek.`;
 }

@@ -13,7 +13,7 @@ export function neueSeite(startZeitalter) {
     gesamtVerdient: 0,
     level: 1,
     xp: 0,
-    kampf: { index: 0, rate: 0, stufe: 1, welle: 1 },
+    kampf: { index: 0, rate: 0, raten: {}, stufe: 1, welle: 1 },
     schmiede: { stufe: 0, geschmiedet: 0, ausbauBis: null },
     waffen: { waffe: null, stil: null },
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
@@ -70,6 +70,7 @@ export function pruefen(stand) {
     seite.kampf = {
       index: Math.max(0, Math.floor(Number(k.index)) || 0),
       rate: Math.max(0, Number(k.rate) || 0),
+      raten: Object.fromEntries(["schwach", "normal", "elite", "xp"].map((a) => [a, Math.max(0, Number(k.raten && k.raten[a]) || 0)])),
       stufe: Math.max(1, Math.floor(Number(k.stufe)) || 1),
       welle: Math.max(1, Math.floor(Number(k.welle)) || 1),
     };
@@ -190,7 +191,7 @@ export function pruefen(stand) {
       const n = Math.floor(Number(v));
       if (!ALT.includes(k) && Number.isFinite(n) && n >= 1) dStufe[k] = n;
     }
-    seite.dungeons = { schluessel: Math.max(0, Math.min(30, schluessel || 0)), stufe: dStufe };
+    seite.dungeons = { schluessel: Math.max(0, Math.min(Number.isFinite(Number(du.schluessel)) ? 999 : 30, schluessel || 0)), stufe: dStufe };
     const se = seite.sets || {};
     const teil = (x) =>
       x && typeof x.z === "string" && typeof x.teil === "string" ? { z: x.z, teil: x.teil, seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0) } : null;

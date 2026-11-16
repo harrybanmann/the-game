@@ -894,3 +894,7 @@ h3 { font-size: 15px; margin-top: 2px; }
 /* Geschosse: quadratisches Feld, sonst schrumpft das Bild auf wenige Pixel */
 .geschoss, .geschoss.gross { width: 38px; height: 38px; margin-left: -19px; bottom: 36px; background-size: contain; }
 .geschoss.gross { width: 48px; height: 48px; margin-left: -24px; bottom: 30px; }
+/* Willkommen-Fenster: Belohnungen als Symbol mit Zahl */
+.beute-liste { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+.beute-eintrag { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.28); font-size: 14px; }
+.wert-bild.gross { width: 24px; height: 24px; flex: 0 0 24px; }
