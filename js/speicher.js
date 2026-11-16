@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 13;
+export const VERSION = 14;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -24,7 +24,6 @@ export function neueSeite(startZeitalter) {
     farm: { rechner: {}, teile: {}, letzter: 0 },
     btcMarkt: { faktor: 1, crashBis: 0, vorCrash: 1, letzter: 0 },
     haushalt: { schulden: 0, firma: 0, letzter: 0 },
-    tech: { punkte: 0, stufen: {}, laeuft: {} },
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { letzterTag: "", tickets: {}, stufe: {} },
@@ -41,6 +40,7 @@ export function neuerStand(startZeitalter) {
     gemeinsam: {
       einstellungen: {},
       figur: { name: "", aussehen: {} },
+      tech: { punkte: 0, stufen: {}, laeuft: {} },
     },
     seiten: {
       gut: neueSeite(startZeitalter),
@@ -137,16 +137,6 @@ export function pruefen(stand) {
       firma: Math.max(0, Math.floor(Number(hh.firma)) || 0),
       letzter: Number.isFinite(hh.letzter) ? hh.letzter : 0,
     };
-    const te = seite.tech || {};
-    const st = {};
-    for (const [id, n] of Object.entries(te.stufen || {})) {
-      const v = Math.floor(Number(n));
-      if (Number.isFinite(v) && v > 0) st[id] = Math.min(5, v);
-    }
-    const lf = {};
-    for (const [astId, l] of Object.entries(te.laeuft || {}))
-      if (l && typeof l.knoten === "string" && Number.isFinite(l.bis)) lf[astId] = { knoten: l.knoten, bis: l.bis };
-    seite.tech = { punkte: Math.max(0, Math.floor(Number(te.punkte)) || 0), stufen: st, laeuft: lf };
     const bt = seite.btc || {};
     const ups = {};
     for (const [platz, n] of Object.entries(bt.upgrades || {})) {
@@ -193,6 +183,21 @@ export function pruefen(stand) {
       seite.upgrades[k] = Number.isFinite(n) && n > 0 ? n : 0;
     }
   }
+  // Tech-Baum ist für Gut und Böse gemeinsam (Harry 16.11.2026). Alte Spielstände hatten ihn je Seite:
+  // Punkte werden zusammengezählt, je Knoten gilt die höhere Stufe, laufende Forschungen bleiben erhalten.
+  const quellen = [stand.gemeinsam.tech, stand.seiten.gut && stand.seiten.gut.tech, stand.seiten.boese && stand.seiten.boese.tech].filter(Boolean);
+  const tech = { punkte: 0, stufen: {}, laeuft: {} };
+  for (const te of quellen) {
+    tech.punkte += Math.max(0, Math.floor(Number(te.punkte)) || 0);
+    for (const [id, n] of Object.entries(te.stufen || {})) {
+      const v = Math.floor(Number(n));
+      if (Number.isFinite(v) && v > 0) tech.stufen[id] = Math.min(5, Math.max(tech.stufen[id] || 0, v));
+    }
+    for (const [astId, l] of Object.entries(te.laeuft || {}))
+      if (!tech.laeuft[astId] && l && typeof l.knoten === "string" && Number.isFinite(l.bis)) tech.laeuft[astId] = { knoten: l.knoten, bis: l.bis };
+  }
+  stand.gemeinsam.tech = tech;
+  for (const seite of [stand.seiten.gut, stand.seiten.boese]) if (seite) delete seite.tech;
   if (!Number.isFinite(stand.zuletztGespeichert)) stand.zuletztGespeichert = Date.now();
   const fig = stand.gemeinsam.figur || {};
   const au = fig.aussehen || {};

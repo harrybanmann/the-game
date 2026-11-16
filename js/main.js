@@ -1,14 +1,14 @@
-import { zahl, btc, dauer } from "./format.js?v=20";
-import * as speicher from "./speicher.js?v=20";
-import { kampfSystem } from "./kampf.js?v=20";
-import { waffenSystem } from "./waffen.js?v=20";
-import { tierSystem } from "./tiere.js?v=20";
-import { dungeonSystem } from "./dungeons.js?v=20";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=20";
-import { bitcoinSystem } from "./bitcoin.js?v=20";
-import { techSystem } from "./tech.js?v=20";
-import { haushaltSystem } from "./haushalt.js?v=20";
-import { farmSystem } from "./farm.js?v=20";
+import { zahl, btc, dauer } from "./format.js?v=21";
+import * as speicher from "./speicher.js?v=21";
+import { kampfSystem } from "./kampf.js?v=21";
+import { waffenSystem } from "./waffen.js?v=21";
+import { tierSystem } from "./tiere.js?v=21";
+import { dungeonSystem } from "./dungeons.js?v=21";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=21";
+import { bitcoinSystem } from "./bitcoin.js?v=21";
+import { techSystem } from "./tech.js?v=21";
+import { haushaltSystem } from "./haushalt.js?v=21";
+import { farmSystem } from "./farm.js?v=21";
 
 const $ = (id) => document.getElementById(id);
 
@@ -855,7 +855,7 @@ function techZeiten() {
 }
 
 function techZeichnen() {
-  $("tech-punkte").textContent = "Tech-Punkte: " + seite().tech.punkte + " (gibt es in den Dungeons)";
+  $("tech-punkte").textContent = "Tech-Punkte: " + stand.gemeinsam.tech.punkte + " (gibt es in den Dungeons, gilt für beide Seiten)";
   const reiter = $("tech-reiter");
   reiter.replaceChildren();
   for (const a of tech.aeste()) {
@@ -1410,7 +1410,7 @@ async function start() {
   });
   tech = techSystem({
     daten: () => daten.tech,
-    seite,
+    techStand: () => stand.gemeinsam.tech,
     zeitalterNummer: () => zeitalter().nummer,
     systemOffen: (name) =>
       name === "immer" || name === "dungeons" || (name === "haushalt" && seite().haushalt.firma > 0) || (name === "farm" && farm.hatFarm()),

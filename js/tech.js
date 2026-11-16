@@ -1,10 +1,11 @@
 // Tech-Baum: 4 Äste, je 12 Ebenen × 3 Knoten, je 5 Stufen. Alle Äste gleich aufgebaut,
 // die Wirkungen wiederholen sich in jeder Ebene reihum (wie bei Forge Master).
+// Der Baum gilt für beide Seiten gemeinsam; neue Ebenen richten sich nach dem Zeitalter der aktiven Seite.
 // Pro Ast läuft höchstens eine Forschung; sie ist nach echter Zeit fertig (auch offline).
 
 export function techSystem(api) {
   const d = () => api.daten();
-  const t = () => api.seite().tech;
+  const t = () => api.techStand(); // gemeinsam für Gut und Böse
 
   const ast = (id) => d().aeste.find((a) => a.id === id);
   const knotenId = (astId, ebene, nr) => astId + "-" + ebene + "-" + nr;
