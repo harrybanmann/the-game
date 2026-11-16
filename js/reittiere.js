@@ -15,7 +15,8 @@ export function reittierSystem(api) {
     const sterne = tier.sterne || 0;
     const tempo = Math.min(
       c.max,
-      (c.grund + c.jeZeitalter * (api.zeitalterNummerVon(vorlage.zeitalter) - 1)) * (1 + c.jeSeltenheit * tier.seltenheit) * (1 + c.jeStern * sterne)
+      (c.grund + c.jeZeitalter * (api.zeitalterNummerVon(vorlage.zeitalter) - 1)) * (1 + c.jeSeltenheit * tier.seltenheit) * (1 + c.jeStern * sterne) *
+        (api.haendlerFaktor ? api.haendlerFaktor() : 1)
     );
     return {
       nr: tier.nr,
@@ -24,6 +25,8 @@ export function reittierSystem(api) {
       zeitalter: vorlage.zeitalter,
       seltenheit: api.seltenheiten()[tier.seltenheit] || api.seltenheiten()[0],
       sterne,
+      rang: tier.seltenheit,
+      zeitalterNr: api.zeitalterNummerVon(vorlage.zeitalter),
       tempo,
     };
   }
@@ -44,7 +47,11 @@ export function reittierSystem(api) {
       const a = werte(finde(r().aktiv));
       return a ? a.tempo : 0;
     },
-    liste: () => r().sammlung.map(werte).filter(Boolean).sort((a, b) => b.tempo - a.tempo),
+    liste: () =>
+      r()
+        .sammlung.map(werte)
+        .filter(Boolean)
+        .sort((a, b) => b.rang - a.rang || b.zeitalterNr - a.zeitalterNr || b.sterne - a.sterne || b.tempo - a.tempo),
     // Wird beim Schlüpfen gefragt: mit etwas Glück kommt ein Reittier statt eines Haustiers.
     ausEi(ei) {
       if (Math.random() >= d().eiChance) return null;
@@ -62,19 +69,21 @@ export function reittierSystem(api) {
     satteln(nr) {
       if (finde(nr)) r().aktiv = nr;
     },
+    // 3 gleiche werden zur nächsten Seltenheit; erst ganz oben gibt es (im Endgame) Sterne.
     mergbar(nr) {
-      if (api.sterneOffen && !api.sterneOffen()) return false;
       const tier = finde(nr);
-      return !!tier && gleiche(tier).length >= 2 && (tier.sterne || 0) < d().maxSterne;
+      if (!tier || gleiche(tier).length < 2) return false;
+      if (tier.seltenheit < api.seltenheiten().length - 1) return true;
+      return (!api.sterneOffen || api.sterneOffen()) && (tier.sterne || 0) < d().maxSterne;
     },
     mergen(nr) {
-      if (api.sterneOffen && !api.sterneOffen()) return false;
+      if (!this.mergbar(nr)) return false;
       const tier = finde(nr);
-      if (!tier || gleiche(tier).length < 2 || (tier.sterne || 0) >= d().maxSterne) return false;
       const war = r().aktiv;
       const weg = gleiche(tier).sort((a, b) => (a.nr === war ? 1 : 0) - (b.nr === war ? 1 : 0)).slice(0, 2);
       r().sammlung = r().sammlung.filter((x) => !weg.includes(x));
-      tier.sterne = (tier.sterne || 0) + 1;
+      if (tier.seltenheit < api.seltenheiten().length - 1) tier.seltenheit += 1;
+      else tier.sterne = (tier.sterne || 0) + 1;
       if (!finde(war)) besteNehmen();
       return true;
     },

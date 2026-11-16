@@ -259,7 +259,14 @@ export function waffenSystem(api) {
       return s()
         .lager.map((e) => ({ ...werte(e), anzahl: e.anzahl, roh: nur(e), mergbar: mergbar(e) }))
         .filter((e) => e.id)
-        .sort((a, b) => b.staerke - a.staerke);
+        // Nach Qualität (Harry 16.11.2026): Seltenheit, dann Zeitalter, dann Sterne, dann Stärke.
+        .sort(
+          (a, b) =>
+            b.roh.seltenheit - a.roh.seltenheit ||
+            api.zeitalterNummerVon(b.zeitalter) - api.zeitalterNummerVon(a.zeitalter) ||
+            b.sterne - a.sterne ||
+            b.staerke - a.staerke
+        );
     },
     anlegenAusLager(stueck) {
       if (ausLager(stueck, 1) === 1) anlegen(stueck);

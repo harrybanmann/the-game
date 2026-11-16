@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 17;
+export const VERSION = 18;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -26,7 +26,8 @@ export function neueSeite(startZeitalter) {
     haushalt: { schulden: 0, firma: 0, letzter: 0 },
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
-    dungeons: { letzterTag: "", tickets: {}, stufe: {} },
+    dungeons: { schluessel: 0, stufe: {} },
+    sets: { sammlung: [], an: { helm: null, ruestung: null, handschuhe: null, waffe: null } },
     tiere: { eier: [], brueten: [], sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
     reittiere: { sammlung: [], naechsteNr: 1, aktiv: null },
   };
@@ -178,19 +179,31 @@ export function pruefen(stand) {
       sammlung,
       ausgeruestet: (Array.isArray(fa.ausgeruestet) ? fa.ausgeruestet : []).filter((id) => ids.has(id)),
     };
+    // Dungeons (V30): Schlüssel statt Tages-Tickets, Stufe je Zeitalter. Alte Tickets werden zu Schlüsseln,
+    // die alten Dungeons (Eier-Höhle, Waffenkammer, Schatzkammer) und ihre Stufen fallen weg.
     const du = seite.dungeons || {};
-    const zahlen = (roh, standard, mindestens) => {
-      const aus = {};
-      for (const art of ["eier", "ausruestung", "schatz"]) {
-        const n = Math.floor(Number(roh && roh[art]));
-        aus[art] = Number.isFinite(n) && n >= mindestens ? n : standard;
-      }
-      return aus;
-    };
-    seite.dungeons = {
-      letzterTag: typeof du.letzterTag === "string" ? du.letzterTag : "",
-      tickets: zahlen(du.tickets, 3, 0),
-      stufe: zahlen(du.stufe, 1, 1),
+    const ALT = ["eier", "ausruestung", "schatz"];
+    let schluessel = Math.floor(Number(du.schluessel));
+    if (!Number.isFinite(schluessel)) schluessel = Object.values(du.tickets || {}).reduce((a, n) => a + (Math.floor(Number(n)) || 0), 0);
+    const dStufe = {};
+    for (const [k, v] of Object.entries(du.stufe || {})) {
+      const n = Math.floor(Number(v));
+      if (!ALT.includes(k) && Number.isFinite(n) && n >= 1) dStufe[k] = n;
+    }
+    seite.dungeons = { schluessel: Math.max(0, Math.min(30, schluessel || 0)), stufe: dStufe };
+    const se = seite.sets || {};
+    const teil = (x) =>
+      x && typeof x.z === "string" && typeof x.teil === "string" ? { z: x.z, teil: x.teil, seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0) } : null;
+    const an = se.an || {};
+    seite.sets = {
+      sammlung: (Array.isArray(se.sammlung) ? se.sammlung : [])
+        .map((x) => {
+          const t = teil(x);
+          const n = Math.floor(Number(x && x.anzahl)) || 0;
+          return t && n > 0 ? { ...t, anzahl: n } : null;
+        })
+        .filter(Boolean),
+      an: { helm: teil(an.helm), ruestung: teil(an.ruestung), handschuhe: teil(an.handschuhe), waffe: teil(an.waffe) },
     };
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);

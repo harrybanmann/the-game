@@ -157,10 +157,16 @@ const BOSSE = {
 // sind an der Figur zu sehen: Material in der Farbe ihres Zeitalters, Rand in der Farbe der Seltenheit.
 export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
   const f = zeitalter.farben;
-  const teil = (p) => (tragen[p] ? { m: material(tragen[p].zeitalter).metall, rand: tragen[p].farbe, frueh: tragen[p].zeitalter.nummer <= 2 } : null);
+  // Set-Teile aus den Dungeons bringen eigene Farben mit (metall); sonst bestimmt das Zeitalter das Material.
+  const teil = (p) =>
+    tragen[p]
+      ? tragen[p].metall
+        ? { m: tragen[p].metall, rand: tragen[p].akzent || tragen[p].farbe, frueh: false }
+        : { m: material(tragen[p].zeitalter).metall, rand: tragen[p].farbe, frueh: tragen[p].zeitalter.nummer <= 2 }
+      : null;
   const helm = teil("helm"), ruestung = teil("ruestung"), handschuhe = teil("handschuhe"), stiefel = teil("stiefel");
   const schluessel =
-    ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe : "-")).join(",") +
+    ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe + (tragen[p].metall || "") + (tragen[p].akzent || "") : "-")).join(",") +
     (tragen.schild ? "S" : "") + (tragen.sitzt ? "R" : "") + (tragen.aura || "");
   return alsBild(["spieler", seite, farbe, zeitalter.id, schluessel].join("|"), () => {
     const o =
@@ -180,12 +186,13 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
 }
 
 // Der Bogen in der Hand des Helden in drei Stufen: 0 = entspannt (Pfeil ist weg), 1 = halb gespannt, 2 = voll gespannt.
-export function bogenBild(zeitalter, stufe) {
-  return alsBild(["bogen", zeitalter.id, stufe].join("|"), () => {
-    const m = material(zeitalter);
+export function bogenBild(zeitalter, stufe, set) {
+  return alsBild(["bogen", zeitalter.id, stufe, set ? set.zeitalter : ""].join("|"), () => {
+    const m = set ? { metall: set.rand } : material(zeitalter);
+    const holz = set ? set.farbe : "#9a6a3c";
     const zug = [0, 9, 18][stufe] || 0;
     const bauch = 52 - zug * 0.35;
-    let t = `<path d="M22,6 Q${bauch},32 22,58" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M22,6 Q${bauch},32 22,58" fill="none" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/>`;
+    let t = `<path d="M22,6 Q${bauch},32 22,58" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M22,6 Q${bauch},32 22,58" fill="none" stroke="${holz}" stroke-width="4" stroke-linecap="round"/>`;
     t += `<path d="M22,6 L${22 - zug},32 L22,58" fill="none" stroke="${U}" stroke-width="2.5" stroke-linejoin="round"/>`;
     if (stufe > 0) t += `<line x1="${22 - zug}" y1="32" x2="${54 - zug}" y2="32" stroke="${U}" stroke-width="3.5" stroke-linecap="round"/><path d="M${60 - zug},32 L${50 - zug},26 V38 Z" fill="${m.metall}" ${S3}/>`;
     return svg(64, 64, t);
@@ -284,6 +291,20 @@ export function stueckeMelden(liste) {
 }
 
 // platz: nah, fern, helm, handschuhe, ruestung, stiefel, ring1, ring2, amulett, guertel. id = Stück (für die Variante).
+// Set-Teile aus den Dungeons: dieselben Formen, aber in den Farben des Sets (set = null: leerer Platz).
+export function setTeilBild(teil, set) {
+  const art = teil === "waffe" ? "nah" : teil;
+  return alsBild(["setteil", art, set ? set.zeitalter : "-"].join("|"), () => {
+    const m = set ? { frueh: false, metall: set.farbe, akzent: set.rand, gold: set.rand } : { frueh: false, metall: "#b9bec7", akzent: "#a3a8b2", gold: "#b9bec7" };
+    return svg(64, 64, `<g opacity="${set ? 1 : 0.55}">${stueck(art, 0, m)}</g>`);
+  });
+}
+// Die getragene Waffe mit dem Aussehen der Set-Waffe (Form der Waffe, Farben des Sets).
+export function setWaffeBild(art, set, id) {
+  const v = varianten.get(id) || 0;
+  return alsBild(["setwaffe", art, set.zeitalter, v].join("|"), () => svg(64, 64, stueck(art, v, { frueh: false, metall: set.farbe, akzent: set.rand, gold: set.rand })));
+}
+
 export function stueckBild(platz, zeitalter, id, leer) {
   const art = platz.startsWith("ring") ? "ring" : platz;
   const v = varianten.get(id) || 0;
@@ -655,6 +676,7 @@ const SYMBOLE = {
   plus: () => `<path d="M32,10 V54 M10,32 H54" stroke="${U}" stroke-width="18" stroke-linecap="round"/><path d="M32,10 V54 M10,32 H54" stroke="#6fe08a" stroke-width="9" stroke-linecap="round"/>`,
   nest: () => `<path d="M6,36 Q32,62 58,36 Q46,44 32,44 Q18,44 6,36 Z" fill="#9a6a3c" ${S}/><path d="M32,10 Q44,10 45,28 Q45,40 32,40 Q19,40 19,28 Q20,10 32,10 Z" fill="#f4efe2" ${S}/>`,
   beutel: () => `<path d="M22,18 Q8,34 12,48 Q16,58 32,58 Q48,58 52,48 Q56,34 42,18 Z" fill="#b98a3e" ${S}/><path d="M22,18 Q32,10 42,18" fill="none" ${S}/><path d="M20,10 L26,18 H38 L44,10 Q32,4 20,10 Z" fill="#b98a3e" ${S}/><circle cx="32" cy="40" r="8" fill="#f2c230" ${S3}/>`,
+  schluessel: () => `<circle cx="20" cy="22" r="13" fill="#f2c230" ${S}/><circle cx="20" cy="22" r="5" fill="#9a6a3c" ${S3}/><path d="M30,30 L56,56 M44,44 l-6,6 M50,50 l-6,6" stroke="${U}" stroke-width="11" stroke-linecap="round"/><path d="M30,30 L56,56 M44,44 l-6,6 M50,50 l-6,6" stroke="#f2c230" stroke-width="5" stroke-linecap="round"/>`,
   zu: () => `<path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="${U}" stroke-width="16" stroke-linecap="round"/><path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>`,
   pfeil: () => `<path d="M2,32 H44" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M2,32 H44" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M62,32 L44,22 V42 Z" fill="#d5dbe2" ${S3}/>`,
   amboss: () => `<path d="M4,30 H40 Q48,30 50,36 H38 V42 Q38,46 42,50 V56 H12 V50 Q16,46 16,42 Q6,40 4,30 Z" fill="#8a94a3" ${S}/><g transform="rotate(30 44 18)"><rect x="41" y="14" width="6" height="30" rx="3" fill="#9a6a3c" ${S3}/><rect x="32" y="4" width="24" height="14" rx="4" fill="#d5dbe2" ${S}/></g>`,

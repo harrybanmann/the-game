@@ -1,16 +1,17 @@
-import { zahl, btc, dauer } from "./format.js?v=40";
-import * as speicher from "./speicher.js?v=40";
-import { kampfSystem } from "./kampf.js?v=40";
-import { waffenSystem } from "./waffen.js?v=40";
-import { tierSystem } from "./tiere.js?v=40";
-import { dungeonSystem } from "./dungeons.js?v=40";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=40";
-import { bitcoinSystem } from "./bitcoin.js?v=40";
-import { techSystem } from "./tech.js?v=40";
-import * as grafik from "./grafik.js?v=40";
-import { haushaltSystem } from "./haushalt.js?v=40";
-import { farmSystem } from "./farm.js?v=40";
-import { reittierSystem } from "./reittiere.js?v=40";
+import { zahl, btc, dauer } from "./format.js?v=41";
+import * as speicher from "./speicher.js?v=41";
+import { kampfSystem } from "./kampf.js?v=41";
+import { waffenSystem } from "./waffen.js?v=41";
+import { tierSystem } from "./tiere.js?v=41";
+import { dungeonSystem } from "./dungeons.js?v=41";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=41";
+import { bitcoinSystem } from "./bitcoin.js?v=41";
+import { techSystem } from "./tech.js?v=41";
+import * as grafik from "./grafik.js?v=41";
+import { haushaltSystem } from "./haushalt.js?v=41";
+import { farmSystem } from "./farm.js?v=41";
+import { reittierSystem } from "./reittiere.js?v=41";
+import { setSystem } from "./sets.js?v=41";
 
 const $ = (id) => document.getElementById(id);
 
@@ -26,6 +27,7 @@ let tech; // Tech-Baum
 let haushalt; // Haushalt und Firma
 let farm; // Trading, Mining Farm, BTC-Markt
 let reittiere; // Reittiere (Angriffstempo)
+let sets; // Set-Teile aus den Dungeons
 let farmReiter = "trading";
 let techAst = "produktion";
 let gewaehltesStueck = null; // { platz } oder { roh } (Lager)
@@ -132,8 +134,9 @@ function schaden() {
   const b = waffen.bonus();
   const tb = tiere.bonus();
   const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
-  return grund * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden"));
+  return grund * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden")) * (1 + setBonus().schaden);
 }
+const setBonus = () => (sets && frei("dungeons") ? sets.bonus() : { schaden: 0, leben: 0, setTeile: 0, setBonus: 0 });
 // Die eine Waffe bestimmt den Kampfstil; die Zusatzwerte (Block, Tempo …) kommen von der ganzen Ausrüstung.
 function kampfWerte() {
   const b = waffen.bonus();
@@ -157,7 +160,7 @@ function maxLeben() {
   const tb = tiere.bonus();
   const b = waffen.bonus();
   const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + b.leben + tb.leben;
-  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("leben"));
+  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("leben")) * (1 + setBonus().leben);
 }
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
@@ -206,7 +209,6 @@ function tick() {
     kampf.schritt(sekunden);
   }
 
-  dungeons.schritt();
   for (const n of farm.schritt(jetzt)) if (!$("farm-fenster").hidden) kurzMeldung(n);
   if (!$("farm-fenster").hidden) farmZeichnen(false);
   if (frei("haushalt")) haushalt.schritt(jetzt, Math.min(24, off.maxStunden + tech.wert("offline")) * 3600);
@@ -292,6 +294,12 @@ function spielerBildSetzen() {
     const w = waffen.werte(waffen.hole(p), p);
     if (w) tragen[p] = { zeitalter: zeitalterVon(w.zeitalter), farbe: w.seltenheit.farbe };
   }
+  // Set-Teile aus den Dungeons bestimmen das Aussehen (Farben des Sets), die Werte kommen weiter von der Rüstung.
+  if (frei("dungeons"))
+    for (const p of ["helm", "ruestung", "handschuhe"]) {
+      const st = sets.angelegt(p);
+      if (st) tragen[p] = { zeitalter: zeitalterVon(st.z), farbe: st.seltenheitInfo.farbe, metall: st.set.farbe, akzent: st.set.rand };
+    }
   const waffe = waffen.werte(waffen.hole("waffe"), "waffe");
   tragen.schild = !!waffe && waffe.hand === "schild";
   tragen.sitzt = frei("reittiere") && !!reittiere.aktiv();
@@ -424,13 +432,13 @@ function treffer(box, menge, farbe, gross) {
 // Pfeil fliegt quer durch die Arena (nur Anzeige; der Schaden ist schon verrechnet).
 function geschoss(von, nach, gespiegelt, art, gross) {
   const arena = $("arena");
-  if (arena.querySelectorAll(".geschoss").length >= 6) return;
+  if (arena.querySelectorAll(".geschoss").length >= 8) return;
   const g = el("div", "geschoss" + (gespiegelt ? " gespiegelt" : "") + (gross ? " gross" : ""));
   g.style.backgroundImage = grafik.geschossBild(art || "pfeil");
   arena.append(g);
-  const flug = g.animate([{ left: von + "%" }, { left: nach + "%" }], { duration: 220, easing: "linear" });
+  const flug = g.animate([{ left: von + "%" }, { left: nach + "%" }], { duration: 360, easing: "linear" });
   flug.onfinish = () => g.remove();
-  setTimeout(() => g.remove(), 400);
+  setTimeout(() => g.remove(), 600);
 }
 
 // Kurzes Wort oder Zeichen, das über einer Figur aufsteigt (Block, Heilung …).
@@ -456,7 +464,8 @@ function heldWaffe(stufe) {
   const w = waffen.werte(waffen.hole("waffe"), "waffe");
   const bild = $("held-waffe");
   const bogen = !!w && w.hand === "bogen";
-  const k = (w ? w.id : "") + "|" + zeitalter().id + "|" + (bogen ? stufe : "");
+  const skin = frei("dungeons") ? sets.angelegt("waffe") : null; // Set-Waffe: Aussehen in den Farben des Sets
+  const k = (w ? w.id : "") + "|" + zeitalter().id + "|" + (bogen ? stufe : "") + "|" + (skin ? skin.z : "");
   if (bild.dataset.k === k) return;
   bild.dataset.k = k;
   bild.hidden = !w;
@@ -465,7 +474,7 @@ function heldWaffe(stufe) {
   bild.classList.toggle("fern", w.art === "fern");
   bild.classList.toggle("nah", w.art === "nah");
   bild.classList.toggle("bogen", bogen);
-  bild.style.backgroundImage = bogen ? grafik.bogenBild(z, stufe) : grafik.stueckBild(w.art, z, w.id, false);
+  bild.style.backgroundImage = bogen ? grafik.bogenBild(z, stufe, skin && skin.set) : skin ? grafik.setWaffeBild(w.art, skin.set, w.id) : grafik.stueckBild(w.art, z, w.id, false);
 }
 
 // Weißer Bogen am Gegner, wenn der Held mit der Nahkampf-Waffe trifft.
@@ -1214,6 +1223,7 @@ function tierKachel(w, marke) {
     bild: grafik.tierBild(w.id),
     sterne: w.sterne,
     lv: marke,
+    punkt: tiere.mergbar(w.nr),
     klick: () => tierInfo(w.nr),
   });
 }
@@ -1248,7 +1258,7 @@ function tierInfo(nr) {
         { text: "Als Kämpfer", aus: t.kaempfer === w.nr, aktion: tun(tiere.alsKaempfer) },
         { text: "Als Helfer", aus: tiere.plaetze() === 0 || t.supporter.includes(w.nr), aktion: tun(tiere.alsSupporter) },
         imTeam ? { text: "Aus dem Team", rot: true, aktion: tun(tiere.herausnehmen) } : null,
-        frei("sterne") ? { text: "Mergen (3 → +1 Stern)", aus: !tiere.mergbar(w.nr), aktion: tun(tiere.mergen) } : null,
+        { text: "Mergen (3 gleiche → nächste Stufe)", aus: !tiere.mergbar(w.nr), aktion: tun((nr) => tiere.mergen(nr)) },
       ],
     };
   });
@@ -1302,8 +1312,10 @@ function tiereZeichnen() {
     team.append(tierKachel(w, frei_ ? "Hilfe" : "Lv. " + ab[i + 1]));
   }
   const alle = t.sammlung.map((x) => tiere.werte(x)).filter(Boolean);
-  alle.sort((a, b) => b.staerke - a.staerke);
+  // Nach Qualität: Seltenheit, Zeitalter, Sterne, Stärke.
+  alle.sort((a, b) => b.rang - a.rang || zeitalterVon(b.zeitalter).nummer - zeitalterVon(a.zeitalter).nummer || b.sterne - a.sterne || b.staerke - a.staerke);
   $("sammlung-titel").textContent = "Sammlung (" + alle.length + ")";
+  $("tier-mergen").hidden = !alle.some((w) => tiere.mergbar(w.nr));
   const sammlung = $("tier-sammlung");
   sammlung.replaceChildren(...alle.map((w) => tierKachel(w, "")));
   if (!alle.length) sammlung.append(el("p", "hinweis", "Noch kein Tier."));
@@ -1311,43 +1323,185 @@ function tiereZeichnen() {
 
 // ---------- Dungeons ----------
 
-function dungeonErgebnis(text) {
-  if (text) $("dungeon-ergebnis").textContent = text;
+function dungeonErgebnis(r) {
+  if (r) {
+    if (r.text) $("dungeon-ergebnis").textContent = r.text;
+    else {
+      const teile = r.teile.map((t) => t.seltenheitInfo.name + " " + t.set.name + "-" + SET_TEIL_NAMEN[t.teil] + (t.angelegt ? " (angelegt)" : "")).join(", ");
+      $("dungeon-ergebnis").textContent =
+        (r.sieg ? (r.auto ? "Auto Stufe " : "Sieg in Stufe ") + r.stufe : "Zu stark. Belohnung von Stufe " + r.stufe) + ": " + teile + (r.traenke ? ", 1 Heiltrank" : "");
+    }
+  }
   dungeonsZeichnen();
+  rasterZeichnen();
   anzeigeAktualisieren();
   sichern();
 }
 
+const SET_TEIL_NAMEN = { helm: "Helm", ruestung: "Rüstung", handschuhe: "Handschuhe", waffe: "Waffe" };
+const offeneDungeons = () => daten.dungeons.sets.filter((x) => zeitalterVon(x.zeitalter).nummer <= zeitalter().nummer && daten.zeitalter.some((z) => z.id === x.zeitalter));
+
+// Ein Dungeon je Zeitalter (bis zum aktuellen), darunter das getragene Set und die Sammlung.
 function dungeonsZeichnen() {
+  $("schluessel-text").textContent = "🗝 " + dungeons.schluessel();
   const box = $("dungeon-liste");
   box.replaceChildren();
-  for (const art of daten.dungeons.arten) {
-    if (art.id === "eier" && !frei("tiere")) continue; // Eier gibt es erst mit den Haustieren
-    const i = dungeons.info(art.id);
+  for (const s of offeneDungeons()) {
+    const z = zeitalterVon(s.zeitalter);
     box.append(
       bildKachel({
-        titel: art.name,
-        farbe: "#6a4a8a",
-        bild: grafik.dungeonBild(art.id),
-        lv: "Stufe " + i.stufe,
-        marke: "🎟 " + i.tickets,
-        klick: () => dungeonInfo(art),
+        titel: s.name,
+        farbe: s.farbe,
+        bild: grafik.setTeilBild("helm", s),
+        lv: "Stufe " + dungeons.stufe(s.zeitalter),
+        marke: "ZA " + z.nummer,
+        klick: () => dungeonInfo(s),
       })
     );
   }
+  const plaetze = $("set-plaetze");
+  plaetze.replaceChildren();
+  for (const p of daten.dungeons.set.teile) {
+    const w = sets.angelegt(p);
+    const lv = bitcoin.stufe("set-" + p);
+    plaetze.append(
+      bildKachel({
+        leer: !w,
+        farbe: w && w.seltenheitInfo.farbe,
+        glanz: w && w.seltenheitInfo.glanz,
+        bild: w ? grafik.setTeilBild(p, w.set) : grafik.setTeilBild(p, null),
+        lv: lv > 0 ? "Lv. " + lv : "",
+        marke: w ? "" : SET_TEIL_NAMEN[p],
+        klick: () => setPlatzInfo(p),
+      })
+    );
+  }
+  const b = setBonus();
+  $("set-bonus").textContent =
+    "+" + prozent(b.schaden) + " Schaden und Leben" + (b.setBonus > 0 ? " (davon Set-Bonus " + prozent(b.setBonus) + ")" : " · Set-Bonus ab 2 Teilen aus einem Set");
+  const liste = sets.liste();
+  $("set-mergen").hidden = !liste.some((e) => e.mergbar);
+  $("set-titel").textContent = "Sammlung (" + liste.reduce((n, e) => n + e.anzahl, 0) + ")";
+  const sammlung = $("set-sammlung");
+  sammlung.replaceChildren();
+  if (!liste.length) sammlung.append(el("p", "hinweis", "Noch keine Set-Teile. Jeder Dungeon-Sieg bringt eins."));
+  for (const e of liste)
+    sammlung.append(
+      bildKachel({
+        farbe: e.seltenheitInfo.farbe,
+        glanz: e.seltenheitInfo.glanz,
+        bild: grafik.setTeilBild(e.teil, e.set),
+        anzahl: e.anzahl,
+        punkt: e.mergbar,
+        klick: () => setTeilInfo(e),
+      })
+    );
 }
 
-function dungeonInfo(art) {
+
+
+function setWerteZeile(w) {
+  return marken([["⚔ +" + prozent(w.prozent)], ["♥ +" + prozent(w.prozent)], [w.set.name]]);
+}
+
+function setPlatzInfo(p) {
   infoZeigen(() => {
-    const i = dungeons.info(art.id);
+    const w = sets.angelegt(p);
     return {
-      titel: art.name,
-      bild: grafik.dungeonBild(art.id),
-      farbe: "#6a4a8a",
-      zeilen: [art.text, marken([["Tickets " + i.tickets + "/" + daten.dungeons.ticketsMax], ["Stufe " + i.stufe]]), "Jeden Tag kommen " + daten.dungeons.ticketsProTag + " Tickets dazu."],
+      titel: w ? w.set.name + "-" + SET_TEIL_NAMEN[p] : SET_TEIL_NAMEN[p],
+      titelFarbe: w ? w.seltenheitInfo.farbe : "",
+      bild: grafik.setTeilBild(p, w ? w.set : null),
+      farbe: w ? w.seltenheitInfo.farbe : "#cfd3da",
+      zeilen: [w ? el("div", "hinweis", w.seltenheitInfo.name) : "Noch leer. Set-Teile gibt es in den Dungeons.", w ? setWerteZeile(w) : "", haendlerZeile("set-" + p)],
+      knoepfe: [haendlerKnopf("set-" + p)],
+    };
+  });
+}
+
+function setTeilInfo(e) {
+  infoZeigen(() => {
+    const aktuell = sets.liste().find((x) => x.z === e.z && x.teil === e.teil && x.seltenheit === e.seltenheit);
+    if (!aktuell) return null;
+    const mitHaendler = sets.werte(aktuell);
+    const tun = (aktion) => () => {
+      aktion();
+      dungeonsZeichnen();
+      rasterZeichnen();
+      anzeigeAktualisieren();
+      sichern();
+    };
+    return {
+      titel: aktuell.set.name + "-" + SET_TEIL_NAMEN[aktuell.teil] + " ×" + aktuell.anzahl,
+      titelFarbe: aktuell.seltenheitInfo.farbe,
+      bild: grafik.setTeilBild(aktuell.teil, aktuell.set),
+      farbe: aktuell.seltenheitInfo.farbe,
+      zeilen: [el("div", "hinweis", aktuell.seltenheitInfo.name + " · Zeitalter " + aktuell.zeitalterNr), setWerteZeile(mitHaendler)],
       knoepfe: [
-        { text: "Stufe " + i.stufe + " kämpfen", aus: i.tickets <= 0, zu: true, aktion: () => dungeonErgebnis(dungeons.kaempfen(art.id)) },
-        i.stufe > 1 ? { text: "Auto: Stufe " + (i.stufe - 1), aus: i.tickets <= 0, zu: true, aktion: () => dungeonErgebnis(dungeons.autoClear(art.id)) } : null,
+        { text: "Anlegen", zu: true, aktion: tun(() => sets.anlegen(aktuell)) },
+        { text: "Mergen (3 gleiche → nächste Stufe)", aus: !aktuell.mergbar, aktion: tun(() => sets.mergen(aktuell)) },
+      ],
+    };
+  });
+}
+
+// ---------- Händler für Plätze ohne Schmiede-Stück (Kämpfer-Tier, Reittier, Set-Teile) ----------
+const HAENDLER_NAMEN = { tier: "Kämpfer-Tier", reittier: "Reittier", "set-helm": "Set-Helm", "set-ruestung": "Set-Rüstung", "set-handschuhe": "Set-Handschuhe", "set-waffe": "Set-Waffe" };
+
+function haendlerZeile(platz) {
+  return el("div", "hinweis", "Händler Lv. " + bitcoin.stufe(platz) + "/100 · +" + Math.round((bitcoin.faktor(platz) - 1) * 100) + " % Werte, bleibt für immer");
+}
+
+function haendlerKnopf(platz) {
+  const voll = bitcoin.voll(platz);
+  const preis = frei("bitcoin") ? btc(bitcoin.preis(platz)) + " ₿" : zahl(bitcoin.preisGeld(platz)) + " " + waehrung().name;
+  return {
+    text: voll ? "Händler: Maximum" : "Verbessern · " + preis,
+    aus: voll,
+    aktion: () => {
+      if (!bitcoin.upgradeKaufen(platz)) return kurzMeldung("Dafür reicht es noch nicht.");
+      btcGeaendert();
+      if (!$("dungeon-fenster").hidden) dungeonsZeichnen();
+      reittierAnzeigen();
+    },
+  };
+}
+
+function haendlerInfo(platz) {
+  infoZeigen(() => {
+    let bild = grafik.symbolBild("amboss");
+    let zeile = "";
+    if (platz === "tier") {
+      const k = tiere.werte(tiere.finde(seite().tiere.kaempfer));
+      if (k) bild = grafik.tierBild(k.id);
+      zeile = "Verstärkt das Tier, das als Kämpfer im Team ist.";
+    } else if (platz === "reittier") {
+      const a = reittiere.aktiv();
+      if (a) bild = grafik.reittierBild(a.id);
+      zeile = "Macht das gesattelte Reittier schneller.";
+    } else {
+      const w = sets.angelegt(platz.slice(4));
+      bild = grafik.setTeilBild(platz.slice(4), w ? w.set : null);
+      zeile = "Verstärkt das Set-Teil auf diesem Platz.";
+    }
+    return { titel: HAENDLER_NAMEN[platz], bild, zeilen: [zeile, haendlerZeile(platz)], knoepfe: [haendlerKnopf(platz)] };
+  });
+}
+
+function dungeonInfo(s) {
+  infoZeigen(() => {
+    const st = dungeons.stufe(s.zeitalter);
+    const k = dungeons.schluessel();
+    return {
+      titel: s.name,
+      bild: grafik.setTeilBild("helm", s),
+      farbe: s.farbe,
+      zeilen: [
+        "Dungeon aus Zeitalter " + zeitalterVon(s.zeitalter).nummer + ". Jeder Sieg bringt ein Teil des Sets " + s.name + " und einen Heiltrank.",
+        marken([["Stufe " + st], ["🗝 " + k]]),
+      ],
+      knoepfe: [
+        { text: "Stufe " + st + " kämpfen · 🗝 1", aus: k <= 0, zu: true, aktion: () => dungeonErgebnis(dungeons.kaempfen(s.zeitalter)) },
+        st > 1 ? { text: "Auto: Stufe " + (st - 1) + " · 🗝 1", aus: k <= 0, zu: true, aktion: () => dungeonErgebnis(dungeons.autoClear(s.zeitalter)) } : null,
       ],
     };
   });
@@ -1393,7 +1547,7 @@ function faehigkeitenZeichnen() {
   const liste = $("faehigkeit-liste");
   liste.replaceChildren();
   const alle = faehigkeiten.liste();
-  if (!alle.length) liste.append(el("p", "hinweis", "Noch keine Fähigkeit. Punkte (★) gibt es in den Dungeons."));
+  if (!alle.length) liste.append(el("p", "hinweis", "Noch keine Fähigkeit. Punkte (★) lassen Gegner manchmal fallen."));
   for (const w of alle) liste.append(kachel(w, w.ausgeruestet ? "an" : mitSternen ? w.kopien + "/2" : ""));
   faehigkeitLeisteZeichnen();
 }
@@ -1458,7 +1612,7 @@ function reittiereZeichnen() {
   const a = reittiere.aktiv();
   $("reittier-tempo").textContent = a ? "Tempo +" + prozent(a.tempo) : "";
   const liste = reittiere.liste();
-  $("reittier-mergen").hidden = !frei("sterne") || !liste.some((w) => reittiere.mergbar(w.nr));
+  $("reittier-mergen").hidden = !liste.some((w) => reittiere.mergbar(w.nr));
   const box = $("reittier-liste");
   box.replaceChildren();
   if (!liste.length) box.append(el("p", "hinweis", "Noch kein Reittier. Aus Eiern schlüpft manchmal eins."));
@@ -1497,7 +1651,7 @@ function reittierInfo(nr) {
       zeilen: [marken([[w.seltenheit.name, w.seltenheit.farbe], ["Zeitalter " + zeitalterVon(w.zeitalter).nummer], ["Tempo +" + prozent(w.tempo)]]), "Mit Reittier greifst du schneller an."],
       knoepfe: [
         { text: a && a.nr === w.nr ? "Gesattelt" : "Satteln", aus: !!a && a.nr === w.nr, aktion: tun(() => reittiere.satteln(w.nr)) },
-        frei("sterne") ? { text: "Mergen (3 → +1 Stern)", aus: !reittiere.mergbar(w.nr), aktion: tun(() => reittiere.mergen(w.nr)) } : null,
+        { text: "Mergen (3 gleiche → nächste Stufe)", aus: !reittiere.mergbar(w.nr), aktion: tun(() => reittiere.mergen(w.nr)) },
       ],
     };
   });
@@ -1525,11 +1679,21 @@ function btcKnoepfe() {
 
 function btcZeichnen() {
   // Je Händler eine Kachel pro Platz, den er verbessert. Antippen zeigt Preis und Wirkung.
+  const platzFrei = (p) => (p === "tier" ? frei("tiere") : p === "reittier" ? frei("reittiere") : p.startsWith("set-") ? frei("dungeons") : true);
   const liste = $("haendler-liste");
   liste.replaceChildren();
   for (const h of bitcoin.haendler()) {
     if (!h.offen) continue;
-    for (const platz of h.plaetze) liste.append(platzKachel(platz, PLATZ_NAMEN[platz], () => stueckInfo(platz)));
+    for (const platz of h.plaetze) {
+      if (!platzFrei(platz)) continue;
+      if (HAENDLER_NAMEN[platz]) {
+        const lv = bitcoin.stufe(platz);
+        let bild = grafik.symbolBild("tiere");
+        if (platz === "reittier") bild = grafik.symbolBild("held");
+        if (platz.startsWith("set-")) bild = grafik.setTeilBild(platz.slice(4), sets.angelegt(platz.slice(4)) ? sets.angelegt(platz.slice(4)).set : null);
+        liste.append(bildKachel({ titel: HAENDLER_NAMEN[platz], farbe: "#6a4a8a", bild, lv: lv > 0 ? "Lv. " + lv : "", marke: HAENDLER_NAMEN[platz].replace("Set-", ""), klick: () => haendlerInfo(platz) }));
+      } else liste.append(platzKachel(platz, PLATZ_NAMEN[platz], () => stueckInfo(platz)));
+    }
   }
   btcKnoepfe();
 }
@@ -1567,7 +1731,7 @@ function techZeichnen() {
   const a = tech.aeste().find((x) => x.id === techAst);
   box.append(el("div", "tech-ast-name", a.name));
   if (!tech.astOffen(a.id)) {
-    const grund = { farm: "mit der Mining Farm", haushalt: "mit der Firma", dungeons: "mit den Dungeons" }[a.offen];
+    const grund = { farm: "mit dem Trading (Zeitalter 9)", haushalt: "mit der Firma (Zeitalter 8)", dungeons: "mit den Dungeons" }[a.offen];
     box.append(el("p", "hinweis", "Öffnet sich " + (grund || "später") + "."));
     return;
   }
@@ -1856,8 +2020,29 @@ function seiteWechseln() {
 
 // ---------- Kampf: Boss und Aufstieg ----------
 
+// Beute in der freien Welt (Harry 16.11.2026): Fähigkeitspunkte, Tech-Punkte (seltener) und Dungeon-Schlüssel.
+function weltBeute(gegner) {
+  const b = daten.einstellungen.beute;
+  const typ = gegner.boss ? "boss" : gegner.typ;
+  const wurf = (art, plus) => Math.random() < (b[art].chance[typ] || 0) * (1 + plus);
+  const menge = (art) => (b[art].menge && b[art].menge[typ]) || 1;
+  if (frei("faehigkeiten") && wurf("fpunkte", tech.wert("fpunkte"))) {
+    seite().faehigkeiten.punkte += menge("fpunkte");
+    beuteZeigen(gegner, grafik.symbolBild("stern"));
+  }
+  if (frei("tech") && wurf("techpunkte", tech.wert("techpunkte"))) {
+    stand.gemeinsam.tech.punkte += menge("techpunkte");
+    beuteZeigen(gegner, grafik.symbolBild("tech"));
+  }
+  if (frei("dungeons") && wurf("schluessel", tech.wert("tickets"))) {
+    dungeons.schluesselGeben(menge("schluessel"));
+    beuteZeigen(gegner, grafik.symbolBild("schluessel"));
+  }
+}
+
 function kampfEreignis(name, gegner) {
   if (name === "sieg") {
+    weltBeute(gegner);
     if (gegner.boss && frei("tiere") && Math.random() < tech.wert("bossEi")) {
       const extra = tiere.eiGeben(2.5, 0);
       kurzMeldung("Zweites Boss-Ei: " + extra.name);
@@ -1879,11 +2064,16 @@ function kampfEreignis(name, gegner) {
 
 // Ein Ei fällt sichtbar beim besiegten Gegner auf den Weg und hüpft dann nach unten zum Helden-Knopf.
 function eiZeigen(gegner, farbe) {
+  beuteZeigen(gegner, grafik.eiBild(farbe));
+}
+
+// Etwas fällt sichtbar beim besiegten Gegner auf den Weg (Ei, Punkte, Schlüssel) und hüpft dann weg.
+function beuteZeigen(gegner, bild) {
   if (document.hidden) return;
   const arena = $("arena");
-  if (arena.querySelectorAll(".ei-beute").length >= 4) return;
+  if (arena.querySelectorAll(".ei-beute").length >= 5) return;
   const ei = el("div", "ei-beute");
-  ei.style.backgroundImage = grafik.eiBild(farbe);
+  ei.style.backgroundImage = bild;
   ei.style.left = 27 + Math.min(1.1, Math.max(0, gegner.x)) * 62 + "%";
   arena.append(ei);
   setTimeout(() => ei.remove(), 1700);
@@ -2062,6 +2252,20 @@ function knoepfeVerbinden() {
       btcGeaendert();
     });
   }
+  $("set-mergen").addEventListener("click", () => {
+    const n = sets.allesMergen();
+    kurzMeldung(n + " Mal gemergt.");
+    dungeonsZeichnen();
+    rasterZeichnen();
+    sichern();
+  });
+  $("tier-mergen").addEventListener("click", () => {
+    const n = tiere.allesMergen();
+    kurzMeldung(n + " Mal gemergt.");
+    kampf.neuStarten();
+    tiereZeichnen();
+    sichern();
+  });
   $("reittier-mergen").addEventListener("click", () => {
     const n = reittiere.allesMergen();
     kurzMeldung(n + " Mal gemergt.");
@@ -2071,7 +2275,7 @@ function knoepfeVerbinden() {
   });
   $("ziehen-knopf").addEventListener("click", () => {
     if (seite().faehigkeiten.punkte < faehigkeiten.ziehenKosten()) {
-      kurzMeldung("Zu wenig Punkte. Punkte gibt es in den Dungeons.");
+      kurzMeldung("Zu wenig Punkte. Gegner lassen manchmal welche fallen.");
       return;
     }
     const r = faehigkeiten.ziehen();
@@ -2152,7 +2356,7 @@ async function start() {
       const k = tiere.werte(tiere.finde(seite().tiere.kaempfer));
       if (!k) return null;
       const a = daten.tiere.tierAngriff;
-      return { alle: a.alle, schaden: k.schaden * (a.grund + a.jeStern * k.sterne) * (1 + tech.wert("schaden")) };
+      return { alle: a.alle, schaden: k.schaden * bitcoin.faktor("tier") * (a.grund + a.jeStern * k.sterne) * (1 + tech.wert("schaden")) };
     },
   });
   tech = techSystem({
@@ -2160,7 +2364,11 @@ async function start() {
     techStand: () => stand.gemeinsam.tech,
     zeitalterNummer: () => zeitalter().nummer,
     systemOffen: (name) =>
-      name === "immer" || name === "dungeons" || (name === "haushalt" && seite().haushalt.firma > 0) || (name === "farm" && farm.hatFarm()),
+      // Äste öffnen sich erst, wenn ihr System nach dem Freischalt-Plan da ist (alte Spielstände hatten Farm und Firma schon früher).
+      name === "immer" ||
+      (name === "dungeons" && frei("dungeons")) ||
+      (name === "haushalt" && frei("firma") && seite().haushalt.firma > 0) ||
+      (name === "farm" && frei("trading")),
   });
   haushalt = haushaltSystem({
     daten: () => daten.haushalt,
@@ -2226,6 +2434,7 @@ async function start() {
     sterneOffen: () => frei("sterne"),
     supporterFaktor: () => 1 + tech.wert("supporter"),
     reittierAusEi: (ei) => (frei("reittiere") ? reittiere.ausEi(ei) : null),
+    haendlerFaktor: () => bitcoin.faktor("tier"),
   });
   reittiere = reittierSystem({
     daten: () => daten.reittiere,
@@ -2233,6 +2442,7 @@ async function start() {
     seite,
     zeitalterNummerVon: (id) => (daten.zeitalter.find((z) => z.id === id) || { nummer: 1 }).nummer,
     sterneOffen: () => frei("sterne"),
+    haendlerFaktor: () => (bitcoin ? bitcoin.faktor("reittier") : 1),
   });
   faehigkeiten = faehigkeitenSystem({
     daten: () => daten.faehigkeiten,
@@ -2243,29 +2453,22 @@ async function start() {
     grundSchaden: schaden,
     sterneOffen: () => frei("sterne"),
   });
+  sets = setSystem({
+    daten: () => daten.dungeons,
+    seite,
+    seltenheiten: () => daten.waffen.seltenheiten,
+    zeitalterNummerVon: (id) => (daten.zeitalter.find((z) => z.id === id) || { nummer: 1 }).nummer,
+    haendlerFaktor: (platz) => bitcoin.faktor(platz),
+  });
   dungeons = dungeonSystem({
     daten: () => daten.dungeons,
     seite,
     spieler: () => ({ schaden: schaden(), leben: maxLeben() }),
-    gegnerBasis: () => {
-      const typen = gegnerDaten().typen;
-      return { leben: typen.elite.leben, schaden: typen.elite.schaden, beute: typen.normal.beute };
+    gegnerBasis: (zId) => {
+      const typen = (daten.gegner[zId] || gegnerDaten()).typen;
+      return { leben: typen.elite.leben, schaden: typen.elite.schaden };
     },
-    eiGeben: (ratio, plus) => tiere.eiGeben(ratio, plus),
-    schmiedenGratis: () => waffen.schmiedenGratis(),
-    gutschreiben,
-    punkteGeben: (stufe, meilenstein) => {
-      const vorher = seite().faehigkeiten.punkte;
-      faehigkeiten.punkteGeben(stufe, meilenstein);
-      const dazu = seite().faehigkeiten.punkte - vorher;
-      const extra = Math.round(dazu * tech.wert("fpunkte"));
-      seite().faehigkeiten.punkte += extra;
-      return dazu + extra;
-    },
-    techPunkteGeben: (stufe, meilenstein) => tech.punkteGeben(stufe, meilenstein),
-    ticketsPlus: () => tech.wert("tickets"),
-    offen: frei,
-    mengeText: (menge) => zahl(menge) + " " + waehrung().name,
+    setTeilGeben: (zId, ratio) => sets.geben(zId, ratio),
   });
   knoepfeVerbinden();
   allesZeichnen();

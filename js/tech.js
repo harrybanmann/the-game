@@ -70,7 +70,7 @@ export function techSystem(api) {
       if (t().laeuft[astId]) return "In diesem Ast läuft schon eine Forschung.";
       if (!ebeneOffen(astId, ebene)) return "Diese Ebene ist noch gesperrt.";
       if (stufe(k.id) >= d().maxStufe) return "Schon auf Höchststufe.";
-      if (t().punkte < kosten(k)) return "Zu wenig Tech-Punkte (gibt es in den Dungeons).";
+      if (t().punkte < kosten(k)) return "Zu wenig Tech-Punkte. Gegner lassen manchmal welche fallen.";
       t().punkte -= kosten(k);
       t().laeuft[astId] = { knoten: k.id, bis: Date.now() + dauer(k) * 1000 };
       return null;

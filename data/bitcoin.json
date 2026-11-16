@@ -18,9 +18,15 @@
         "gut": "Schmied",
         "boese": "Hehler"
       },
-      "text": "Verbessert deine Waffe dauerhaft.",
+      "text": "Verbessert Waffe, Kämpfer-Tier, Reittier und Set-Teile dauerhaft.",
       "plaetze": [
-        "waffe"
+        "waffe",
+        "tier",
+        "reittier",
+        "set-helm",
+        "set-ruestung",
+        "set-handschuhe",
+        "set-waffe"
       ]
     },
     {

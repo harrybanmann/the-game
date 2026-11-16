@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=40">
+  <link rel="stylesheet" href="css/style.css?v=41">
 </head>
 <body>
   <div id="spiel">
@@ -133,7 +133,7 @@
       <p id="brut-text" class="hinweis"></p>
       <h3>Team</h3>
       <div id="tier-team" class="kachel-raster"></div>
-      <h3 id="sammlung-titel">Sammlung</h3>
+      <div class="titel-zeile"><h3 id="sammlung-titel">Sammlung</h3><button id="tier-mergen" class="knopf klein" type="button">Alles mergen</button></div>
       <div id="tier-sammlung" class="kachel-raster"></div>
       <button class="knopf rot" type="button" data-schliessen="tiere-fenster">Zurück</button>
     </div>
@@ -150,9 +150,14 @@
 
   <div id="dungeon-fenster" class="fenster" hidden>
     <div class="karte">
-      <h2>Dungeons</h2>
+      <div class="titel-zeile"><h2>Dungeons</h2><span id="schluessel-text" class="zahl-chip"></span></div>
       <div id="dungeon-liste" class="kachel-raster drei"></div>
       <p id="dungeon-ergebnis" class="ergebnis"></p>
+      <h3>Dein Set</h3>
+      <div id="set-plaetze" class="kachel-raster vier"></div>
+      <p id="set-bonus" class="hinweis"></p>
+      <div class="titel-zeile"><h3 id="set-titel">Sammlung</h3><button id="set-mergen" class="knopf klein" type="button">Alles mergen</button></div>
+      <div id="set-sammlung" class="kachel-raster"></div>
       <button class="knopf rot" type="button" data-schliessen="dungeon-fenster">Zurück</button>
     </div>
   </div>
@@ -271,7 +276,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=40"></script>
+  <script type="module" src="js/main.js?v=41"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

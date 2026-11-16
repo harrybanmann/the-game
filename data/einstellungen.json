@@ -105,5 +105,41 @@
       "name": "Bitcoin",
       "text": "Kaufe und schürfe Bitcoin. Händler nehmen ab jetzt Bitcoin."
     }
+  },
+  "beute": {
+    "_hinweis": "Harry 16.11.2026: Fähigkeitspunkte, Tech-Punkte (seltener) und Dungeon-Schlüssel fallen im normalen Kampf. Chancen je besiegtem Gegner und Mengen sind Vorschläge.",
+    "fpunkte": {
+      "chance": {
+        "schwach": 0.006,
+        "normal": 0.012,
+        "elite": 0.06,
+        "boss": 1
+      },
+      "menge": {
+        "boss": 5
+      }
+    },
+    "techpunkte": {
+      "chance": {
+        "schwach": 0.003,
+        "normal": 0.006,
+        "elite": 0.03,
+        "boss": 1
+      },
+      "menge": {
+        "boss": 3
+      }
+    },
+    "schluessel": {
+      "chance": {
+        "schwach": 0.003,
+        "normal": 0.006,
+        "elite": 0.04,
+        "boss": 1
+      },
+      "menge": {
+        "boss": 2
+      }
+    }
   }
 }

@@ -889,3 +889,8 @@ h3 { font-size: 15px; margin-top: 2px; }
 .blut { position: absolute; top: 45%; width: 6px; height: 6px; border-radius: 50%; background: #c8102e; border: 1.5px solid #5e0714; pointer-events: none; z-index: 6;
   animation: blut 0.45s ease-out forwards; }
 @keyframes blut { 0% { translate: 0 0; opacity: 1; scale: 1.2; } 60% { opacity: 1; } 100% { translate: var(--dx) calc(var(--dy) + 34px); opacity: 0; scale: 0.6; } }
+
+/* ================= V30 ================= */
+/* Geschosse: quadratisches Feld, sonst schrumpft das Bild auf wenige Pixel */
+.geschoss, .geschoss.gross { width: 38px; height: 38px; margin-left: -19px; bottom: 36px; background-size: contain; }
+.geschoss.gross { width: 48px; height: 48px; margin-left: -24px; bottom: 30px; }

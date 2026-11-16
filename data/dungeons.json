@@ -1,17 +1,111 @@
 {
-  "_hinweis": "Regeln von Harry (Dungeons-Chat): 3 Arten, je 3 Tickets pro Tag, höchstens 6, jede Stufe ca. +10 %, Auto-Clear für geschaffte Stufen, Meilenstein alle 10 Stufen. Die übrigen Zahlen sind Startwerte (Vorschlag).",
-  "ticketsProTag": 3,
-  "ticketsMax": 6,
+  "_hinweis": "Harry 16.11.2026: Jedes Zeitalter hat einen Dungeon mit eigenem Set (Helm, Rüstung, Handschuhe, Waffe). Set-Teile geben pro Teil % Schaden und % Leben, dazu einen Set-Bonus; 3 gleiche werden zur nächsten Seltenheit; beim Händler bis Lv. 100. Schlüssel fallen in der freien Welt, kein tägliches Warten. Alle Zahlen und Set-Namen sind Vorschläge des Bau-Chats.",
+  "schluesselMax": 30,
   "stufenFaktor": 1.1,
   "meilensteinAlle": 10,
-  "gegner": { "lebenFaktor": 2, "schadenFaktor": 1 },
-  "heiltrank": { "max": 5, "bossMax": 3, "schwelle": 0.3, "heilung": 0.3 },
-  "ei": { "ratioStart": 5, "ratioEnde": 2, "ratioProStufe": 0.1 },
-  "ausruestung": { "stuecke": 3, "meilensteinStuecke": 2 },
-  "schatz": { "beuteFaktor": 30, "traenke": 1, "meilensteinTraenke": 2 },
-  "arten": [
-    { "id": "eier", "name": "Eier-Höhle", "text": "Belohnung: ein Ei. Höhere Stufe = seltenere Eier." },
-    { "id": "ausruestung", "name": "Waffenkammer", "text": "Belohnung: 3 geschmiedete Stücke, ohne Kosten." },
-    { "id": "schatz", "name": "Schatzkammer", "text": "Belohnung: Währung und ein Heiltrank." }
+  "gegner": {
+    "lebenFaktor": 2,
+    "schadenFaktor": 1
+  },
+  "heiltrank": {
+    "max": 5,
+    "bossMax": 3,
+    "schwelle": 0.3,
+    "heilung": 0.3
+  },
+  "traenkeJeSieg": 1,
+  "seltenheit": {
+    "ratioStart": 5,
+    "ratioEnde": 2,
+    "ratioProStufe": 0.1
+  },
+  "set": {
+    "teile": [
+      "helm",
+      "ruestung",
+      "handschuhe",
+      "waffe"
+    ],
+    "grundProzent": 0.02,
+    "jeZeitalter": 0.15,
+    "bonus": {
+      "2": 0.05,
+      "4": 0.15
+    },
+    "meilensteinTeile": 1
+  },
+  "sets": [
+    {
+      "zeitalter": "steinzeit",
+      "name": "Mammutjäger",
+      "farbe": "#9a6a3c",
+      "rand": "#e8d5a8"
+    },
+    {
+      "zeitalter": "muscheln",
+      "name": "Muscheltaucher",
+      "farbe": "#f2a7a0",
+      "rand": "#4fa7b5"
+    },
+    {
+      "zeitalter": "bronzezeit",
+      "name": "Bronzewächter",
+      "farbe": "#c98a4a",
+      "rand": "#2e7d4f"
+    },
+    {
+      "zeitalter": "muenzen",
+      "name": "Goldener Lyder",
+      "farbe": "#f2c230",
+      "rand": "#b3342e"
+    },
+    {
+      "zeitalter": "rom",
+      "name": "Legionär",
+      "farbe": "#b3342e",
+      "rand": "#f2c230"
+    },
+    {
+      "zeitalter": "mittelalter",
+      "name": "Kreuzritter",
+      "farbe": "#e2e7ec",
+      "rand": "#b3342e"
+    },
+    {
+      "zeitalter": "banken",
+      "name": "Medici",
+      "farbe": "#25355e",
+      "rand": "#f2c230"
+    },
+    {
+      "zeitalter": "entdeckungen",
+      "name": "Freibeuter",
+      "farbe": "#2b2b33",
+      "rand": "#b3342e"
+    },
+    {
+      "zeitalter": "aktien",
+      "name": "Börsenbaron",
+      "farbe": "#2e7d4f",
+      "rand": "#f2c230"
+    },
+    {
+      "zeitalter": "industrie",
+      "name": "Dampfschmied",
+      "farbe": "#6b4033",
+      "rand": "#e8751a"
+    },
+    {
+      "zeitalter": "fiat",
+      "name": "Zentralbanker",
+      "farbe": "#3c4a5e",
+      "rand": "#6fbf73"
+    },
+    {
+      "zeitalter": "digital",
+      "name": "Neon-Hacker",
+      "farbe": "#1b1f4a",
+      "rand": "#1fe3e3"
+    }
   ]
 }

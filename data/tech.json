@@ -79,20 +79,20 @@
         },
         {
           "id": "tickets",
-          "name": "Mehr Tickets",
-          "text": "+1 Ticket-Höchstzahl je Dungeon",
-          "wert": 1
+          "name": "Mehr Schlüssel",
+          "text": "+5 % Chance auf Dungeon-Schlüssel",
+          "wert": 0.05
         },
         {
           "id": "fpunkte",
           "name": "Mehr Fähigkeitspunkte",
-          "text": "+10 % Fähigkeitspunkte",
+          "text": "+10 % Chance auf Fähigkeitspunkte",
           "wert": 0.1
         },
         {
           "id": "techpunkte",
           "name": "Mehr Tech-Punkte",
-          "text": "+10 % Tech-Punkte",
+          "text": "+10 % Chance auf Tech-Punkte",
           "wert": 0.1
         },
         {

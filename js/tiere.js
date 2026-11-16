@@ -27,6 +27,8 @@ export function tierSystem(api) {
     return {
       nr: tier.nr,
       sterne,
+      rang: tier.seltenheit,
+      zeitalter: vorlage.zeitalter,
       id: vorlage.id,
       name: vorlage.name,
       seltenheit: selten,
@@ -131,7 +133,8 @@ export function tierSystem(api) {
     },
     bonus() {
       const k = werte(finde(t().kaempfer));
-      const bonus = { schaden: k ? k.schaden : 0, leben: k ? k.leben : 0, schadenProzent: 0, lebenProzent: 0 };
+      const hf = api.haendlerFaktor ? api.haendlerFaktor() : 1; // Händler-Stufe für das Kämpfer-Tier
+      const bonus = { schaden: k ? k.schaden * hf : 0, leben: k ? k.leben * hf : 0, schadenProzent: 0, lebenProzent: 0 };
       for (const nr of t().supporter.slice(0, plaetze())) {
         const s = werte(finde(nr));
         if (!s) continue;
@@ -154,21 +157,34 @@ export function tierSystem(api) {
       return true;
     },
     herausnehmen: ausTeam,
-    mergbar(nr) {
-      if (api.sterneOffen && !api.sterneOffen()) return false;
-      return gleiche(nr).length >= 2 && (finde(nr).sterne || 0) < d().maxSterne;
+    allesMergen() {
+      let n = 0;
+      for (let i = 0; i < 500; i++) {
+        const tier = t().sammlung.find((x) => this.mergbar(x.nr));
+        if (!tier) break;
+        this.mergen(tier.nr);
+        n += 1;
+      }
+      return n;
     },
-    // 3 gleiche Tiere (Art, Seltenheit, Sternzahl) werden zu 1 Tier mit +1 Stern.
+    // Harry 16.11.2026: 3 gleiche Tiere werden zu einem Tier der nächsten Seltenheit, wie bei den Waffen.
+    mergbar(nr) {
+      const tier = finde(nr);
+      if (!tier || gleiche(nr).length < 2) return false;
+      if (tier.seltenheit < api.seltenheiten().length - 1) return true;
+      return (!api.sterneOffen || api.sterneOffen()) && (tier.sterne || 0) < d().maxSterne;
+    },
+    // 3 gleiche Tiere (Art, Seltenheit, Sternzahl) werden zu 1 Tier der nächsten Seltenheit (ganz oben: +1 Stern).
     mergen(nr) {
+      if (!this.mergbar(nr)) return false;
       const tier = finde(nr);
       const andere = gleiche(nr);
-      if (api.sterneOffen && !api.sterneOffen()) return false;
-      if (!tier || andere.length < 2 || (tier.sterne || 0) >= d().maxSterne) return false;
       const imTeam = (x) => (t().kaempfer === x.nr || t().supporter.includes(x.nr) ? 1 : 0);
       const weg = andere.sort((a, b) => imTeam(a) - imTeam(b)).slice(0, 2);
       for (const x of weg) ausTeam(x.nr);
       t().sammlung = t().sammlung.filter((x) => !weg.includes(x));
-      tier.sterne = (tier.sterne || 0) + 1;
+      if (tier.seltenheit < api.seltenheiten().length - 1) tier.seltenheit += 1;
+      else tier.sterne = (tier.sterne || 0) + 1;
       return true;
     },
   };
