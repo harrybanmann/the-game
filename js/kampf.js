@@ -1,4 +1,5 @@
-// Automatischer Kampf: Jede Stufe hat 10 Ebenen (intern „Welle“), Ebene n hat n Gegner (Harry 16.11.2026).
+// Automatischer Kampf: Jedes Zeitalter hat 100 Stufen, jede Stufe 10 Ebenen (intern „Welle“), Ebene n hat n Gegner.
+// Alle 5 Stufen ist die letzte Ebene 5 Elite-Gegner, alle 10 Stufen ein Zwischen-Boss (Harry 16.11.2026).
 // Je höher die Stufe, desto stärkere Gegner. Boss per Knopf (mit Aufstiegs-Bedingungen).
 // Verlieren kostet nichts, aber die Stufe beginnt wieder bei Ebene 1.
 // Ablauf (Harry 16.11.2026): Gegner laufen von rechts heran. Der Held trägt EINE Waffe:
@@ -54,12 +55,23 @@ export function kampfSystem(api) {
   // Ebene n hat n Gegner.
   const anzahl = (stufe, welle) => Math.max(1, Math.min(w().maxGegner, welle));
 
+  // Was auf der aktuellen Ebene kommt: "zwischen" (Zwischen-Boss), "elite" (5 Elite-Gegner) oder "" (normal).
+  function besondere(s, nr) {
+    const c = w();
+    if (nr !== c.proStufe) return "";
+    if (c.zwischenBossAlle && s % c.zwischenBossAlle === 0 && s < (c.maxStufe || 1e9)) return "zwischen";
+    if (c.eliteAlleStufen && s % c.eliteAlleStufen === 0) return "elite";
+    return "";
+  }
+
   function welleStellen(heilen) {
     const d = api.gegnerDaten();
     const c = w();
+    if (c.maxStufe && k().stufe > c.maxStufe) k().stufe = c.maxStufe; // alte Spielstände: höchstens Stufe 100
     const s = k().stufe;
     const nr = k().welle;
-    const n = anzahl(s, nr);
+    const art0 = besondere(s, nr);
+    const n = art0 === "zwischen" ? 1 : art0 === "elite" ? c.eliteAnzahl || 5 : anzahl(s, nr);
     const faktor = Math.pow(c.staerkeFaktor, s - 1);
     const beuteFaktor = Math.pow(c.beuteFaktor, s - 1);
     gegner = [];
@@ -68,11 +80,23 @@ export function kampfSystem(api) {
     let ferne = 0;
     for (let i = 0; i < n; i++) {
       let typ = s < 3 ? "schwach" : i % 2 ? "normal" : "schwach";
-      if (nr === c.proStufe && i === n - 1) typ = s % c.eliteAlleStufen === 0 ? "elite" : "normal";
+      if (art0) typ = "elite";
       // Jeder dritte Gegner ist ein Fernkämpfer; Elite kämpft immer nah.
       const art = typ !== "elite" && i % 3 === 2 ? "fern" : "nah";
-      const halt = art === "fern" ? l.fernHalt + l.fernAbstand * ferne++ : l.nahHalt + l.nahAbstand * nahe++;
-      gegner.push(machGegner(d.typen[typ], typ, faktor, beuteFaktor, false, art, 1 + l.startAbstand * i, halt));
+      const halt = art0 === "zwischen" ? l.bossHalt : art === "fern" ? l.fernHalt + l.fernAbstand * ferne++ : l.nahHalt + l.nahAbstand * nahe++;
+      const g = machGegner(d.typen[typ], typ, faktor, beuteFaktor, false, art, 1 + l.startAbstand * i, halt);
+      if (art0 === "zwischen") {
+        // Zwischen-Boss: ein Anführer, viel mehr Leben und Schaden, mehr Beute.
+        const z = c.zwischenBoss || { leben: 6, schaden: 1.5, beute: 10 };
+        g.zwischen = true;
+        g.name = "Anführer " + g.name;
+        g.leben *= z.leben;
+        g.maxLeben *= z.leben;
+        g.schaden *= z.schaden;
+        g.beute *= z.beute;
+        g.xp *= z.beute;
+      }
+      gegner.push(g);
     }
     spielerUhr = 0;
     heldX = 0; // jede Welle beginnt am Startplatz: Held und Gegner laufen neu aufeinander zu
@@ -119,7 +143,8 @@ export function kampfSystem(api) {
     k().welle += 1;
     if (k().welle > w().proStufe) {
       k().welle = 1;
-      k().stufe += 1;
+      // Auf Stufe 100 bleibt man stehen; weiter geht es nur über den Zeitalter-Boss.
+      if (!w().maxStufe || k().stufe < w().maxStufe) k().stufe += 1;
       welleStellen("voll");
     } else {
       welleStellen("teil");
@@ -286,10 +311,10 @@ export function kampfSystem(api) {
       if (!boss || bossKampf) return;
       takt = 0;
       traenkeDabei = Math.min(api.seite().traenke, api.trank().bossMax);
-      // Harry 16.11.2026: Bosse deutlich schwerer. Der Boss ist so stark wie die Gegner auf Stufe 10 × Zeitalter.
+      // Harry 16.11.2026: Der Zeitalter-Boss auf Stufe 100 ist sehr stark (so stark wie Stufe 100, mal lebenFaktor).
       const r = api.bossRegeln();
       const c = w();
-      const bs = Math.max(1, r.stufeJeZeitalter * api.zeitalterNummer());
+      const bs = Math.max(1, r.stufe || 100);
       const faktor = Math.pow(c.staerkeFaktor, bs - 1);
       const g = machGegner(boss, "boss", faktor, Math.pow(c.beuteFaktor, bs - 1), true, "nah", 1, api.lauf().bossHalt);
       g.leben *= r.lebenFaktor;
@@ -327,6 +352,8 @@ export function kampfSystem(api) {
         effekte: effekte.splice(0),
         boss: bossKampf,
         bossPhase,
+        besondere: bossKampf ? "" : besondere(k().stufe, k().welle),
+        maxStufe: w().maxStufe || 0,
         stufe: k().stufe,
         welle: k().welle,
         wellenProStufe: w().proStufe,

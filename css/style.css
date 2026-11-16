@@ -917,4 +917,8 @@ h3 { font-size: 15px; margin-top: 2px; }
 .perma-reihe { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
 .perma-reihe .tech-knoten { position: relative; }
 .sammel-raster .kachel.leer .kachel-bild { filter: grayscale(1) brightness(0.45); opacity: 0.7; }
-#sammelbuch { z-index: 60; }
+
+/* ---------- Version 35: 100 Stufen, Anführer, Menü mit Reitern ---------- */
+.gegner.zwischen .figur { transform: scale(1.3); transform-origin: 50% 100%; }
+.gegner.zwischen .gegner-waffe { transform: scale(1.3); }
+#perma-punkte { font-size: 14px; }

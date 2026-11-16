@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=45";
-import * as speicher from "./speicher.js?v=45";
-import { kampfSystem } from "./kampf.js?v=45";
-import { waffenSystem } from "./waffen.js?v=45";
-import { tierSystem } from "./tiere.js?v=45";
-import { dungeonSystem } from "./dungeons.js?v=45";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=45";
-import { bitcoinSystem } from "./bitcoin.js?v=45";
-import { techSystem } from "./tech.js?v=45";
-import * as grafik from "./grafik.js?v=45";
-import { haushaltSystem } from "./haushalt.js?v=45";
-import { farmSystem } from "./farm.js?v=45";
-import { reittierSystem } from "./reittiere.js?v=45";
-import { setSystem } from "./sets.js?v=45";
-import { permaSystem } from "./perma.js?v=45";
+import { zahl, btc, dauer } from "./format.js?v=48";
+import * as speicher from "./speicher.js?v=48";
+import { kampfSystem } from "./kampf.js?v=48";
+import { waffenSystem } from "./waffen.js?v=48";
+import { tierSystem } from "./tiere.js?v=48";
+import { dungeonSystem } from "./dungeons.js?v=48";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=48";
+import { bitcoinSystem } from "./bitcoin.js?v=48";
+import { techSystem } from "./tech.js?v=48";
+import * as grafik from "./grafik.js?v=48";
+import { haushaltSystem } from "./haushalt.js?v=48";
+import { farmSystem } from "./farm.js?v=48";
+import { reittierSystem } from "./reittiere.js?v=48";
+import { setSystem } from "./sets.js?v=48";
+import { permaSystem } from "./perma.js?v=48";
 
 const $ = (id) => document.getElementById(id);
 
@@ -538,7 +538,9 @@ function kampfZeichnen() {
   const s = seite();
   const trank = daten.dungeons.heiltrank;
   // Harry 16.11.2026: Stufe und Ebene wie „46-3“ (10 Ebenen je Stufe).
-  $("stufe-text").textContent = z.boss ? "Boss · Phase " + z.bossPhase + " · Tränke " + s.traenke + "/" + traenkeMax() : "Stufe " + z.stufe + "-" + z.welle;
+  $("stufe-text").textContent = z.boss
+    ? "Boss · Phase " + z.bossPhase + " · Tränke " + s.traenke + "/" + traenkeMax()
+    : "Stufe " + z.stufe + "-" + z.welle + (z.besondere === "zwischen" ? " · Anführer" : z.besondere === "elite" ? " · Elite" : "");
   // Punkte für die Wellen der Stufe: geschaffte sind gefüllt, die laufende ist größer.
   const punkte = $("wellen-punkte");
   const kp = z.boss ? "boss" : z.wellenProStufe + "|" + z.welle;
@@ -553,17 +555,17 @@ function kampfZeichnen() {
   // Figuren bleiben bestehen und werden nur verschoben, damit Laufen und Treffer-Effekte flüssig sind.
   const gruppe = $("gegner-gruppe");
   gruppe.dataset.phase = z.boss ? z.bossPhase : ""; // Boss-Phase färbt den Boss (CSS)
-  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + "/" + g.art + (g.boss ? "/B" : "")).join("|");
+  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + "/" + g.art + (g.boss ? "/B" : "") + (g.zwischen ? "/Z" : "")).join("|");
   if (gruppe.dataset.k !== schluessel) {
     gruppe.dataset.k = schluessel;
     gruppe.replaceChildren();
     z.gegner.forEach((g, i) => {
-      const box = el("div", "gegner" + (g.boss ? " boss" : ""));
+      const box = el("div", "gegner" + (g.boss ? " boss" : "") + (g.zwischen ? " boss zwischen" : ""));
       const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
       figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss, g.art);
       const balken = el("div", "balken klein");
       balken.append(el("div", "fuellung rot"));
-      if (g.boss) box.append(el("div", "gegner-name", g.name));
+      if (g.boss || g.zwischen) box.append(el("div", "gegner-name", g.name));
       // Die Waffe ist ein eigenes Bild über der Figur: so wird sie nie abgeschnitten und kann sich bewegen.
       const stapel = el("div", "gegner-stapel");
       stapel.append(figur);
@@ -683,6 +685,7 @@ function aufstiegFehlt() {
   const s = seite();
   const fehlt = [];
   if (s.level < a.levelJeZeitalter * nr) fehlt.push("Level " + a.levelJeZeitalter * nr + " (du: " + s.level + ")");
+  if (a.stufe && s.kampf.stufe < a.stufe) fehlt.push("Kampfstufe " + a.stufe + " (du: " + s.kampf.stufe + ")");
   if (s.schmiede.stufe < a.schmiedeJeZeitalter * nr)
     fehlt.push("Schmiede " + a.schmiedeJeZeitalter * nr + " (du: " + s.schmiede.stufe + ")");
   if (a.alleUpgradesMax) {
@@ -889,8 +892,18 @@ function upgradeInfo(u) {
 
 // Unten 5 Knöpfe. Jeder öffnet eine ganze Seite; darüber liegen die Reiter der Gruppe (wie bei Forge Master).
 // Die Schmiede-Seite gehört zu keinem Knopf: Sie öffnet sich beim Tippen auf die Ausrüstung.
+// Harry 16.11.2026: unten ein Hauptmenü, darüber die Unterpunkte des gewählten Bereichs als Reiter.
+// "arena" ist kein Fenster: der Reiter zeigt einfach den Kampf.
 const GRUPPEN = [
-  { id: "kampf", name: "Kampf" },
+  {
+    id: "kampf",
+    name: "Kampf",
+    reiter: [
+      ["arena", "Kampf", () => {}],
+      ["waffen-fenster", "Schmiede", () => waffenZeichnen()],
+      ["upgrades-fenster", "Upgrades", () => upgradesZeichnen()],
+    ],
+  },
   { id: "dungeons", name: "Dungeons", reiter: [["dungeon-fenster", "Dungeons", () => (($("dungeon-ergebnis").textContent = ""), dungeonsZeichnen()), "dungeons"]] },
   {
     id: "held",
@@ -899,34 +912,43 @@ const GRUPPEN = [
       ["faehigkeiten-fenster", "Fähigkeiten", () => (($("faehigkeit-ergebnis").textContent = ""), faehigkeitenZeichnen()), "faehigkeiten"],
       ["tiere-fenster", "Haustiere", () => tiereZeichnen(), "tiere"],
       ["reittiere-fenster", "Reittiere", () => reittiereZeichnen(), "reittiere"],
+    ],
+  },
+  {
+    id: "fortschritt",
+    name: "Forschung",
+    bild: "tech",
+    reiter: [
       ["tech-fenster", "Tech-Baum", () => techZeichnen(), "tech"],
+      ["perma-fenster", "Perma 👑", () => permaSeiteZeichnen()],
+      ["sammelbuch", "Sammelbuch", () => (sammelbuchPruefen(), sammelbuchZeichnen())],
     ],
   },
   {
     id: "geld",
     name: "Geld",
     reiter: [
-      ["upgrades-fenster", "Upgrades", () => upgradesZeichnen()],
       ["btc-fenster", "Händler", () => btcZeichnen()],
       ["haushalt-fenster", "Haushalt", () => haushaltZeichnen(), "haushalt"],
       ["farm-fenster", "Farm", () => farmZeichnen(true), "farm"],
     ],
   },
   { id: "menue", name: "Menü", reiter: [["menue", "Menü", () => {}]] },
-  { id: "schmiede", name: "Schmiede", versteckt: true, reiter: [["waffen-fenster", "Schmiede", () => waffenZeichnen()]] },
 ];
 let offeneGruppe = null;
 let offenerReiter = null;
 const letzterReiter = {};
 // Ein Reiter ist nur da, wenn sein System freigeschaltet ist (4. Eintrag = Name in einstellungen.freischalten).
-// Der Tech-Baum-Reiter ist nach einem Neustart sofort da, damit man die Perma-Punkte ausgeben kann.
-const reiterOffen = (r) =>
-  !r[3] || (r[3] === "farm" ? frei("trading") || frei("bitcoin") : r[3] === "tech" ? frei("tech") || (perma && perma.neustarts() > 0) : frei(r[3]));
+const reiterOffen = (r) => !r[3] || (r[3] === "farm" ? frei("trading") || frei("bitcoin") : frei(r[3]));
 const reiterVon = (g) => (g.reiter || []).filter(reiterOffen);
 const gruppeVon = (fensterId) => GRUPPEN.find((g) => g.reiter && g.reiter.some((r) => r[0] === fensterId));
 
+const fensterVerstecken = () => {
+  for (const g of GRUPPEN) for (const r of g.reiter || []) if ($(r[0])) $(r[0]).hidden = true;
+};
+
 function seiteSchliessen() {
-  for (const g of GRUPPEN) for (const r of g.reiter || []) $(r[0]).hidden = true;
+  fensterVerstecken();
   offeneGruppe = null;
   offenerReiter = null;
   $("reiter").hidden = true;
@@ -938,7 +960,7 @@ function seiteOeffnen(gruppeId, fensterId) {
   const offene = g ? reiterVon(g) : [];
   if (!offene.length) return seiteSchliessen();
   const r = offene.find((x) => x[0] === (fensterId || letzterReiter[g.id])) || offene[0];
-  for (const gg of GRUPPEN) for (const rr of gg.reiter || []) $(rr[0]).hidden = true;
+  fensterVerstecken();
   offeneGruppe = g.id;
   offenerReiter = r[0];
   letzterReiter[g.id] = r[0];
@@ -953,6 +975,12 @@ function seiteOeffnen(gruppeId, fensterId) {
   }
   r[2]();
   const f = $(r[0]);
+  if (!f) {
+    // Reiter „Kampf“: kein Fenster, nur die Reiter-Leiste über dem Kampf
+    leisteZeichnen();
+    document.documentElement.style.setProperty("--unten", $("leiste").offsetHeight + (leiste.hidden ? 0 : leiste.offsetHeight) + "px");
+    return;
+  }
   f.classList.add("seite");
   f.hidden = false;
   f.querySelector(".karte").scrollTop = 0;
@@ -970,9 +998,9 @@ function leisteZeichnen() {
     const knopf = el("button", "rund" + (an ? " an" : ""));
     knopf.type = "button";
     const rund = el("span", "rund-symbol");
-    rund.style.backgroundImage = grafik.symbolBild(an ? "zu" : g.id === "geld" && !frei("bitcoin") ? "muenze" : g.id);
+    rund.style.backgroundImage = grafik.symbolBild(an ? "zu" : g.id === "geld" && !frei("bitcoin") ? "muenze" : g.bild || g.id);
     knopf.append(rund, el("span", "rund-name", g.name));
-    knopf.addEventListener("click", () => (an || g.id === "kampf" ? seiteSchliessen() : seiteOeffnen(g.id)));
+    knopf.addEventListener("click", () => (an ? seiteSchliessen() : seiteOeffnen(g.id, g.id === "kampf" ? "arena" : undefined)));
     leiste.append(knopf);
   }
 }
@@ -1785,20 +1813,10 @@ const AST_BILD = { produktion: "beutel", kampf: "schwert", handel: "farm", haush
 
 // Der Baum wächst von oben nach unten: je Ebene ein Knoten in der Mitte, darunter zwei an den Seiten.
 function techZeichnen() {
-  if (!frei("tech")) techAst = "perma"; // vor Zeitalter 3 (nach einem Neustart) nur der Perma-Baum
-  $("tech-punkte").textContent = techAst === "perma" ? "👑 " + perma.punkte() : "⚗ " + stand.gemeinsam.tech.punkte;
+  $("tech-punkte").textContent = "⚗ " + stand.gemeinsam.tech.punkte;
   const reiter = $("tech-reiter");
   reiter.replaceChildren();
-  // Eigener Ast für den Perma-Baum (Punkte nur durch Neustart).
-  const pk = el("button", "ast-knopf perma" + (techAst === "perma" ? " an" : ""));
-  pk.type = "button";
-  pk.title = "Perma-Baum";
-  pk.style.backgroundImage = grafik.symbolBild("krone");
-  pk.addEventListener("click", () => {
-    techAst = "perma";
-    techZeichnen();
-  });
-  for (const a of frei("tech") ? tech.aeste() : []) {
+  for (const a of tech.aeste()) {
     const offen = tech.astOffen(a.id);
     const k = el("button", "ast-knopf" + (a.id === techAst ? " an" : "") + (offen ? "" : " zu"));
     k.type = "button";
@@ -1810,10 +1828,8 @@ function techZeichnen() {
     });
     reiter.append(k);
   }
-  reiter.append(pk);
   const box = $("tech-ebenen");
   box.replaceChildren();
-  if (techAst === "perma") return permaZeichnen(box);
   const a = tech.aeste().find((x) => x.id === techAst);
   box.append(el("div", "tech-ast-name", a.name));
   if (!tech.astOffen(a.id)) {
@@ -2110,7 +2126,7 @@ function seiteWechseln() {
 // Beute in der freien Welt (Harry 16.11.2026): Fähigkeitspunkte, Tech-Punkte (seltener) und Dungeon-Schlüssel.
 function weltBeute(gegner) {
   const b = daten.einstellungen.beute;
-  const typ = gegner.boss ? "boss" : gegner.typ;
+  const typ = gegner.boss || gegner.zwischen ? "boss" : gegner.typ; // Zwischen-Boss gibt Boss-Beute
   const wurf = (art, plus) => Math.random() < (b[art].chance[typ] || 0) * (1 + plus);
   const menge = (art) => (b[art].menge && b[art].menge[typ]) || 1;
   if (frei("faehigkeiten") && wurf("fpunkte", tech.wert("fpunkte") + reittierBonus("fpunkte"))) {
@@ -2366,6 +2382,38 @@ function importieren(text) {
   kurzMeldung("Spielstand importiert.");
 }
 
+// Sicherung zurückholen: tauscht den jetzigen Stand mit der Sicherung (so lässt sich auch das wieder rückgängig machen).
+function sicherungInfo() {
+  const alt = speicher.sicherungLaden();
+  infoZeigen(() => {
+    if (!alt) return { titel: "Keine Sicherung", bild: grafik.symbolBild("schloss"), zeilen: ["Es gibt noch keine Sicherung. Sie entsteht beim Löschen und bei jedem Neustart."] };
+    const s = alt.seiten[alt.aktiveSeite];
+    const z = daten.zeitalter.find((x) => x.id === s.zeitalter) || daten.zeitalter[0];
+    const wann = new Date(alt.zuletztGespeichert || Date.now()).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" });
+    return {
+      titel: "Sicherung zurückholen",
+      bild: grafik.symbolBild("uhr"),
+      zeilen: [
+        marken([["Zeitalter " + z.nummer], ["Stufe " + ((s.kampf && s.kampf.stufe) || 1)], ["Lv " + (s.level || 1)]]),
+        "Gespeichert am " + wann + ". Dein jetziger Stand wird dafür zur neuen Sicherung, du kannst also zurücktauschen.",
+      ],
+      knoepfe: [
+        {
+          text: "Zurückholen",
+          zu: true,
+          aktion: () => {
+            const jetzt = JSON.parse(JSON.stringify(stand));
+            speicher.sichern(jetzt);
+            stand = alt;
+            speicher.speichern(stand);
+            location.reload();
+          },
+        },
+      ],
+    };
+  });
+}
+
 function neuAnfangen() {
   if (!confirm("Wirklich neu anfangen? Der jetzige Spielstand wird ersetzt.")) return;
   speicher.sichern(stand);
@@ -2449,6 +2497,7 @@ function brutInfo(i) {
 
 // Neustart: alles auf dieser Seite beginnt neu, außer Tech-Baum, Perma-Baum, Energie und Sammelbuch.
 function neustartInfo() {
+  // aus dem Perma-Reiter heraus
   infoZeigen(() => {
     const nr = zeitalter().nummer;
     const st = seite().kampf.stufe;
@@ -2460,7 +2509,7 @@ function neustartInfo() {
         marken([["+" + p + " Perma-Punkte"], ["Zeitalter " + nr], ["Stufe " + st]]),
         "Neu beginnt alles auf dieser Seite: Zeitalter, Level, Geld, Upgrades, Ausrüstung, Tiere, Reittiere, Sets, Fähigkeiten.",
         "Es bleibt: Tech-Baum, Perma-Baum, Energie und Sammelbuch.",
-        "Perma-Punkte gibt es nur durch einen Neustart: 10 je Zeitalter ab dem zweiten, dazu 1 je 5 Stufen. Ausgeben im Tech-Baum unter 👑.",
+        "Perma-Punkte gibt es nur durch einen Neustart: 10 je Zeitalter ab dem zweiten, dazu 1 je 5 Stufen. Ausgeben unter Forschung → Perma 👑.",
       ],
       knoepfe: [{ text: p > 0 ? "Neustart · +" + p + " 👑" : "Noch keine Perma-Punkte", aus: p <= 0, zu: true, aktion: neustartMachen }],
     };
@@ -2477,8 +2526,8 @@ function neustartMachen() {
   kampf.neuStarten();
   sichern();
   allesZeichnen();
-  fensterSchliessen("menue");
-  hinweis("Neustart!", "Du hast " + p + " Perma-Punkte bekommen. Gib sie im Tech-Baum unter 👑 aus – sie bleiben für immer.", "👑");
+  seiteSchliessen();
+  hinweis("Neustart!", "Du hast " + p + " Perma-Punkte bekommen. Gib sie unter Forschung → Perma 👑 aus – sie bleiben für immer.", "👑");
 }
 
 const PERMA_BILD = {
@@ -2486,8 +2535,15 @@ const PERMA_BILD = {
   reittierChance: "tiere", fpunkte: "stern", techpunkte: "tech", schmiedeSelten: "amboss", autoSchmiede: "uhr", rabatt: "upgrades",
   energieZeit: "blitz", offline: "uhr", offlineBeute: "beutel", schluepfen: "nest", supporter: "tiere", setStaerke: "schild", setSelten: "schatz",
 };
+// Eigene Seite „Perma“ unter Forschung, mit dem Neustart-Knopf ganz oben.
+function permaSeiteZeichnen() {
+  $("perma-punkte").textContent = "👑 " + perma.punkte();
+  const box = $("perma-inhalt");
+  box.replaceChildren();
+  permaZeichnen(box);
+}
 function permaZeichnen(box) {
-  box.append(el("div", "tech-ast-name", "Perma-Baum · " + perma.neustarts() + " Neustarts"));
+  box.append(el("div", "tech-ast-name", perma.neustarts() + " Neustarts bisher"));
   for (const a of perma.aeste()) {
     const ast = el("div", "perma-ast");
     ast.append(el("div", "perma-ast-name", a.name));
@@ -2532,7 +2588,7 @@ function permaInfo(astId, i) {
           aktion: () => {
             const fehler = perma.kaufen(astId, i);
             if (fehler) return kurzMeldung(fehler);
-            techZeichnen();
+            permaSeiteZeichnen();
             anzeigeAktualisieren();
             sichern();
           },
@@ -2692,11 +2748,7 @@ function knoepfeVerbinden() {
   });
   $("neu-anfangen").addEventListener("click", neuAnfangen);
   $("neustart-knopf").addEventListener("click", neustartInfo);
-  $("sammelbuch-knopf").addEventListener("click", () => {
-    sammelbuchPruefen();
-    sammelbuchZeichnen();
-    $("sammelbuch").hidden = false;
-  });
+  $("sicherung-knopf").addEventListener("click", sicherungInfo);
   $("energie-chip").addEventListener("click", energieInfo);
   $("aufstieg-balken").addEventListener("click", bossTippen);
   $("seite-knopf").addEventListener("click", seiteWechseln);

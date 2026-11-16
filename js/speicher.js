@@ -312,6 +312,18 @@ export function sichern(stand) {
   }
 }
 
+// Die Sicherung (wird vor „Alles löschen“ und vor einem Neustart angelegt) lesen; null, wenn keine da ist.
+export function sicherungLaden() {
+  try {
+    const text = localStorage.getItem(SCHLUESSEL_SICHERUNG);
+    if (!text) return null;
+    const stand = JSON.parse(text);
+    return pruefen(stand) ? null : stand;
+  } catch {
+    return null;
+  }
+}
+
 export function alsText(stand) {
   stand.zuletztGespeichert = Date.now();
   return JSON.stringify(stand, null, 2);
