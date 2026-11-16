@@ -49,7 +49,17 @@
       "schaden": 4,
       "beute": 150,
       "xp": 20,
-      "naechstesZeitalter": "muscheln"
+      "naechstesZeitalter": "muscheln",
+      "faehigkeiten": [
+        {
+          "id": "feuer",
+          "art": "wut",
+          "wert": 0.5,
+          "alle": 8,
+          "dauer": 3,
+          "text": "Prometheus schleudert Feuer: mehr Schaden!"
+        }
+      ]
     }
   },
   "muscheln": {
@@ -101,7 +111,17 @@
       "schaden": 8,
       "beute": 40,
       "xp": 60,
-      "naechstesZeitalter": "bronzezeit"
+      "naechstesZeitalter": "bronzezeit",
+      "faehigkeiten": [
+        {
+          "id": "flink",
+          "art": "schild",
+          "wert": 0.5,
+          "alle": 8,
+          "dauer": 3,
+          "text": "Hermes weicht flink aus: halber Schaden!"
+        }
+      ]
     }
   },
   "bronzezeit": {
@@ -153,7 +173,17 @@
       "schaden": 22,
       "beute": 40,
       "xp": 150,
-      "naechstesZeitalter": "muenzen"
+      "naechstesZeitalter": "muenzen",
+      "faehigkeiten": [
+        {
+          "id": "gesetz",
+          "art": "betaeuben",
+          "wert": 0,
+          "alle": 9,
+          "dauer": 1,
+          "text": "Hammurabi verkündet ein Gesetz: du setzt einen Schlag aus!"
+        }
+      ]
     }
   },
   "muenzen": {
@@ -205,7 +235,17 @@
       "schaden": 60,
       "beute": 40,
       "xp": 400,
-      "naechstesZeitalter": "rom"
+      "naechstesZeitalter": "rom",
+      "faehigkeiten": [
+        {
+          "id": "gold",
+          "art": "heilen",
+          "wert": 0.1,
+          "alle": 7,
+          "dauer": 0,
+          "text": "Krösus heilt sich mit Gold!"
+        }
+      ]
     }
   },
   "rom": {
@@ -257,7 +297,25 @@
       "schaden": 168,
       "beute": 40,
       "xp": 1000,
-      "naechstesZeitalter": "mittelalter"
+      "naechstesZeitalter": "mittelalter",
+      "faehigkeiten": [
+        {
+          "id": "legion",
+          "art": "wut",
+          "wert": 0.6,
+          "alle": 8,
+          "dauer": 3,
+          "text": "Caesar ruft die Legion: mehr Schaden!"
+        },
+        {
+          "id": "lorbeer",
+          "art": "heilen",
+          "wert": 0.08,
+          "alle": 10,
+          "dauer": 0,
+          "text": "Caesar setzt den Lorbeer auf und heilt sich!"
+        }
+      ]
     }
   },
   "mittelalter": {
@@ -309,7 +367,25 @@
       "schaden": 470,
       "beute": 40,
       "xp": 2500,
-      "naechstesZeitalter": "banken"
+      "naechstesZeitalter": "banken",
+      "faehigkeiten": [
+        {
+          "id": "ansturm",
+          "art": "wut",
+          "wert": 0.7,
+          "alle": 7,
+          "dauer": 3,
+          "text": "Dschingis Khan stürmt an: mehr Schaden!"
+        },
+        {
+          "id": "pfeilhagel",
+          "art": "betaeuben",
+          "wert": 0,
+          "alle": 10,
+          "dauer": 1,
+          "text": "Pfeilhagel: du setzt einen Schlag aus!"
+        }
+      ]
     }
   },
   "banken": {
@@ -361,7 +437,25 @@
       "schaden": 1316,
       "beute": 40,
       "xp": 6250,
-      "naechstesZeitalter": "entdeckungen"
+      "naechstesZeitalter": "entdeckungen",
+      "faehigkeiten": [
+        {
+          "id": "kredit",
+          "art": "heilen",
+          "wert": 0.1,
+          "alle": 8,
+          "dauer": 0,
+          "text": "Medici nimmt einen Kredit auf und heilt sich!"
+        },
+        {
+          "id": "tresor",
+          "art": "schild",
+          "wert": 0.5,
+          "alle": 10,
+          "dauer": 3,
+          "text": "Medici verschanzt sich im Tresor: halber Schaden!"
+        }
+      ]
     }
   },
   "entdeckungen": {
@@ -413,7 +507,25 @@
       "schaden": 3685,
       "beute": 40,
       "xp": 15625,
-      "naechstesZeitalter": "aktien"
+      "naechstesZeitalter": "aktien",
+      "faehigkeiten": [
+        {
+          "id": "betaeuben",
+          "art": "betaeuben",
+          "wert": 0,
+          "alle": 7,
+          "dauer": 1,
+          "text": "Blackbeard betäubt dich kurz!"
+        },
+        {
+          "id": "rum",
+          "art": "heilen",
+          "wert": 0.08,
+          "alle": 10,
+          "dauer": 0,
+          "text": "Blackbeard trinkt Rum und heilt sich!"
+        }
+      ]
     }
   },
   "aktien": {
@@ -465,7 +577,25 @@
       "schaden": 10318,
       "beute": 40,
       "xp": 39062,
-      "naechstesZeitalter": "industrie"
+      "naechstesZeitalter": "industrie",
+      "faehigkeiten": [
+        {
+          "id": "blase",
+          "art": "wut",
+          "wert": 0.8,
+          "alle": 8,
+          "dauer": 3,
+          "text": "John Law bläht die Blase auf: mehr Schaden!"
+        },
+        {
+          "id": "flucht",
+          "art": "schild",
+          "wert": 0.5,
+          "alle": 9,
+          "dauer": 3,
+          "text": "John Law flieht: halber Schaden!"
+        }
+      ]
     }
   },
   "industrie": {
@@ -517,7 +647,25 @@
       "schaden": 28890,
       "beute": 40,
       "xp": 97655,
-      "naechstesZeitalter": "fiat"
+      "naechstesZeitalter": "fiat",
+      "faehigkeiten": [
+        {
+          "id": "monopol",
+          "art": "schild",
+          "wert": 0.5,
+          "alle": 8,
+          "dauer": 3,
+          "text": "Rockefeller baut ein Monopol: halber Schaden!"
+        },
+        {
+          "id": "oel",
+          "art": "heilen",
+          "wert": 0.1,
+          "alle": 9,
+          "dauer": 0,
+          "text": "Rockefeller pumpt Öl und heilt sich!"
+        }
+      ]
     }
   },
   "fiat": {
@@ -569,7 +717,25 @@
       "schaden": 80892,
       "beute": 40,
       "xp": 244138,
-      "naechstesZeitalter": "digital"
+      "naechstesZeitalter": "digital",
+      "faehigkeiten": [
+        {
+          "id": "schock",
+          "art": "betaeuben",
+          "wert": 0,
+          "alle": 8,
+          "dauer": 1,
+          "text": "Nixon-Schock: du setzt einen Schlag aus!"
+        },
+        {
+          "id": "druckerpresse",
+          "art": "heilen",
+          "wert": 0.12,
+          "alle": 10,
+          "dauer": 0,
+          "text": "Nixon druckt Geld und heilt sich!"
+        }
+      ]
     }
   },
   "digital": {
@@ -622,7 +788,33 @@
       "beute": 40,
       "xp": 610345,
       "naechstesZeitalter": null,
-      "endboss": true
+      "endboss": true,
+      "faehigkeiten": [
+        {
+          "id": "hack",
+          "art": "betaeuben",
+          "wert": 0,
+          "alle": 7,
+          "dauer": 1,
+          "text": "Der Satoshi-Schatten hackt dich: du setzt aus!"
+        },
+        {
+          "id": "halving",
+          "art": "wut",
+          "wert": 1.0,
+          "alle": 9,
+          "dauer": 3,
+          "text": "Halving! Der Schatten macht doppelten Schaden!"
+        },
+        {
+          "id": "blockchain",
+          "art": "heilen",
+          "wert": 0.1,
+          "alle": 11,
+          "dauer": 0,
+          "text": "Der Schatten repariert die Blockchain und heilt sich!"
+        }
+      ]
     }
   }
 }

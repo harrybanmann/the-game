@@ -557,5 +557,10 @@
         "prozent": 0.05
       }
     }
-  ]
+  ],
+  "tierAngriff": {
+    "alle": 5,
+    "grund": 2,
+    "jeStern": 1
+  }
 }

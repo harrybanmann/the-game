@@ -1,14 +1,14 @@
-import { zahl, btc, dauer } from "./format.js?v=19";
-import * as speicher from "./speicher.js?v=19";
-import { kampfSystem } from "./kampf.js?v=19";
-import { waffenSystem } from "./waffen.js?v=19";
-import { tierSystem } from "./tiere.js?v=19";
-import { dungeonSystem } from "./dungeons.js?v=19";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=19";
-import { bitcoinSystem } from "./bitcoin.js?v=19";
-import { techSystem } from "./tech.js?v=19";
-import { haushaltSystem } from "./haushalt.js?v=19";
-import { farmSystem } from "./farm.js?v=19";
+import { zahl, btc, dauer } from "./format.js?v=20";
+import * as speicher from "./speicher.js?v=20";
+import { kampfSystem } from "./kampf.js?v=20";
+import { waffenSystem } from "./waffen.js?v=20";
+import { tierSystem } from "./tiere.js?v=20";
+import { dungeonSystem } from "./dungeons.js?v=20";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=20";
+import { bitcoinSystem } from "./bitcoin.js?v=20";
+import { techSystem } from "./tech.js?v=20";
+import { haushaltSystem } from "./haushalt.js?v=20";
+import { farmSystem } from "./farm.js?v=20";
 
 const $ = (id) => document.getElementById(id);
 
@@ -1400,6 +1400,13 @@ async function start() {
     ereignis: kampfEreignis,
     trank: () => daten.dungeons.heiltrank,
     faehigkeiten: () => faehigkeiten,
+    hinweis: (text) => kurzMeldung(text),
+    tierAngriff: () => {
+      const k = tiere.werte(tiere.finde(seite().tiere.kaempfer));
+      if (!k) return null;
+      const a = daten.tiere.tierAngriff;
+      return { alle: a.alle, schaden: k.schaden * (a.grund + a.jeStern * k.sterne) * (1 + tech.wert("schaden")) };
+    },
   });
   tech = techSystem({
     daten: () => daten.tech,

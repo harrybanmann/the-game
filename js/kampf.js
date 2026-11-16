@@ -10,6 +10,13 @@ export function kampfSystem(api) {
   let seitWelle = 0;
   let beuteWelle = 0;
   let traenkeDabei = 0;
+  // Boss-Fähigkeiten (lösen automatisch aus, im Kampf als Hinweis sichtbar) und Tier-Angriff.
+  let bossUhren = {};
+  let bossWutBis = 0;
+  let bossSchildBis = 0;
+  let aussetzen = 0;
+  let kampfZeit = 0;
+  let tierUhr = 0;
 
   const k = () => api.seite().kampf;
   const w = () => api.wellen();
@@ -26,6 +33,7 @@ export function kampfSystem(api) {
       xp: vorlage.xp * beuteFaktor,
       naechstesZeitalter: vorlage.naechstesZeitalter,
       endboss: !!vorlage.endboss,
+      faehigkeiten: vorlage.faehigkeiten || [],
     };
   }
 
@@ -100,7 +108,32 @@ export function kampfSystem(api) {
     if (ziel.leben <= 0) besiegt(ziel);
   }
 
+  function bossZug() {
+    const boss = gegner[0];
+    for (const f of boss.faehigkeiten) {
+      bossUhren[f.id] = (bossUhren[f.id] || 0) + api.schlagZeit();
+      if (bossUhren[f.id] < f.alle) continue;
+      bossUhren[f.id] = 0;
+      if (f.art === "heilen") boss.leben = Math.min(boss.maxLeben, boss.leben + boss.maxLeben * f.wert);
+      else if (f.art === "wut") bossWutBis = kampfZeit + f.dauer;
+      else if (f.art === "schild") bossSchildBis = kampfZeit + f.dauer;
+      else if (f.art === "betaeuben") aussetzen = f.dauer;
+      api.hinweis(f.text);
+    }
+  }
+
   function runde() {
+    kampfZeit += api.schlagZeit();
+    if (bossKampf && gegner[0] && gegner[0].leben > 0) bossZug();
+    // Kämpfer-Tier greift alle paar Sekunden selbst an (mehr Sterne = mehr Schaden).
+    const tier = api.tierAngriff();
+    if (tier) {
+      tierUhr += api.schlagZeit();
+      if (tierUhr >= tier.alle) {
+        tierUhr = 0;
+        treffen(tier.schaden * (kampfZeit < bossSchildBis ? 0.5 : 1));
+      }
+    }
     const fae = api.faehigkeiten();
     fae.schritt(api.schlagZeit(), {
       treffen,
@@ -110,9 +143,11 @@ export function kampfSystem(api) {
       },
     });
     if (!lebende().length) return welleGeschafft();
-    treffen(api.schaden() * fae.schadenFaktor());
+    if (aussetzen > 0) aussetzen -= 1;
+    else treffen(api.schaden() * fae.schadenFaktor() * (kampfZeit < bossSchildBis ? 0.5 : 1));
     if (!lebende().length) return welleGeschafft();
-    for (const g of lebende()) spielerLeben -= g.schaden * fae.schutzFaktor();
+    const wut = kampfZeit < bossWutBis ? 1 + (gegner[0].faehigkeiten.find((f) => f.art === "wut") || { wert: 0 }).wert : 1;
+    for (const g of lebende()) spielerLeben -= g.schaden * fae.schutzFaktor() * (g.boss ? wut : 1);
     if (spielerLeben <= 0) return niederlage();
     // Heiltrank: nur im Boss-Kampf, automatisch unter der Schwelle.
     const regel = api.trank();
@@ -144,6 +179,11 @@ export function kampfSystem(api) {
       traenkeDabei = Math.min(api.seite().traenke, api.trank().bossMax);
       gegner = [machGegner(boss, "boss", 1, 1, true)];
       bossKampf = true;
+      bossUhren = {};
+      bossWutBis = 0;
+      bossSchildBis = 0;
+      aussetzen = 0;
+      kampfZeit = 0;
       spielerLeben = api.maxLeben();
       seitWelle = 0;
       beuteWelle = 0;
