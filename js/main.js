@@ -1,16 +1,16 @@
-import { zahl, btc, dauer } from "./format.js?v=37";
-import * as speicher from "./speicher.js?v=37";
-import { kampfSystem } from "./kampf.js?v=37";
-import { waffenSystem } from "./waffen.js?v=37";
-import { tierSystem } from "./tiere.js?v=37";
-import { dungeonSystem } from "./dungeons.js?v=37";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=37";
-import { bitcoinSystem } from "./bitcoin.js?v=37";
-import { techSystem } from "./tech.js?v=37";
-import * as grafik from "./grafik.js?v=37";
-import { haushaltSystem } from "./haushalt.js?v=37";
-import { farmSystem } from "./farm.js?v=37";
-import { reittierSystem } from "./reittiere.js?v=37";
+import { zahl, btc, dauer } from "./format.js?v=39";
+import * as speicher from "./speicher.js?v=39";
+import { kampfSystem } from "./kampf.js?v=39";
+import { waffenSystem } from "./waffen.js?v=39";
+import { tierSystem } from "./tiere.js?v=39";
+import { dungeonSystem } from "./dungeons.js?v=39";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=39";
+import { bitcoinSystem } from "./bitcoin.js?v=39";
+import { techSystem } from "./tech.js?v=39";
+import * as grafik from "./grafik.js?v=39";
+import { haushaltSystem } from "./haushalt.js?v=39";
+import { farmSystem } from "./farm.js?v=39";
+import { reittierSystem } from "./reittiere.js?v=39";
 
 const $ = (id) => document.getElementById(id);
 
@@ -78,7 +78,8 @@ async function datenLaden() {
 const seite = () => stand.seiten[stand.aktiveSeite];
 const zeitalter = () => daten.zeitalter.find((z) => z.id === seite().zeitalter) || daten.zeitalter[0];
 const waehrung = () => zeitalter().waehrung;
-const upgradesHier = () => daten.upgrades.filter((u) => !u.zeitalter || u.zeitalter === zeitalter().id);
+// Das Sammeln per Fingertipp gibt es nicht mehr (Harry 16.11.2026), deshalb fehlen die Tipp-Upgrades in der Liste.
+const upgradesHier = () => daten.upgrades.filter((u) => u.wirkung !== "klick" && (!u.zeitalter || u.zeitalter === zeitalter().id));
 const upgradeName = (u) => (u.namen && u.namen[zeitalter().id]) || u.name;
 const upgradeText = (u) => u.text.replace("{w}", waehrung().name);
 const stufe = (u) => seite().upgrades[u.id] || 0;
@@ -314,7 +315,6 @@ function anzeigeAktualisieren() {
   $("chip-staerke").textContent = "⚔ " + zahl(staerke());
   $("chip-level").textContent = "Lv " + s.level;
   $("chip-xp").style.width = Math.min(100, (100 * s.xp) / xpBedarf(s.level)) + "%";
-  $("verdienen-text").textContent = "+" + zahl(klickWert());
   if (!$("btc-fenster").hidden) btcKnoepfe();
   for (const u of upgradesHier()) {
     const knopf = document.querySelector(`[data-upgrade="${u.id}"]`);
@@ -396,9 +396,23 @@ function wackeln(element, klasse) {
 }
 
 // Treffer: Figur blitzt kurz auf, die Schadenszahl steigt hoch.
+// Ein paar rote Tropfen spritzen von der getroffenen Figur weg.
+function blut(box) {
+  if (box.querySelectorAll(".blut").length >= 10) return;
+  for (let i = 0; i < 5; i++) {
+    const t = el("span", "blut");
+    t.style.setProperty("--dx", Math.round(Math.random() * 44 - 22) + "px");
+    t.style.setProperty("--dy", Math.round(-8 - Math.random() * 26) + "px");
+    t.style.left = 40 + Math.random() * 20 + "%";
+    box.append(t);
+    setTimeout(() => t.remove(), 460);
+  }
+}
+
 function treffer(box, menge, farbe, gross) {
   if (document.hidden) return;
   wackeln(box.querySelector(".figur"), "getroffen");
+  blut(box);
   if (box.querySelectorAll(".schadenszahl").length >= 3) return;
   const zahlEl = el("span", "schadenszahl" + (gross ? " krit" : ""), "-" + zahl(Math.max(1, Math.round(menge))));
   zahlEl.style.color = farbe;
@@ -491,7 +505,16 @@ function kampfZeichnen() {
       const balken = el("div", "balken klein");
       balken.append(el("div", "fuellung rot"));
       if (g.boss) box.append(el("div", "gegner-name", g.name));
-      box.append(balken, figur);
+      // Die Waffe ist ein eigenes Bild über der Figur: so wird sie nie abgeschnitten und kann sich bewegen.
+      const stapel = el("div", "gegner-stapel");
+      stapel.append(figur);
+      const gw = grafik.gegnerWaffe(stand.aktiveSeite, zeitalter(), g.boss, g.art);
+      if (gw) {
+        const waffe = el("div", "gegner-waffe " + gw.art);
+        waffe.style.backgroundImage = gw.bild;
+        stapel.append(waffe);
+      }
+      box.append(balken, stapel);
       box.style.bottom = (i % 3) * 8 + "px";
       box.style.zIndex = String(3 - (i % 3));
       gruppe.append(box);
@@ -537,8 +560,15 @@ function kampfZeichnen() {
         wackeln($("held-waffe"), "schwung");
         hiebSpur(zielBox);
       } else if (e.art === "mitSchlag" && ziel) hiebSpur(zielBox);
-      else if (e.art === "gegnerSchuss" && ziel) geschoss(ort(ziel), heldOrt + 14, true, zeitalter().nummer >= 10 ? "kugel" : "pfeil");
-      else if (e.art === "gegnerSchlag" && ziel) wackeln(zielBox.querySelector(".figur"), "hieb");
+      else if (e.art === "gegnerSchuss" && ziel) {
+        const gw = zielBox.querySelector(".gegner-waffe");
+        if (gw) wackeln(gw, "los");
+        geschoss(ort(ziel), heldOrt + 14, true, zeitalter().nummer >= 10 ? "kugel" : "pfeil");
+      } else if (e.art === "gegnerSchlag" && ziel) {
+        const gw = zielBox.querySelector(".gegner-waffe");
+        if (gw) wackeln(gw, "los");
+        wackeln(zielBox.querySelector(".figur"), "hieb");
+      }
       else if (e.art === "block") wortZeigen(spielerBox, "Block!", "#9fd0ff");
       else if (e.art === "ausweichen") wortZeigen(spielerBox, "Daneben!", "#d8f0c0");
       else if (e.art === "zauber" && ziel) {
@@ -735,7 +765,7 @@ function schmiedeInfo() {
       ],
       knoepfe: [
         { text: voll ? "Maximum" : rest !== null ? "Ausbau läuft …" : "Ausbauen · " + zahl(waffen.stufeKosten()) + " " + waehrung().name, aus: voll || rest !== null, aktion: schmiedeVerbessern },
-        frei("sterne") ? { text: "Lager und Mergen", zu: true, aktion: () => fensterZeigen("waffen-fenster") } : null,
+        { text: "Lager und Mergen", zu: true, aktion: () => fensterZeigen("waffen-fenster") },
       ],
     };
   });
@@ -749,6 +779,7 @@ function ambossZeichnen() {
   $("amboss-knopf").classList.toggle("matt", guthaben() < waffen.schmiedeKosten());
   const rest = waffen.ausbauRest(Date.now());
   $("schmiede-stufe-zahl").textContent = "Stufe " + seite().schmiede.stufe;
+  $("schmiede-stufe-knopf").classList.toggle("mergbar", waffen.lagerListe().some((e) => e.mergbar));
   $("schmiede-zeit").textContent = rest !== null ? dauer(Math.ceil(rest)) : waffen.stufeVoll() ? "Max" : "▲ " + zahl(waffen.stufeKosten());
 }
 
@@ -915,7 +946,7 @@ function geldInfo() {
   infoZeigen(() => ({
     titel: zahl(guthaben()) + " " + waehrung().name,
     bild: grafik.waehrungBild(zeitalter()),
-    zeilen: [marken([["+" + zahl(proSekunde()) + " pro Sek."], ["+" + zahl(klickWert()) + " pro Tippen"], ["Kampf +" + zahl(seite().kampf.rate) + " pro Sek."]])],
+    zeilen: [marken([["+" + zahl(proSekunde()) + " pro Sek."], ["Kampf +" + zahl(seite().kampf.rate) + " pro Sek."]])],
   }));
 }
 
@@ -970,9 +1001,6 @@ function waffenGeaendert() {
 }
 
 function lagerZeichnen() {
-  const mitSternen = frei("sterne");
-  $("lager-teil").hidden = !mitSternen;
-  if (!mitSternen) return;
   const liste = waffen.lagerListe();
   $("lager-titel").textContent = "Lager (" + liste.reduce((n, e) => n + e.anzahl, 0) + ")";
   $("alles-mergen").hidden = !liste.some((e) => e.mergbar);
@@ -1024,7 +1052,6 @@ function stueckInfoZeichnen() {
   const box = $("stueck-info");
   box.replaceChildren();
   const g = gewaehltesStueck;
-  if (g && g.roh && !frei("sterne")) gewaehltesStueck = null;
   if (!gewaehltesStueck) return box.append(el("p", "hinweis", "Tippe ein Stück an, um Name und Werte zu sehen."));
   const knopf = (text, aus, aktion) => {
     const k = el("button", "knopf klein", text);
@@ -1051,7 +1078,7 @@ function stueckInfoZeichnen() {
     gewaehltesStueck = null;
     waffenGeaendert();
   });
-  knopf("Mergen (3 → +1 Stern)", !e.mergbar, () => {
+  knopf("Mergen (3 gleiche → nächste Stufe)", !e.mergbar, () => {
     waffen.mergen(e.roh);
     gewaehltesStueck = null;
     waffenGeaendert();
@@ -1155,7 +1182,7 @@ function schmieden(auto) {
   const text = $("schmiede-ergebnis");
   text.textContent =
     r.neu.seltenheit.name + ": " + r.neu.name +
-    (r.besser ? " – ausgerüstet!" : frei("sterne") ? " – ins Lager gelegt." : " – verkauft für " + zahl(r.verkauft) + " " + waehrung().name + ".");
+    (r.besser ? " – ausgerüstet!" : " – ins Lager gelegt.");
   text.style.color = r.neu.seltenheit.farbe;
   wackeln(document.querySelector(".amboss-bild"), "haemmern");
   // Beim Auto-Schmieden nur melden, wenn etwas Besseres angelegt wurde.
@@ -2001,7 +2028,6 @@ function neuAnfangen() {
 // ---------- Start ----------
 
 function knoepfeVerbinden() {
-  $("verdienen").addEventListener("pointerdown", verdienen);
   $("boss-knopf").addEventListener("click", bossTippen);
   $("chip-held").addEventListener("click", heldInfo);
   $("chip-geld").addEventListener("click", geldInfo);

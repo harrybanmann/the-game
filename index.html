@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=37">
+  <link rel="stylesheet" href="css/style.css?v=39">
 </head>
 <body>
   <div id="spiel">
@@ -56,10 +56,6 @@
         <div id="gegner-gruppe"></div>
       </div>
       <div id="szene-knoepfe">
-        <button id="verdienen" class="rund-knopf" type="button" aria-label="Sammeln">
-          <span class="stein klein" aria-hidden="true"></span>
-          <span id="verdienen-text"></span>
-        </button>
         <span class="platzhalter"></span>
         <button id="boss-knopf" class="rund-knopf" type="button" aria-label="Boss">
           <span id="boss-bild" aria-hidden="true"></span>
@@ -109,29 +105,22 @@
 
   <div id="waffen-fenster" class="fenster" hidden>
     <div class="karte">
-      <h2>Schmiede</h2>
-      <div id="schmiede-raster" class="kachel-raster"></div>
-      <div id="stueck-info" class="info-box"></div>
-      <div class="stil-reihe" title="Welche Waffen darf die Schmiede anlegen?">
-        <button class="knopf klein" type="button" data-stil="">Egal</button>
-        <button class="knopf klein" type="button" data-stil="nah">Nur Nahkampf</button>
-        <button class="knopf klein" type="button" data-stil="fern">Nur Fernkampf</button>
-      </div>
-      <button id="schmieden-knopf" class="knopf" type="button"></button>
-      <p id="schmiede-ergebnis" class="ergebnis"></p>
       <div id="lager-teil">
-        <div class="titel-zeile"><h3 id="lager-titel"></h3><button id="alles-mergen" class="knopf klein" type="button">Alles mergen</button></div>
+        <div class="titel-zeile"><h2 id="lager-titel"></h2><button id="alles-mergen" class="knopf klein" type="button">Alles mergen</button></div>
+        <p class="hinweis">3 gleiche Stücke werden zu einem Stück der nächsten Seltenheit.</p>
+        <div id="stueck-info" class="info-box"></div>
         <div id="lager" class="kachel-raster"></div>
       </div>
-      <h3 id="schmiede-stufe"></h3>
-      <button id="schmiede-knopf" class="knopf" type="button"></button>
-      <details>
-        <summary>Chancen und Set-Boni</summary>
+      <!-- Alte Schmiede-Ansicht: wird nicht mehr gezeigt, die Felder bleiben für den Code erhalten. -->
+      <div hidden>
+        <div id="schmiede-raster"></div>
+        <button id="schmieden-knopf" type="button"></button>
+        <p id="schmiede-ergebnis"></p>
+        <h3 id="schmiede-stufe"></h3>
+        <button id="schmiede-knopf" type="button"></button>
         <div id="schmiede-chancen"></div>
-        <p id="waffen-set" class="hinweis"></p>
-        <p id="ruestung-set" class="hinweis"></p>
-        <p id="schmuck-set" class="hinweis"></p>
-      </details>
+        <p id="waffen-set"></p><p id="ruestung-set"></p><p id="schmuck-set"></p>
+      </div>
       <button class="knopf rot" type="button" data-schliessen="waffen-fenster">Zurück</button>
     </div>
   </div>
@@ -282,7 +271,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=37"></script>
+  <script type="module" src="js/main.js?v=39"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

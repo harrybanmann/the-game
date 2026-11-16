@@ -88,7 +88,7 @@ function person(o) {
   if (o.kopf === "visier") t += `<path d="M23,30 Q22,4 50,4 Q78,4 77,30 Z" fill="#1b1f3a" ${S}/><rect x="36" y="26" width="42" height="13" rx="6" fill="${o.akzent}" ${S3}/><path d="M42,30 h14" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.8"/>`;
   // Schild vorne
   if (o.schild)
-    t += `<path d="M62,58 h34 v16 q0,20 -17,27 q-17,-7 -17,-27 z" fill="${o.schild}" ${S}/><path d="M79,64 v30 M68,76 h22" stroke="${o.akzent}" stroke-width="5" stroke-linecap="round" fill="none"/>`;
+    t += `<path d="M4,56 h34 v16 q0,20 -17,27 q-17,-7 -17,-27 z" fill="${o.schild}" ${S}/><path d="M21,62 v30 M10,74 h22" stroke="${o.akzent}" stroke-width="5" stroke-linecap="round" fill="none"/>`;
   return t;
 }
 
@@ -215,8 +215,25 @@ export function gegnerBild(seite, zeitalter, typ, boss, art) {
     else if (seite === "boese")
       o = { ...waechter(zeitalter, typ), boese: true, schild: fern ? null : f.zweit, waffe: fern ? fernWaffe : "speer" };
     else o = { ...dieb(zeitalter, typ), waffe: fern ? fernWaffe : "keule" };
+    o.waffe = null; // die Waffe liegt als eigenes Bild über der Figur (gegnerWaffe), damit sie sich bewegen kann
     return figurSvg(spiegeln(person(o)));
   });
+}
+
+// Die Waffe eines Gegners als eigenes Bild (zeigt nach links). Gibt { art, bild } zurück oder null.
+const GEGNER_WAFFEN = {
+  keule: `<g transform="rotate(-28 32 40)"><rect x="24" y="2" width="16" height="54" rx="8" fill="#9a6a3c" ${S3}/><circle cx="31" cy="14" r="2.5" fill="${U}"/><circle cx="34" cy="26" r="2" fill="${U}"/></g>`,
+  speer: `<path d="M62,36 H18" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M62,36 H18" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M2,36 L22,26 V46 Z" fill="#c9ced6" ${S3}/>`,
+  bogen: `<path d="M44,6 Q14,32 44,58" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M44,6 Q14,32 44,58" fill="none" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M44,6 V58" stroke="${U}" stroke-width="2.5"/>`,
+  blaster: `<rect x="8" y="24" width="40" height="14" rx="4" fill="#5a5f69" ${S3}/><rect x="36" y="36" width="12" height="16" rx="3" fill="#3a3f49" ${S3}/><circle cx="8" cy="31" r="4" fill="#ff4bd8"/>`,
+};
+export function gegnerWaffe(seite, zeitalter, boss, art) {
+  let w;
+  if (boss) w = BOSSE[zeitalter.id] && "waffe" in BOSSE[zeitalter.id] ? BOSSE[zeitalter.id].waffe : "speer";
+  else if (art === "fern") w = zeitalter.nummer >= 10 ? "blaster" : "bogen";
+  else w = seite === "boese" ? "speer" : zeitalter.nummer === 12 ? null : "keule";
+  if (!w || !GEGNER_WAFFEN[w]) return null;
+  return { art: w, bild: alsBild("gegnerwaffe|" + w, () => svg(64, 64, GEGNER_WAFFEN[w])) };
 }
 
 // ---------- Ausrüstung ----------

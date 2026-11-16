@@ -120,12 +120,11 @@ export function waffenSystem(api) {
     return Math.max(1, Math.round(d().schmiede.kosten * (d().schmiede.verkaufAnteil || 0) * selten.faktor * (1 + (stueck.sterne || 0))));
   };
   let verkauft = 0; // Erlös seit dem letzten Schmieden (für die Meldung)
+  // Harry 16.11.2026 (nach V27): Doppelte bleiben im Lager, 3 gleiche werden zur nächsten Seltenheit gemergt.
   function ablegen(stueck) {
-    if (sterneOffen()) return insLager(stueck);
-    const wert = verkaufsWert(stueck);
-    verkauft += wert;
-    api.gutschreiben(wert);
+    insLager(stueck);
   }
+  void verkaufsWert;
 
   function anlegen(stueck, platz) {
     const art = platz || zielPlatz(stueck);
@@ -151,7 +150,10 @@ export function waffenSystem(api) {
     return (eintrag ? eintrag.anzahl : 0) + plaetzeFuer(stueck).filter((p) => gleich(hole(p), stueck)).length;
   }
 
-  const mergbar = (stueck) => sterneOffen() && (stueck.sterne || 0) < d().maxSterne && anzahlGleich(stueck) >= 3;
+  // Erst geht es die Seltenheiten hinauf; ganz oben kommen (im Endgame) die Sterne.
+  const hoechste = () => d().seltenheiten.length - 1;
+  const mergbar = (stueck) =>
+    anzahlGleich(stueck) >= 3 && (stueck.seltenheit < hoechste() || (sterneOffen() && (stueck.sterne || 0) < d().maxSterne));
   const schmiedeKosten = () => d().schmiede.kosten;
   const stufeVoll = () => s().schmiede.stufe >= d().schmiede.maxStufe;
   const stufeKosten = () => Math.ceil(d().schmiede.stufenKosten * Math.pow(d().schmiede.stufenFaktor, s().schmiede.stufe));
@@ -267,7 +269,7 @@ export function waffenSystem(api) {
       if (!mergbar(stueck)) return null;
       const angelegt = plaetzeFuer(stueck).filter((p) => gleich(hole(p), stueck));
       let fehlt = 3 - ausLager(stueck, 3);
-      const neu = { ...nur(stueck), sterne: (stueck.sterne || 0) + 1 };
+      const neu = stueck.seltenheit < hoechste() ? { ...nur(stueck), seltenheit: stueck.seltenheit + 1 } : { ...nur(stueck), sterne: (stueck.sterne || 0) + 1 };
       // Fehlende Stücke kommen von den angelegten Plätzen; der erste bekommt das neue Stück.
       for (let i = 1; i < fehlt; i++) setze(angelegt[i], null);
       if (fehlt > 0) setze(angelegt[0], neu);

@@ -75,6 +75,7 @@ export function kampfSystem(api) {
       gegner.push(machGegner(d.typen[typ], typ, faktor, beuteFaktor, false, art, 1 + l.startAbstand * i, halt));
     }
     spielerUhr = 0;
+    heldX = 0; // jede Welle beginnt am Startplatz: Held und Gegner laufen neu aufeinander zu
     effekte = [];
     bossKampf = false;
     const max = api.maxLeben();
