@@ -125,6 +125,9 @@ export function waffenSystem(api) {
   const schmiedeKosten = () => d().schmiede.kosten;
   const stufeVoll = () => s().schmiede.stufe >= d().schmiede.maxStufe;
   const stufeKosten = () => Math.ceil(d().schmiede.stufenKosten * Math.pow(d().schmiede.stufenFaktor, s().schmiede.stufe));
+  // Auto-Schmieden: alle paar Sekunden, mit jeder Schmiede-Stufe etwas schneller.
+  const autoSekunden = () =>
+    Math.max(d().schmiede.autoMinSekunden, d().schmiede.autoSekunden - d().schmiede.autoSchnellerJeStufe * s().schmiede.stufe);
   const stufeDauer = () => Math.round(d().schmiede.dauerGrund * Math.pow(d().schmiede.dauerFaktor, s().schmiede.stufe));
 
   return {
@@ -191,6 +194,7 @@ export function waffenSystem(api) {
       return { neu: werte(neu), besser };
     },
     stufeDauer,
+    autoSekunden,
     ausbauRest(jetzt) {
       const bis = s().schmiede.ausbauBis;
       return bis ? Math.max(0, (bis - jetzt) / 1000) : null;

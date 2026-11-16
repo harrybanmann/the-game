@@ -53,7 +53,10 @@
     "ratioStart": 5,
     "ratioEnde": 2,
     "dauerGrund": 60,
-    "dauerFaktor": 1.8
+    "dauerFaktor": 1.8,
+    "autoSekunden": 2,
+    "autoSchnellerJeStufe": 0.05,
+    "autoMinSekunden": 0.5
   },
   "setBonusSchaden": 0.1,
   "ruestungSet": {

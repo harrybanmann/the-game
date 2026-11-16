@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=21">
+  <link rel="stylesheet" href="css/style.css?v=22">
 </head>
 <body>
   <div id="spiel">
@@ -60,6 +60,7 @@
     <section id="ausruestung-bereich" aria-label="Ausrüstung">
       <div id="ausruestung-raster"></div>
       <div id="amboss-reihe">
+        <button id="auto-knopf" type="button" aria-pressed="false">Auto<br><span id="auto-zustand">aus</span></button>
         <button id="amboss-knopf" type="button">
           <span class="amboss-bild" aria-hidden="true">🔨</span>
           <span id="amboss-text">Schmieden</span>
@@ -249,7 +250,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=21"></script>
+  <script type="module" src="js/main.js?v=22"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

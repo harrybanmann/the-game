@@ -1,14 +1,14 @@
-import { zahl, btc, dauer } from "./format.js?v=21";
-import * as speicher from "./speicher.js?v=21";
-import { kampfSystem } from "./kampf.js?v=21";
-import { waffenSystem } from "./waffen.js?v=21";
-import { tierSystem } from "./tiere.js?v=21";
-import { dungeonSystem } from "./dungeons.js?v=21";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=21";
-import { bitcoinSystem } from "./bitcoin.js?v=21";
-import { techSystem } from "./tech.js?v=21";
-import { haushaltSystem } from "./haushalt.js?v=21";
-import { farmSystem } from "./farm.js?v=21";
+import { zahl, btc, dauer } from "./format.js?v=22";
+import * as speicher from "./speicher.js?v=22";
+import { kampfSystem } from "./kampf.js?v=22";
+import { waffenSystem } from "./waffen.js?v=22";
+import { tierSystem } from "./tiere.js?v=22";
+import { dungeonSystem } from "./dungeons.js?v=22";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=22";
+import { bitcoinSystem } from "./bitcoin.js?v=22";
+import { techSystem } from "./tech.js?v=22";
+import { haushaltSystem } from "./haushalt.js?v=22";
+import { farmSystem } from "./farm.js?v=22";
 
 const $ = (id) => document.getElementById(id);
 
@@ -168,6 +168,7 @@ function tick() {
     if (!$("waffen-fenster").hidden) waffenZeichnen();
     sichern();
   }
+  autoSchritt(jetzt);
   for (const tier of tiere.schritt(jetzt)) {
     kurzMeldung("Geschlüpft: " + tier.seltenheit.name + " – " + tier.name);
     if (!$("tiere-fenster").hidden) tiereZeichnen();
@@ -338,6 +339,7 @@ function rasterZeichnen() {
 }
 
 function ambossZeichnen() {
+  autoZeichnen();
   $("amboss-text").textContent = "Schmieden · " + zahl(waffen.schmiedeKosten()) + " " + waehrung().name;
   $("amboss-knopf").classList.toggle("matt", guthaben() < waffen.schmiedeKosten());
   const rest = waffen.ausbauRest(Date.now());
@@ -574,14 +576,43 @@ function waffenZeichnen() {
   waffenKnoepfe();
 }
 
-function schmieden() {
+// Auto-Schmieden läuft nur, solange das Spiel offen ist (nicht offline). Nach Neustart oder Seitenwechsel aus.
+let autoAn = false;
+let autoLetzter = 0;
+
+function autoSetzen(an) {
+  autoAn = an;
+  autoLetzter = 0;
+  autoZeichnen();
+}
+
+function autoZeichnen() {
+  const k = $("auto-knopf");
+  const wartet = autoAn && guthaben() < waffen.schmiedeKosten();
+  k.classList.toggle("an", autoAn);
+  k.classList.toggle("wartet", wartet);
+  k.setAttribute("aria-pressed", String(autoAn));
+  $("auto-zustand").textContent = !autoAn ? "aus" : wartet ? "wartet" : "an";
+}
+
+function autoSchritt(jetzt) {
+  if (!autoAn) return;
+  if (kampf.zustand().boss) return;
+  if (jetzt - autoLetzter < waffen.autoSekunden() * 1000) return;
+  if (guthaben() < waffen.schmiedeKosten()) return;
+  autoLetzter = jetzt;
+  schmieden(true);
+}
+
+function schmieden(auto) {
   const r = waffen.schmieden();
   if (!r) return;
   const text = $("schmiede-ergebnis");
   text.textContent =
     r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – ausgerüstet!" : " – ins Lager gelegt.");
   text.style.color = r.neu.seltenheit.farbe;
-  if ($("waffen-fenster").hidden) kurzMeldung(text.textContent);
+  // Beim Auto-Schmieden nur melden, wenn etwas Besseres angelegt wurde.
+  if ($("waffen-fenster").hidden && (!auto || r.besser)) kurzMeldung(text.textContent);
   waffenZeichnen();
   anzeigeAktualisieren();
   sichern();
@@ -1110,6 +1141,7 @@ function seiteWechseln() {
     stand.seiten[ziel] = speicher.neueSeite(daten.einstellungen.startZeitalter);
     speicher.pruefen(stand);
   }
+  autoSetzen(false);
   stand.aktiveSeite = ziel;
   letzterTick = Date.now();
   kampf.neuStarten();
@@ -1348,10 +1380,14 @@ function knoepfeVerbinden() {
     }
     faehigkeitGeaendert();
   });
-  $("schmieden-knopf").addEventListener("click", schmieden);
+  $("schmieden-knopf").addEventListener("click", () => schmieden(false));
   $("amboss-knopf").addEventListener("click", () => {
     if (guthaben() < waffen.schmiedeKosten()) return kurzMeldung("Zu wenig " + waehrung().name + " zum Schmieden.");
     schmieden();
+  });
+  $("auto-knopf").addEventListener("click", () => {
+    autoSetzen(!autoAn);
+    kurzMeldung(autoAn ? "Auto-Schmieden an: alle " + zahl(waffen.autoSekunden()) + " Sek., solange das Spiel offen ist." : "Auto-Schmieden aus.");
   });
   $("schmiede-stufe-knopf").addEventListener("click", schmiedeVerbessern);
   $("alles-mergen").addEventListener("click", allesMergen);
