@@ -538,3 +538,76 @@ body.boese #ausruestung-bereich { background: #d9d0e4; }
 @keyframes hoch { 0% { opacity: 0; translate: 0 6px; } 20% { opacity: 1; } 100% { opacity: 0; translate: 0 -30px; } }
 @keyframes haemmern { 0% { rotate: 0deg; } 40% { rotate: -22deg; } 100% { rotate: 0deg; } }
 @media (prefers-reduced-motion: reduce) { .figur { animation: none; } }
+
+/* ---------- Version 23: Kampf mit Laufen, Seiten mit Reitern, Bild-Kacheln ---------- */
+.arena { position: relative; display: block; height: 150px; flex: 0 0 150px; }
+#spieler-box { position: absolute; left: 0; bottom: 0; width: 96px; display: flex; flex-direction: column; align-items: center; gap: 3px; z-index: 4; }
+#gegner-gruppe { position: absolute; inset: 0; display: block; }
+.gegner { position: absolute; bottom: 0; width: 62px; transform: translateX(-50%); transition: left 0.26s linear, opacity 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 30px; }
+.gegner.boss { width: 120px; }
+.gegner .balken.klein { width: 44px; }
+.gegner.boss .balken.klein { width: 90px; height: 12px; }
+.gegner .gegner-name { min-height: 0; font-size: 12px; white-space: nowrap; }
+.gegner.weg { opacity: 0; transition: opacity 0.5s 0.2s; }
+.gegner.laeuft .figur { animation: laufen 0.36s ease-in-out infinite; }
+.figur.hieb { animation: wippen 1.8s ease-in-out infinite, hieb 0.22s ease-out; }
+.reit-stapel { position: relative; display: flex; flex-direction: column; align-items: center; }
+.reittier-bild { width: 92px; height: 70px; margin-top: -34px; background: center bottom / contain no-repeat; position: relative; z-index: 1; }
+#spieler-box.reitet .figur.spieler { width: 68px; height: 84px; z-index: 2; }
+#spieler-box .balken { height: 18px; }
+#spieler-box .balken span { font-size: 12px; }
+.kaempfer-werte { font-size: 12px; white-space: nowrap; }
+.geschoss { position: absolute; bottom: 70px; width: 30px; height: 14px; margin-left: -15px; z-index: 5; pointer-events: none;
+  background: center / contain no-repeat; }
+.geschoss.gespiegelt { transform: scaleX(-1); }
+@keyframes laufen { 0%, 100% { translate: 0 0; rotate: -3deg; } 50% { translate: 0 -5px; rotate: 3deg; } }
+@keyframes hieb { 0% { translate: 0 0; } 45% { translate: -14px -4px; rotate: -6deg; } 100% { translate: 0 0; } }
+
+/* Seiten: füllen alles über der Leiste, die Leiste bleibt sichtbar */
+.fenster.seite { inset: 0 0 var(--unten, 96px) 0; padding: 0; background: var(--panel); align-items: stretch; z-index: 8; }
+.fenster.seite .karte { max-width: 480px; max-height: none; height: 100%; border: 0; border-radius: 0; padding: 14px 12px 18px; }
+.fenster.seite [data-schliessen] { display: none; }
+#reiter { position: relative; z-index: 9; flex: 0 0 auto; display: flex; gap: 0; padding: 8px 8px 6px; background: #d8d8dc; border-top: 4px solid var(--umriss); }
+#reiter[hidden] { display: none; }
+.reiter-knopf { flex: 1 1 0; min-width: 0; padding: 9px 2px; font: inherit; font-size: 13px; color: #fff; background: #3b4a66; cursor: pointer;
+  border: 3px solid var(--umriss); border-left-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }
+.reiter-knopf:first-child { border-left-width: 3px; border-radius: 12px 0 0 12px; }
+.reiter-knopf:last-child { border-radius: 0 12px 12px 0; }
+.reiter-knopf.an { background: var(--knopf); font-size: 15px; margin: -4px 0; border-left-width: 3px; border-radius: 12px; box-shadow: 0 4px 0 var(--umriss); z-index: 1; }
+#leiste { position: relative; z-index: 9; }
+.rund-symbol, .rund:nth-child(n) .rund-symbol { background-color: #2a3454; }
+.rund.an .rund-symbol { background-color: #e8475a; border-radius: 50%; }
+
+/* Kacheln mit Bild */
+.kachel-raster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.kachel-raster .hinweis { grid-column: 1 / -1; }
+.kachel { font: inherit; color: #fff; overflow: hidden; }
+.kachel:disabled { cursor: default; }
+.kachel-bild { width: 66%; }
+.kachel.rund { border-radius: 50%; }
+.kachel.gewaehlt { outline: 4px solid #fff; outline-offset: -2px; }
+.kachel .sterne { position: absolute; bottom: 1px; left: 0; right: 0; text-align: center; font-size: 9px; color: #ffd54a;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }
+.kachel-name { position: absolute; left: 0; right: 0; bottom: 12px; font-size: 9px; }
+.kachel.leer .kachel-name { position: static; color: #555a66; text-shadow: none; }
+.kachel.leer .kachel-bild:not([style]) { display: none; }
+.kachel-lv, .kachel-anzahl { position: absolute; top: 1px; font-size: 10px; color: #fff;
+  text-shadow: -1px 0 var(--umriss), 1px 0 var(--umriss), 0 -1px var(--umriss), 0 1px var(--umriss); }
+.kachel-lv { left: 3px; }
+.kachel-anzahl { right: 3px; }
+.kachel-punkt { position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; background: #e8475a; border: 2px solid var(--umriss); }
+.kachel.rund .kachel-lv { left: 0; right: 0; top: 2px; text-align: center; }
+.kachel.rund .kachel-punkt { top: 8%; right: 8%; }
+.info-box { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 20px; }
+.info-box > .hinweis, .info-box > .info-name { flex: 1 1 100%; margin: 0; }
+.info-box .knopf.klein { width: auto; flex: 1 1 auto; margin: 0; padding: 8px 10px; }
+.info-name { font-size: 17px; }
+.titel-zeile { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.titel-zeile .knopf.klein { width: auto; margin: 0; padding: 6px 12px; }
+#eier-reihe { display: flex; align-items: flex-end; gap: 4px; min-height: 30px; flex-wrap: wrap; }
+.ei { width: 28px; height: 28px; background: center / contain no-repeat; }
+.ei.gross { width: 54px; height: 54px; animation: wippen 1s ease-in-out infinite; transform-origin: 50% 100%; }
+details summary { cursor: pointer; padding: 6px 0; }
+#lager.kachel-raster, #faehigkeit-liste.kachel-raster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-height: none; overflow: visible; }

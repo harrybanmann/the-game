@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 14;
+export const VERSION = 15;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -28,6 +28,7 @@ export function neueSeite(startZeitalter) {
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { letzterTag: "", tickets: {}, stufe: {} },
     tiere: { eier: [], brut: null, sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
+    reittiere: { sammlung: [], naechsteNr: 1, aktiv: null },
   };
 }
 
@@ -99,6 +100,15 @@ export function pruefen(stand) {
       })
       .filter(Boolean);
     seite.tiere = tierePruefen(seite.tiere);
+    const rt = seite.reittiere || {};
+    const rtListe = (Array.isArray(rt.sammlung) ? rt.sammlung : [])
+      .filter((x) => x && typeof x.id === "string" && Number.isFinite(x.nr))
+      .map((x) => ({ nr: x.nr, id: x.id, seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0), sterne: Math.max(0, Math.floor(Number(x.sterne)) || 0) }));
+    seite.reittiere = {
+      sammlung: rtListe,
+      naechsteNr: Math.max(1, Math.floor(Number(rt.naechsteNr)) || 1, ...rtListe.map((x) => x.nr + 1)),
+      aktiv: rtListe.some((x) => x.nr === rt.aktiv) ? rt.aktiv : null,
+    };
     seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
     const zahl = (x, std) => (Number.isFinite(Number(x)) ? Number(x) : std);
     const zaehlen = (o) => {

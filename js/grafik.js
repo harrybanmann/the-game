@@ -28,6 +28,10 @@ function person(o) {
     t += `<g transform="rotate(28 82 70)"><rect x="76" y="26" width="15" height="52" rx="7.5" fill="#9a6a3c" ${S}/><circle cx="83" cy="38" r="2.5" fill="${U}"/><circle cx="80" cy="50" r="2" fill="${U}"/></g>`;
   if (o.waffe === "speer")
     t += `<line x1="84" y1="104" x2="84" y2="14" stroke="${U}" stroke-width="9" stroke-linecap="round"/><line x1="84" y1="104" x2="84" y2="20" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M84,2 L93,22 L75,22 Z" fill="#c9ced6" ${S3}/>`;
+  if (o.waffe === "bogen")
+    t += `<path d="M84,44 Q104,72 84,100" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M84,44 Q104,72 84,100" fill="none" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M84,44 V100" stroke="${U}" stroke-width="2.5"/>`;
+  if (o.waffe === "blaster")
+    t += `<rect x="74" y="64" width="26" height="10" rx="3" fill="#5a5f69" ${S3}/><rect x="76" y="72" width="8" height="12" rx="2" fill="#3a3f49" ${S3}/><circle cx="100" cy="69" r="3" fill="${o.akzent}"/>`;
   // Beine und Schuhe
   t += `<rect x="33" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/>`;
   t += `<path d="M30,106 h20 v6 h-20 z M52,106 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
@@ -148,15 +152,18 @@ export function spielerBild(seite, zeitalter, farbe) {
 }
 
 // Gegner: auf der Gut-Seite Diebe (Kapuze, Maske), auf der Böse-Seite Wächter (Helm, Schild).
-export function gegnerBild(seite, zeitalter, typ, boss) {
+// art: "nah" (Keule/Speer) oder "fern" (Bogen, später Blaster) – nie beides.
+export function gegnerBild(seite, zeitalter, typ, boss, art) {
   const f = zeitalter.farben;
-  return alsBild(["gegner", seite, zeitalter.id, typ, boss ? 1 : 0].join("|"), () => {
+  const fern = art === "fern";
+  return alsBild(["gegner", seite, zeitalter.id, typ, boss ? 1 : 0, fern ? 1 : 0].join("|"), () => {
+    const fernWaffe = zeitalter.nummer >= 10 ? "blaster" : "bogen";
     let o;
     if (boss)
       o = { haut: "#e9b98a", kleid: f.akzent, kleid2: "#5a2a1a", kopf: "krone", boese: true, akzent: f.akzent, waffe: "speer", umhang: "#8e2d2d", aura: true, ...(BOSSE[zeitalter.id] || {}) };
     else if (seite === "boese")
-      o = { ...waechter(zeitalter, typ), boese: true, schild: typ === "schwach" ? null : f.zweit, waffe: typ === "normal" ? null : "speer" };
-    else o = dieb(zeitalter, typ);
+      o = { ...waechter(zeitalter, typ), boese: true, schild: fern ? null : f.zweit, waffe: fern ? fernWaffe : "speer" };
+    else o = { ...dieb(zeitalter, typ), waffe: fern ? fernWaffe : "keule" };
     return figurSvg(spiegeln(person(o)));
   });
 }
@@ -377,6 +384,7 @@ function vier(o) {
   for (const x of [24, 36, 56, 68]) t += `<rect x="${x}" y="68" width="11" height="21" rx="5" fill="${o.robo ? "#8a94a3" : c}" ${S}/>`;
   t += `<ellipse cx="46" cy="60" rx="30" ry="19" fill="${c}" ${S}/>`;
   if (o.bauch) t += `<ellipse cx="46" cy="68" rx="20" ry="9" fill="${o.bauch}"/>`;
+  if (o.sattel) t += `<path d="M30,46 Q46,36 60,46 L58,58 Q46,52 32,58 Z" fill="${o.sattel}" ${S3}/><path d="M34,56 v10" ${S3}/>`;
   if (o.streifen) t += `<path d="M34,44 l3,14 M46,42 l2,14 M58,45 l1,12" fill="none" ${S3}/>`;
   if (o.flecken) t += `<circle cx="34" cy="54" r="4.5" fill="${c2}"/><circle cx="50" cy="62" r="5.5" fill="${c2}"/><circle cx="44" cy="48" r="3.5" fill="${c2}"/><circle cx="30" cy="68" r="3" fill="${c2}"/>`;
   if (o.panzer) t += `<path d="M22,52 l8,-10 l8,10 l8,-10 l8,10 l8,-10 l8,10" fill="${c2}" ${S3}/>`;
@@ -558,8 +566,66 @@ const SYMBOLE = {
   tiere: () => `<ellipse cx="32" cy="42" rx="15" ry="12" fill="${W}" ${S}/><circle cx="12" cy="28" r="6.5" fill="${W}" ${S}/><circle cx="25" cy="15" r="6.5" fill="${W}" ${S}/><circle cx="39" cy="15" r="6.5" fill="${W}" ${S}/><circle cx="52" cy="28" r="6.5" fill="${W}" ${S}/>`,
   farm: () => `<rect x="8" y="38" width="11" height="18" rx="2" fill="${W}" ${S}/><rect x="26" y="28" width="11" height="28" rx="2" fill="${W}" ${S}/><rect x="44" y="16" width="11" height="40" rx="2" fill="${W}" ${S}/><path d="M8,24 L24,12 L32,18 L50,4" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M8,24 L24,12 L32,18 L50,4" fill="none" stroke="#7be08a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
   menue: () => [14, 28, 42].map((y) => `<rect x="10" y="${y}" width="44" height="10" rx="5" fill="${W}" ${S3}/>`).join(""),
+  kampf: () => `<g transform="rotate(45 32 32)"><rect x="27" y="2" width="10" height="40" rx="3" fill="#d5dbe2" ${S}/><path d="M27,2 L32,-6 L37,2 Z" fill="#d5dbe2" ${S3}/><rect x="18" y="40" width="28" height="7" rx="3" fill="#f2c230" ${S}/><rect x="28" y="47" width="8" height="13" rx="3" fill="#9a6a3c" ${S}/></g>`,
+  dungeons: () => `<path d="M12,58 V28 Q12,6 32,6 Q52,6 52,28 V58 Z" fill="#9a6a3c" ${S}/><path d="M32,6 V58 M12,34 H52" ${S3} fill="none"/><circle cx="40" cy="40" r="3.5" fill="#f2c230" ${S3}/>`,
+  held: () => `<circle cx="32" cy="22" r="14" fill="${W}" ${S}/><path d="M8,58 Q8,38 32,38 Q56,38 56,58 Z" fill="${W}" ${S}/>`,
+  geld: () => `<circle cx="32" cy="32" r="25" fill="#f7931a" ${S}/><text x="32" y="45" font-size="36" font-weight="900" font-family="Arial, sans-serif" text-anchor="middle" fill="#fff">₿</text>`,
+  zu: () => `<path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="${U}" stroke-width="16" stroke-linecap="round"/><path d="M16,16 L48,48 M48,16 L16,48" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>`,
+  pfeil: () => `<path d="M2,32 H44" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M2,32 H44" stroke="#9a6a3c" stroke-width="4" stroke-linecap="round"/><path d="M62,32 L44,22 V42 Z" fill="#d5dbe2" ${S3}/>`,
   amboss: () => `<path d="M4,30 H40 Q48,30 50,36 H38 V42 Q38,46 42,50 V56 H12 V50 Q16,46 16,42 Q6,40 4,30 Z" fill="#8a94a3" ${S}/><g transform="rotate(30 44 18)"><rect x="41" y="14" width="6" height="30" rx="3" fill="#9a6a3c" ${S3}/><rect x="32" y="4" width="24" height="14" rx="4" fill="#d5dbe2" ${S}/></g>`,
 };
 export function symbolBild(id) {
   return SYMBOLE[id] ? alsBild("symbol|" + id, () => svg(64, 64, SYMBOLE[id]())) : null;
+}
+
+// ---------- Reittiere (gleiche Bausteine wie die Tiere, mit Sattel) ----------
+const R = (o) => T(vier, { sattel: "#8e2d2d", schwanz: "lang", ...o });
+const ROSS = (c, c2, mehr) => R({ c, c2, pferd: true, ohren: "spitz", schnauze: "lang", maul: c, schwanz: "busch", ...mehr });
+const REITTIERE = {
+  wollnashorn: R({ c: "#8a6a4a", ohren: "rund", nashorn: true }),
+  riesenhirsch: R({ c: "#a8763a", ohren: "spitz", horn: true, schnauze: "lang", maul: "#a8763a" }),
+  reitochse: R({ c: "#c9a27a", horn: true, ohren: "rund", maul: "#f2b8a8" }),
+  pony: ROSS("#d9b88a", "#8a5a3a"),
+  onager: R({ c: "#c9b08a", ohren: "lang", schnauze: "lang", maul: "#e8dcc4" }),
+  dromedar: R({ c: "#d9b06a", hoecker: true, ohren: "rund", schnauze: "lang", maul: "#d9b06a" }),
+  lydischesross: ROSS("#f1ead8", "#f2b632", { sattel: "#8e2d4a" }),
+  maultier: R({ c: "#7a5a3a", ohren: "lang", schnauze: "lang", maul: "#c9b08a" }),
+  roemerross: ROSS("#3a3038", "#17171c", { sattel: "#7b2a6b" }),
+  kriegselefant: R({ c: "#9aa3ad", ohren: "gross", ruessel: true, stosszaehne: true, sattel: "#d9a526" }),
+  schlachtross: ROSS("#8a8d91", "#3a3038", { sattel: "#a63a32", panzer: true, c2: "#c6cdd4" }),
+  steppenpony: ROSS("#c98a4a", "#5a3a22"),
+  schimmel: ROSS("#f4f1ea", "#c6cdd4", { sattel: "#25355e" }),
+  kutschpferd: ROSS("#5a3a22", "#2b1a12"),
+  mustang: ROSS("#b9773a", "#f1ead8", { flecken: true }),
+  lama: R({ c: "#f1ead8", ohren: "lang", schnauze: "lang", maul: "#f1ead8", sattel: "#1e8c93", schwanz: "kurz" }),
+  rennpferd: ROSS("#6b3a1a", "#2b1a12", { sattel: "#2e7d4f" }),
+  postpferd: ROSS("#b9a892", "#6b5a4a", { sattel: "#b8892b" }),
+  dampfross: ROSS("#8a6a4a", "#4a3a32", { schornstein: true, robo: true, neon: "#e8751a", schwanz: "ohne", sattel: "#5f6b76" }),
+  eisenochse: R({ c: "#7f8b98", horn: true, ohren: "rund", robo: true, neon: "#e8751a", schwanz: "ohne", sattel: "#e8751a" }),
+  rennkamel: R({ c: "#e0c080", hoecker: true, ohren: "rund", schnauze: "lang", maul: "#e0c080", sattel: "#3c6fb5" }),
+  stahlhengst: ROSS("#b9c2cf", "#5f6b76", { robo: true, schwanz: "ohne", sattel: "#3fa34d" }),
+  neonross: ROSS("#2b2f5a", "#ff4bd8", { robo: true, neon: "#ff4bd8", sattel: "#a24bff" }),
+  hoverwolf: R({ c: "#1b1f4a", ohren: "spitz", schnauze: "lang", maul: "#3a3f7a", robo: true, neon: NEON, schwanz: "busch", sattel: "#1fe3e3" }),
+};
+export function reittierBild(id) {
+  return alsBild("reittier|" + id, () => {
+    const t = REITTIERE[id] || R({ c: "#b9a892", ohren: "rund" });
+    return svg(104, 100, `<g transform="translate(2,4)">${t.form(t)}</g>`);
+  });
+}
+
+// ---------- Fähigkeiten (ein Symbol je Wirkung) und Eier ----------
+const FAEHIGKEIT = {
+  schaden: `<path d="M34,4 L46,28 L60,30 L44,42 L50,60 L32,48 L14,60 L20,42 L4,30 L22,28 Z" fill="#ffd54a" ${S}/><circle cx="32" cy="34" r="7" fill="#f2761e" ${S3}/>`,
+  heilung: `<path d="M32,56 Q4,36 10,18 Q18,4 32,18 Q46,4 54,18 Q60,36 32,56 Z" fill="#e8475a" ${S}/><path d="M32,24 v18 M23,33 h18" stroke="#fff" stroke-width="6" stroke-linecap="round"/>`,
+  staerke: `<path d="M10,40 Q8,22 22,20 Q24,8 36,10 Q42,12 40,22 Q56,22 56,38 Q56,54 34,54 Q14,54 10,40 Z" fill="#f3c9a0" ${S}/><path d="M24,36 q8,-10 18,-2" fill="none" ${S3}/>`,
+  schutz: `<path d="M12,8 H52 V30 Q52,50 32,58 Q12,50 12,30 Z" fill="#6f9ad0" ${S}/><path d="M32,16 V48 M20,30 H44" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`,
+};
+export function faehigkeitBild(art) {
+  return alsBild("faehigkeit|" + art, () => svg(64, 64, FAEHIGKEIT[art] || FAEHIGKEIT.schaden));
+}
+export function eiBild(farbe) {
+  return alsBild("ei|" + farbe, () =>
+    svg(64, 64, `<path d="M32,6 Q52,6 54,36 Q54,58 32,58 Q10,58 10,36 Q12,6 32,6 Z" fill="${farbe}" ${S}/><path d="M20,24 q4,-10 12,-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.7"/><circle cx="40" cy="38" r="5" fill="#fff" opacity="0.35"/><circle cx="26" cy="44" r="3.5" fill="#fff" opacity="0.35"/>`)
+  );
 }

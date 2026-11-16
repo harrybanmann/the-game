@@ -24,6 +24,17 @@
       "beuteFaktor": 1.08,
       "eliteAlleStufen": 5,
       "heilungZwischen": 0.25
+    },
+    "lauf": {
+      "_hinweis": "Abstand 1 = rechter Rand, 0 = beim Helden. tempo = Strecke pro Sekunde. Vorschlag.",
+      "tempo": 0.45,
+      "startAbstand": 0.12,
+      "nahHalt": 0.04,
+      "nahAbstand": 0.07,
+      "fernHalt": 0.55,
+      "fernAbstand": 0.1,
+      "bossHalt": 0.1,
+      "nahWeite": 0.42
     }
   },
   "level": {

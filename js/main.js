@@ -1,15 +1,16 @@
-import { zahl, btc, dauer } from "./format.js?v=24";
-import * as speicher from "./speicher.js?v=24";
-import { kampfSystem } from "./kampf.js?v=24";
-import { waffenSystem } from "./waffen.js?v=24";
-import { tierSystem } from "./tiere.js?v=24";
-import { dungeonSystem } from "./dungeons.js?v=24";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=24";
-import { bitcoinSystem } from "./bitcoin.js?v=24";
-import { techSystem } from "./tech.js?v=24";
-import * as grafik from "./grafik.js?v=24";
-import { haushaltSystem } from "./haushalt.js?v=24";
-import { farmSystem } from "./farm.js?v=24";
+import { zahl, btc, dauer } from "./format.js?v=25";
+import * as speicher from "./speicher.js?v=25";
+import { kampfSystem } from "./kampf.js?v=25";
+import { waffenSystem } from "./waffen.js?v=25";
+import { tierSystem } from "./tiere.js?v=25";
+import { dungeonSystem } from "./dungeons.js?v=25";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=25";
+import { bitcoinSystem } from "./bitcoin.js?v=25";
+import { techSystem } from "./tech.js?v=25";
+import * as grafik from "./grafik.js?v=25";
+import { haushaltSystem } from "./haushalt.js?v=25";
+import { farmSystem } from "./farm.js?v=25";
+import { reittierSystem } from "./reittiere.js?v=25";
 
 const $ = (id) => document.getElementById(id);
 
@@ -24,9 +25,13 @@ let bitcoin; // Bitcoin und Händler
 let tech; // Tech-Baum
 let haushalt; // Haushalt und Firma
 let farm; // Trading, Mining Farm, BTC-Markt
+let reittiere; // Reittiere (Angriffstempo)
 let farmReiter = "trading";
 let techAst = "produktion";
 let gewaehltesTier = null;
+let gewaehltesStueck = null; // { platz } oder { roh } (Lager)
+let gewaehlteFaehigkeit = null;
+let gewaehltesReittier = null;
 let letzterTick = Date.now();
 let letztesSpeichern = Date.now();
 
@@ -39,7 +44,7 @@ async function json(pfad) {
 }
 
 async function datenLaden() {
-  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten, farmDaten] = await Promise.all([
+  const [einstellungen, zeitalter, upgrades, gegner, waffenDaten, tierDaten, dungeonDaten, faehigkeitDaten, btcDaten, techDaten, haushaltDaten, farmDaten, reittierDaten] = await Promise.all([
     json("data/einstellungen.json"),
     json("data/zeitalter.json"),
     json("data/upgrades.json"),
@@ -52,6 +57,7 @@ async function datenLaden() {
     json("data/tech.json"),
     json("data/haushalt.json"),
     json("data/farm.json"),
+    json("data/reittiere.json"),
   ]);
   return {
     einstellungen,
@@ -66,6 +72,7 @@ async function datenLaden() {
     tech: techDaten,
     haushalt: haushaltDaten,
     farm: farmDaten,
+    reittiere: reittierDaten,
   };
 }
 
@@ -92,10 +99,12 @@ function summe(wirkung) {
 
 const klickWert = () => (zeitalter().klickGrundwert + summe("klick")) * (1 + tech.wert("produktion"));
 const proSekunde = () => summe("proSekunde") * (1 + tech.wert("produktion"));
-function schaden() {
+// art: "nah" oder "fern" – je nachdem, welche Waffe der Held gerade benutzt.
+function schaden(art) {
   const b = waffen.bonus();
   const tb = tiere.bonus();
-  const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
+  const grund =
+    daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + (art === "fern" ? b.schadenFern : b.schadenNah) + tb.schaden;
   return grund * (1 + b.set) * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden"));
 }
 function maxLeben() {
@@ -171,7 +180,9 @@ function tick() {
   }
   autoSchritt(jetzt);
   for (const tier of tiere.schritt(jetzt)) {
-    kurzMeldung("Geschlüpft: " + tier.seltenheit.name + " – " + tier.name);
+    kurzMeldung((tier.reittier ? "Neues Reittier: " : "Geschlüpft: ") + tier.seltenheit.name + " – " + tier.name);
+    if (tier.reittier) reittierAnzeigen();
+    if (!$("reittiere-fenster").hidden) reittiereZeichnen();
     if (!$("tiere-fenster").hidden) tiereZeichnen();
     sichern();
   }
@@ -266,48 +277,71 @@ function treffer(box, menge, farbe) {
   setTimeout(() => zahlEl.remove(), 700);
 }
 
+// Pfeil fliegt quer durch die Arena (nur Anzeige; der Schaden ist schon verrechnet).
+function geschoss(von, nach, gespiegelt) {
+  const arena = $("arena");
+  if (arena.querySelectorAll(".geschoss").length >= 6) return;
+  const g = el("div", "geschoss" + (gespiegelt ? " gespiegelt" : ""));
+  g.style.backgroundImage = grafik.symbolBild("pfeil");
+  arena.append(g);
+  const flug = g.animate([{ left: von + "%" }, { left: nach + "%" }], { duration: 200, easing: "linear" });
+  flug.onfinish = () => g.remove();
+  setTimeout(() => g.remove(), 400);
+}
+
 function kampfZeichnen() {
   const z = kampf.zustand();
   const s = seite();
   const trank = daten.dungeons.heiltrank;
   $("stufe-text").textContent = z.boss ? "Boss-Kampf" : "Stufe " + z.stufe + "-" + z.welle;
-  $("spieler-level").textContent =
-    "Level " + s.level + " · XP " + zahl(s.xp) + "/" + zahl(xpBedarf(s.level)) + " · Heiltränke " + s.traenke + "/" + trank.max;
-  $("spieler-werte").textContent = zahl(schaden()) + " Schaden";
+  $("spieler-level").textContent = "Level " + s.level + " · " + Math.floor((100 * s.xp) / xpBedarf(s.level)) + " %" + (z.boss ? " · Tränke " + s.traenke + "/" + trank.max : "");
+  $("spieler-werte").textContent = "⚔ " + zahl(schaden("nah")) + " · ➶ " + zahl(schaden("fern"));
   $("spieler-balken").style.width = (100 * z.spielerLeben) / z.maxLeben + "%";
   $("spieler-leben").textContent = zahl(Math.ceil(z.spielerLeben)) + "/" + zahl(Math.ceil(z.maxLeben));
 
-  // Figuren bleiben stehen und werden nur aktualisiert, damit Bewegungen und Treffer-Effekte laufen können.
+  // Figuren bleiben bestehen und werden nur verschoben, damit Laufen und Treffer-Effekte flüssig sind.
   const gruppe = $("gegner-gruppe");
-  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + (g.boss ? "/B" : "")).join("|");
+  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + "/" + g.art + (g.boss ? "/B" : "")).join("|");
   if (gruppe.dataset.k !== schluessel) {
     gruppe.dataset.k = schluessel;
     gruppe.replaceChildren();
-    for (const g of z.gegner) {
+    z.gegner.forEach((g, i) => {
       const box = el("div", "gegner" + (g.boss ? " boss" : ""));
       const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
-      figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss);
+      figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss, g.art);
       const balken = el("div", "balken klein");
       balken.append(el("div", "fuellung rot"));
-      box.append(el("div", "gegner-name", g.name), figur, balken);
+      if (g.boss) box.append(el("div", "gegner-name", g.name));
+      box.append(balken, figur);
+      box.style.bottom = (i % 3) * 8 + "px";
+      box.style.zIndex = String(3 - (i % 3));
       gruppe.append(box);
-    }
+    });
     lebenVorher = z.gegner.map((g) => g.leben);
   }
-  let getroffen = false;
+  const ort = (g) => 27 + Math.min(1.1, g.x) * 62; // Prozent der Arena-Breite
   z.gegner.forEach((g, i) => {
     const box = gruppe.children[i];
+    box.style.left = ort(g) + "%";
     box.classList.toggle("weg", g.leben <= 0);
+    box.classList.toggle("laeuft", g.leben > 0 && g.x > g.halt + 1e-6);
     box.querySelector(".fuellung").style.width = (100 * Math.max(0, g.leben)) / g.maxLeben + "%";
     const weniger = lebenVorher[i] - g.leben;
-    if (weniger > 0.001) {
-      getroffen = true;
-      treffer(box, weniger, "#fff");
-    }
+    if (weniger > 0.001) treffer(box, weniger, "#fff");
     lebenVorher[i] = g.leben;
   });
-  const spielerBox = document.querySelector(".arena .kaempfer");
-  if (getroffen) wackeln(spielerBox.querySelector(".figur"), "schlag");
+  const spielerBox = $("spieler-box");
+  const spielerFigur = spielerBox.querySelector(".figur");
+  if (!document.hidden) {
+    for (const e of z.effekte) {
+      const ziel = z.gegner[e.i];
+      if (!ziel) continue;
+      if (e.art === "schuss") geschoss(16, ort(ziel), false);
+      else if (e.art === "schlag") wackeln(spielerFigur, "schlag");
+      else if (e.art === "gegnerSchuss") geschoss(ort(ziel), 14, true);
+      else if (e.art === "gegnerSchlag") wackeln(gruppe.children[e.i].querySelector(".figur"), "hieb");
+    }
+  }
   if (spielerLebenVorher - z.spielerLeben > 0.001 && spielerLebenVorher <= z.maxLeben) treffer(spielerBox, spielerLebenVorher - z.spielerLeben, "#ff6b5e");
   spielerLebenVorher = z.spielerLeben;
 
@@ -359,35 +393,53 @@ const PLAETZE = [
   ["guertel", "Gürtel", "🎗"],
 ];
 
+// Eine Kachel mit Bild statt Text: Farbe = Seltenheit, unten Sterne, oben links Level, oben rechts Anzahl.
+function bildKachel(o) {
+  const k = el("button", "kachel" + (o.leer ? " leer" : "") + (o.rund ? " rund" : "") + (o.gewaehlt ? " gewaehlt" : "") + (o.glanz ? " glanz" : ""));
+  k.type = "button";
+  if (o.titel) k.title = o.titel;
+  if (o.farbe && !o.leer) k.style.background = o.farbe;
+  const bild = el("span", "kachel-bild");
+  if (o.bild) bild.style.backgroundImage = o.bild;
+  k.append(bild);
+  if (o.marke) k.append(el("span", "kachel-name", o.marke));
+  if (o.sterne > 0) k.append(el("span", "sterne", "★".repeat(o.sterne)));
+  if (o.lv) k.append(el("span", "kachel-lv", o.lv));
+  if (o.anzahl > 1) k.append(el("span", "kachel-anzahl", "×" + o.anzahl));
+  if (o.punkt) k.append(el("span", "kachel-punkt"));
+  if (o.klick) k.addEventListener("click", o.klick);
+  else k.disabled = true;
+  return k;
+}
+
+const zeitalterVon = (id) => daten.zeitalter.find((x) => x.id === id) || zeitalter();
+
+function platzKachel(art, name, klick, gewaehlt) {
+  const w = waffen.werte(waffen.hole(art), art);
+  const lv = bitcoin.stufe(art);
+  return bildKachel({
+    titel: w ? w.name : name,
+    leer: !w,
+    farbe: w && w.seltenheit.farbe,
+    glanz: w && w.seltenheit.glanz,
+    bild: grafik.stueckBild(art, w ? zeitalterVon(w.zeitalter) : zeitalter(), w ? w.id : "", !w),
+    sterne: w ? w.sterne : 0,
+    lv: lv > 0 ? "Lv. " + lv : "",
+    gewaehlt,
+    klick,
+  });
+}
+
 function rasterZeichnen() {
   const raster = $("ausruestung-raster");
   raster.replaceChildren();
-  const aktiv = waffen.aktiveArt();
-  for (const [art, name, symbol] of PLAETZE) {
-    const offen = true;
-    const w = waffen.werte(waffen.hole(art), art);
-    const kachel = el("button", "kachel" + (w ? "" : " leer") + (offen ? "" : " zu"));
-    kachel.type = "button";
-    kachel.title = name;
-    if (w) {
-      kachel.style.background = w.seltenheit.farbe;
-      if (w.seltenheit.glanz) kachel.classList.add("glanz");
-      if ((art === "nah" || art === "fern") && art === aktiv) kachel.classList.add("aktiv");
-    }
-    const bild = el("span", "kachel-bild");
-    const za = w ? daten.zeitalter.find((x) => x.id === w.zeitalter) || zeitalter() : zeitalter();
-    bild.style.backgroundImage = grafik.stueckBild(art, za, w ? w.id : "", !w);
-    kachel.append(bild, el("span", "kachel-name", w ? w.name : offen ? name : "bald"));
-    if (w) kachel.append(el("span", "sterne", sterne(w.sterne)));
-    const lv = bitcoin.stufe(art);
-    if (lv > 0) kachel.append(el("span", "kachel-lv", "Lv. " + lv));
-    kachel.addEventListener("click", () => {
-      if (!offen) return kurzMeldung(name + " kommt in einer späteren Version.");
-      waffenZeichnen();
-      fensterZeigen("waffen-fenster");
-    });
-    raster.append(kachel);
-  }
+  for (const [art, name] of PLAETZE)
+    raster.append(
+      platzKachel(art, name, () => {
+        gewaehltesStueck = waffen.hole(art) ? { platz: art } : null;
+        fensterZeigen("waffen-fenster");
+      })
+    );
 }
 
 function ambossZeichnen() {
@@ -424,24 +476,85 @@ function upgradesZeichnen() {
   anzeigeAktualisieren();
 }
 
+// Unten 5 Knöpfe. Jeder öffnet eine ganze Seite; darüber liegen die Reiter der Gruppe (wie bei Forge Master).
+// Die Schmiede-Seite gehört zu keinem Knopf: Sie öffnet sich beim Tippen auf die Ausrüstung.
+const GRUPPEN = [
+  { id: "kampf", name: "Kampf" },
+  { id: "dungeons", name: "Dungeons", reiter: [["dungeon-fenster", "Dungeons", () => (($("dungeon-ergebnis").textContent = ""), dungeonsZeichnen())]] },
+  {
+    id: "held",
+    name: "Held",
+    reiter: [
+      ["faehigkeiten-fenster", "Fähigkeiten", () => (($("faehigkeit-ergebnis").textContent = ""), faehigkeitenZeichnen())],
+      ["tiere-fenster", "Haustiere", () => tiereZeichnen()],
+      ["reittiere-fenster", "Reittiere", () => reittiereZeichnen()],
+      ["tech-fenster", "Tech-Baum", () => techZeichnen()],
+    ],
+  },
+  {
+    id: "geld",
+    name: "Geld",
+    reiter: [
+      ["upgrades-fenster", "Upgrades", () => upgradesZeichnen()],
+      ["btc-fenster", "Bitcoin", () => btcZeichnen()],
+      ["haushalt-fenster", "Haushalt", () => haushaltZeichnen()],
+      ["farm-fenster", "Farm", () => farmZeichnen(true)],
+    ],
+  },
+  { id: "menue", name: "Menü", reiter: [["menue", "Menü", () => {}]] },
+  { id: "schmiede", name: "Schmiede", versteckt: true, reiter: [["waffen-fenster", "Schmiede", () => waffenZeichnen()]] },
+];
+let offeneGruppe = null;
+let offenerReiter = null;
+const letzterReiter = {};
+const gruppeVon = (fensterId) => GRUPPEN.find((g) => g.reiter && g.reiter.some((r) => r[0] === fensterId));
+
+function seiteSchliessen() {
+  for (const g of GRUPPEN) for (const r of g.reiter || []) $(r[0]).hidden = true;
+  offeneGruppe = null;
+  offenerReiter = null;
+  $("reiter").hidden = true;
+  leisteZeichnen();
+}
+
+function seiteOeffnen(gruppeId, fensterId) {
+  const g = GRUPPEN.find((x) => x.id === gruppeId);
+  if (!g || !g.reiter) return seiteSchliessen();
+  const r = g.reiter.find((x) => x[0] === (fensterId || letzterReiter[g.id])) || g.reiter[0];
+  for (const gg of GRUPPEN) for (const rr of gg.reiter || []) $(rr[0]).hidden = true;
+  offeneGruppe = g.id;
+  offenerReiter = r[0];
+  letzterReiter[g.id] = r[0];
+  const leiste = $("reiter");
+  leiste.replaceChildren();
+  leiste.hidden = g.reiter.length < 2;
+  for (const rr of g.reiter) {
+    const k = el("button", "reiter-knopf" + (rr[0] === r[0] ? " an" : ""), rr[1]);
+    k.type = "button";
+    k.addEventListener("click", () => seiteOeffnen(g.id, rr[0]));
+    leiste.append(k);
+  }
+  r[2]();
+  const f = $(r[0]);
+  f.classList.add("seite");
+  f.hidden = false;
+  f.querySelector(".karte").scrollTop = 0;
+  leisteZeichnen();
+  document.documentElement.style.setProperty("--unten", $("leiste").offsetHeight + (leiste.hidden ? 0 : leiste.offsetHeight) + "px");
+}
+
 function leisteZeichnen() {
   const leiste = $("leiste");
   leiste.replaceChildren();
-  for (const k of daten.einstellungen.leiste) {
-    const knopf = el("button", "rund" + (k.offen ? "" : " gesperrt"));
+  for (const g of GRUPPEN) {
+    if (g.versteckt) continue;
+    const an = offeneGruppe === g.id;
+    const knopf = el("button", "rund" + (an ? " an" : ""));
     knopf.type = "button";
     const rund = el("span", "rund-symbol");
-    const bild = grafik.symbolBild(k.id);
-    if (bild) rund.style.backgroundImage = bild;
-    else rund.textContent = k.symbol;
-    knopf.append(rund, el("span", "rund-name", k.name));
-    knopf.addEventListener("click", () => {
-      if (k.id === "menue") fensterZeigen("menue");
-      else if (k.fenster) {
-        ({ tiere: tiereZeichnen, waffen: waffenZeichnen, upgrades: upgradesZeichnen, farm: () => farmZeichnen(true) })[k.id]();
-        fensterZeigen(k.fenster);
-      } else kurzMeldung(k.name + " kommt in einer späteren Version.");
-    });
+    rund.style.backgroundImage = grafik.symbolBild(an ? "zu" : g.id);
+    knopf.append(rund, el("span", "rund-name", g.name));
+    knopf.addEventListener("click", () => (an || g.id === "kampf" ? seiteSchliessen() : seiteOeffnen(g.id)));
     leiste.append(knopf);
   }
 }
@@ -455,6 +568,7 @@ function allesZeichnen() {
   upgradesZeichnen();
   leisteZeichnen();
   rasterZeichnen();
+  reittierAnzeigen();
 }
 
 // ---------- Aktionen ----------
@@ -476,56 +590,9 @@ function verdienen(ereignis) {
 const sterne = (n) => "★".repeat(n) + "☆".repeat(Math.max(0, 5 - n));
 const prozent = (anteil) => (anteil * 100).toLocaleString("de-DE", { maximumSignificantDigits: 2 }) + " %";
 
-function waffenKarte(art, titel) {
-  const w = waffen.werte(seite().waffen[art]);
-  const karte = el("div", "waffe");
-  karte.append(el("div", "waffe-art", titel));
-  if (!w) {
-    karte.append(el("div", "waffe-leer", "Noch keine Waffe"));
-    return karte;
-  }
-  karte.style.borderColor = w.seltenheit.farbe;
-  if (w.seltenheit.glanz) karte.classList.add("glanz");
-  const selten = el("div", "waffe-selten", w.seltenheit.name);
-  selten.style.color = w.seltenheit.farbe;
-  const aktiv = waffen.aktiveArt() === art;
-  const knopf = el("button", "knopf klein", aktiv ? "Schlägt zu" : "Auswählen");
-  knopf.type = "button";
-  knopf.disabled = aktiv;
-  knopf.addEventListener("click", () => {
-    waffen.aktivSetzen(art);
-    waffenZeichnen();
-    anzeigeAktualisieren();
-    sichern();
-  });
-  karte.append(
-    el("div", "waffe-name", w.name),
-    selten,
-    el("div", "sterne", sterne(w.sterne)),
-    el("div", "waffe-werte", "+" + zahl(w.schaden) + " Schaden"),
-    el("div", "waffe-werte", "+" + zahl(w.leben) + " Leben"),
-    knopf
-  );
-  return karte;
-}
 
-function ruestungKarte(art, titel) {
-  const w = waffen.werte(waffen.hole(art), art);
-  const karte = el("div", "waffe klein");
-  karte.append(el("div", "waffe-art", titel));
-  if (!w) {
-    karte.append(el("div", "waffe-leer", "–"));
-    return karte;
-  }
-  karte.style.borderColor = w.seltenheit.farbe;
-  if (w.seltenheit.glanz) karte.classList.add("glanz");
-  karte.append(
-    el("div", "waffe-name", w.name),
-    el("div", "sterne", sterne(w.sterne)),
-    el("div", "waffe-werte", (w.schaden > 0 ? "+" + zahl(w.schaden) + " Schaden · " : "") + "+" + zahl(w.leben) + " Leben")
-  );
-  return karte;
-}
+
+
 
 function waffenGeaendert() {
   rasterZeichnen();
@@ -540,36 +607,63 @@ function lagerZeichnen() {
   $("alles-mergen").hidden = !liste.some((e) => e.mergbar);
   const box = $("lager");
   box.replaceChildren();
-  if (!liste.length) {
-    box.append(el("p", "hinweis", "Leer. Was nicht besser ist, landet hier. 3 gleiche Stücke werden zu 1 Stück mit +1 Stern."));
+  if (!liste.length) return box.append(el("p", "hinweis", "Leer. Was nicht besser ist, landet hier."));
+  const gleich = (a, b) => a && b && a.id === b.id && a.seltenheit === b.seltenheit && (a.sterne || 0) === (b.sterne || 0);
+  for (const e of liste.slice(0, 60))
+    box.append(
+      bildKachel({
+        titel: e.name,
+        farbe: e.seltenheit.farbe,
+        glanz: e.seltenheit.glanz,
+        bild: grafik.stueckBild(e.art, zeitalterVon(e.zeitalter), e.id, false),
+        sterne: e.sterne,
+        anzahl: e.anzahl,
+        punkt: e.mergbar,
+        gewaehlt: gewaehltesStueck && gleich(gewaehltesStueck.roh, e.roh),
+        klick: () => {
+          gewaehltesStueck = { roh: e.roh };
+          waffenZeichnen();
+        },
+      })
+    );
+}
+
+// Zeigt Name und Werte des angetippten Stücks, dazu die passenden Knöpfe.
+function stueckInfoZeichnen() {
+  const box = $("stueck-info");
+  box.replaceChildren();
+  const g = gewaehltesStueck;
+  if (!g) return box.append(el("p", "hinweis", "Tippe ein Stück an, um Name und Werte zu sehen."));
+  const knopf = (text, aus, aktion) => {
+    const k = el("button", "knopf klein", text);
+    k.type = "button";
+    k.disabled = aus;
+    k.addEventListener("click", aktion);
+    box.append(k);
+  };
+  if (g.platz) {
+    const w = waffen.werte(waffen.hole(g.platz), g.platz);
+    if (!w) return;
+    const name = el("div", "info-name", w.name + " " + "★".repeat(w.sterne));
+    name.style.color = w.seltenheit.farbe;
+    box.append(name, el("div", "hinweis", w.seltenheit.name + " · angelegt · +" + zahl(w.schaden) + " Schaden · +" + zahl(w.leben) + " Leben · Händler Lv. " + bitcoin.stufe(g.platz)));
     return;
   }
-  for (const e of liste.slice(0, 40)) {
-    const zeile = el("div", "lager-zeile");
-    const bild = el("span", "lager-bild");
-    bild.style.backgroundImage = grafik.stueckBild(e.art, daten.zeitalter.find((x) => x.id === e.zeitalter) || zeitalter(), e.id, false);
-    bild.style.backgroundColor = e.seltenheit.farbe;
-    zeile.append(bild);
-    const name = el("span", "lager-name", e.name + " ×" + e.anzahl);
-    name.style.color = e.seltenheit.farbe;
-    const info = el("span", "lager-info");
-    info.append(name, el("span", "sterne", sterne(e.sterne)));
-    const anlegen = el("button", "knopf klein", "Anlegen");
-    anlegen.type = "button";
-    anlegen.addEventListener("click", () => {
-      waffen.anlegenAusLager(e.roh);
-      waffenGeaendert();
-    });
-    const mergen = el("button", "knopf klein", "Mergen");
-    mergen.type = "button";
-    mergen.disabled = !e.mergbar;
-    mergen.addEventListener("click", () => {
-      waffen.mergen(e.roh);
-      waffenGeaendert();
-    });
-    zeile.append(info, anlegen, mergen);
-    box.append(zeile);
-  }
+  const e = waffen.lagerListe().find((x) => x.roh.id === g.roh.id && x.roh.seltenheit === g.roh.seltenheit && (x.roh.sterne || 0) === (g.roh.sterne || 0));
+  if (!e) return void (gewaehltesStueck = null);
+  const name = el("div", "info-name", e.name + " " + "★".repeat(e.sterne) + " ×" + e.anzahl);
+  name.style.color = e.seltenheit.farbe;
+  box.append(name, el("div", "hinweis", e.seltenheit.name + " · +" + zahl(e.schaden) + " Schaden · +" + zahl(e.leben) + " Leben"));
+  knopf("Anlegen", false, () => {
+    waffen.anlegenAusLager(e.roh);
+    gewaehltesStueck = null;
+    waffenGeaendert();
+  });
+  knopf("Mergen (3 → +1 Stern)", !e.mergbar, () => {
+    waffen.mergen(e.roh);
+    gewaehltesStueck = null;
+    waffenGeaendert();
+  });
 }
 
 function allesMergen() {
@@ -595,34 +689,31 @@ function waffenKnoepfe() {
 }
 
 function waffenZeichnen() {
-  $("waffen-plaetze").replaceChildren(waffenKarte("nah", "Nahkampf"), waffenKarte("fern", "Fernkampf"));
-  $("ruestung-plaetze").replaceChildren(
-    ruestungKarte("helm", "Helm"),
-    ruestungKarte("handschuhe", "Handschuhe"),
-    ruestungKarte("ruestung", "Rüstung"),
-    ruestungKarte("stiefel", "Stiefel")
-  );
+  const raster = $("schmiede-raster");
+  raster.replaceChildren();
+  for (const [art, name] of PLAETZE)
+    raster.append(
+      platzKachel(
+        art,
+        name,
+        () => {
+          gewaehltesStueck = waffen.hole(art) ? { platz: art } : null;
+          waffenZeichnen();
+        },
+        !!gewaehltesStueck && gewaehltesStueck.platz === art
+      )
+    );
   lagerZeichnen();
+  stueckInfoZeichnen();
   const b = waffen.bonus();
   const sm = Math.round(daten.waffen.schmuckSet * 100);
-  $("schmuck-plaetze").replaceChildren(
-    ruestungKarte("ring1", "Ring"),
-    ruestungKarte("ring2", "Ring"),
-    ruestungKarte("amulett", "Amulett"),
-    ruestungKarte("guertel", "Gürtel")
-  );
-  $("schmuck-set").textContent =
-    b.schmuckSet > 0
-      ? "Schmuck-Set aktiv: +" + sm + " % auf alle Werte."
-      : "Schmuck-Set: 2 Ringe + Amulett aus einem Zeitalter geben +" + sm + " % auf alle Werte.";
+  const bonusText = "+" + Math.round(daten.waffen.setBonusSchaden * 100) + " % Schaden";
+  $("waffen-set").textContent = (b.set > 0 ? "Waffen-Set aktiv: " : "Waffen-Set: Nah- und Fernkampf-Waffe aus demselben Zeitalter geben ") + bonusText + ".";
   $("ruestung-set").textContent =
     "Rüstungs-Set: " + b.ruestungTeile + " von 4 Teilen aus einem Zeitalter (2 Teile +5 % Leben, 4 Teile +15 % Leben)" +
     (b.lebenProzent > 0 ? " – aktiv: +" + prozent(b.lebenProzent) + " Leben." : ".");
-  const bonusText = "+" + Math.round(daten.waffen.setBonusSchaden * 100) + " % Schaden";
-  $("waffen-set").textContent =
-    b.set > 0
-      ? "Waffen-Set aktiv: " + bonusText
-      : "Waffen-Set: Nah- und Fernkampf-Waffe aus demselben Zeitalter geben " + bonusText + ".";
+  $("schmuck-set").textContent =
+    (b.schmuckSet > 0 ? "Schmuck-Set aktiv: +" : "Schmuck-Set: 2 Ringe + Amulett aus einem Zeitalter geben +") + sm + " % auf alle Werte.";
   rasterZeichnen();
   $("schmiede-stufe").textContent = "Schmiede Stufe " + seite().schmiede.stufe;
   const liste = $("schmiede-chancen");
@@ -638,7 +729,6 @@ function waffenZeichnen() {
   waffenKnoepfe();
 }
 
-// Auto-Schmieden läuft nur, solange das Spiel offen ist (nicht offline). Nach Neustart oder Seitenwechsel aus.
 let autoAn = false;
 let autoLetzter = 0;
 
@@ -695,45 +785,40 @@ function schmiedeVerbessern() {
 // ---------- Tiere und Eier ----------
 
 function tierKachel(w, marke) {
-  const kachel = el("button", "tier");
-  kachel.type = "button";
-  if (!w) {
-    kachel.classList.add("leer");
-    kachel.append(el("span", "tier-marke", marke));
-    kachel.disabled = true;
-    return kachel;
-  }
-  kachel.style.borderColor = w.seltenheit.farbe;
-  if (w.seltenheit.glanz) kachel.classList.add("glanz");
-  if (w.nr === gewaehltesTier) kachel.classList.add("gewaehlt");
-  if (marke) kachel.append(el("span", "tier-marke", marke));
-  const selten = el("span", "tier-selten", w.seltenheit.name);
-  selten.style.color = w.seltenheit.farbe;
-  const bild = el("span", "tier-bild");
-  bild.style.backgroundImage = grafik.tierBild(w.id);
-  kachel.append(bild, el("span", "tier-name", w.name), selten, el("span", "sterne", sterne(w.sterne)));
-  kachel.addEventListener("click", () => {
-    gewaehltesTier = gewaehltesTier === w.nr ? null : w.nr;
-    tiereZeichnen();
+  if (!w) return bildKachel({ leer: true, marke });
+  return bildKachel({
+    titel: w.name,
+    farbe: w.seltenheit.farbe,
+    glanz: w.seltenheit.glanz,
+    bild: grafik.tierBild(w.id),
+    sterne: w.sterne,
+    lv: marke,
+    gewaehlt: w.nr === gewaehltesTier,
+    klick: () => {
+      gewaehltesTier = gewaehltesTier === w.nr ? null : w.nr;
+      tiereZeichnen();
+    },
   });
-  return kachel;
 }
 
 function brutZeichnen() {
   const brut = tiere.brutInfo(Date.now());
   const text = $("brut-text");
-  if (brut) {
-    text.textContent = "Ei (" + brut.seltenheit.name + ") schlüpft in " + dauer(Math.ceil(brut.restSekunden));
-    text.style.color = brut.seltenheit.farbe;
-  } else {
-    text.textContent = "Der Brutkasten ist leer.";
-    text.style.color = "";
-  }
-  const wartend = seite().tiere.eier.length;
-  $("eier-text").textContent =
-    wartend > 0
-      ? "Eier im Lager: " + wartend + " (höchstens " + daten.tiere.eierLagerMax + "). Sie schlüpfen der Reihe nach."
-      : "Eier fallen im Kampf, vom Boss sicher. Je seltener das Ei, desto länger dauert es.";
+  text.textContent = brut ? brut.seltenheit.name + " – schlüpft in " + dauer(Math.ceil(brut.restSekunden)) : "Der Brutkasten ist leer. Eier fallen im Kampf.";
+  text.style.color = brut ? brut.seltenheit.farbe : "";
+  const reihe = $("eier-reihe");
+  const eier = seite().tiere.eier;
+  const k = (brut ? "1" : "0") + "|" + eier.map((e) => e.seltenheit).join(",");
+  if (reihe.dataset.k === k) return;
+  reihe.dataset.k = k;
+  reihe.replaceChildren();
+  const ei = (farbe, gross) => {
+    const e = el("span", "ei" + (gross ? " gross" : ""));
+    e.style.backgroundImage = grafik.eiBild(farbe);
+    reihe.append(e);
+  };
+  if (brut) ei(brut.seltenheit.farbe, true);
+  for (const e of eier) ei((daten.waffen.seltenheiten[e.seltenheit] || daten.waffen.seltenheiten[0]).farbe, false);
 }
 
 function tierTeamAendern(aktion) {
@@ -748,12 +833,12 @@ function tiereZeichnen() {
   brutZeichnen();
   const t = seite().tiere;
   const team = $("tier-team");
-  team.replaceChildren(tierKachel(tiere.werte(tiere.finde(t.kaempfer)), "Kämpfer"));
+  team.replaceChildren(tierKachel(tiere.werte(tiere.finde(t.kaempfer)), "Kampf"));
   const ab = tiere.plaetzeAbLevel();
   for (let i = 0; i < ab.length - 1; i++) {
     const frei = i < tiere.plaetze();
     const w = frei ? tiere.werte(tiere.finde(t.supporter[i])) : null;
-    team.append(tierKachel(w, frei ? "Supporter" : "ab Level " + ab[i + 1]));
+    team.append(tierKachel(w, frei ? "Hilfe" : "ab Lv. " + ab[i + 1]));
   }
 
   const alle = t.sammlung.map((x) => tiere.werte(x)).filter(Boolean);
@@ -768,11 +853,14 @@ function tiereZeichnen() {
   const w = tiere.werte(tiere.finde(gewaehltesTier));
   if (!w) return;
   const art = w.supporterArt === "schaden" ? "Schaden" : "Leben";
+  const tierName = el("div", "info-name", w.name + " " + "★".repeat(w.sterne));
+  tierName.style.color = w.seltenheit.farbe;
   aktionen.append(
+    tierName,
     el(
       "p",
       "hinweis",
-      w.name + ": als Kämpfer +" + zahl(w.schaden) + " Schaden und +" + zahl(w.leben) + " Leben. Als Supporter +" +
+      w.seltenheit.name + ": als Kämpfer +" + zahl(w.schaden) + " Schaden und +" + zahl(w.leben) + " Leben. Als Supporter +" +
         prozent(w.supporterProzent) + " " + art + "."
     )
   );
@@ -833,9 +921,26 @@ function faehigkeitGeaendert() {
 
 function faehigkeitenZeichnen() {
   const f = seite().faehigkeiten;
-  $("punkte-text").textContent = "Fähigkeitspunkte: " + f.punkte + " (gibt es in den Dungeons)";
-  $("ziehen-knopf").textContent = "Fähigkeit ziehen (" + faehigkeiten.ziehenKosten() + " Punkte)";
+  $("punkte-text").textContent = "Punkte: " + f.punkte + " (gibt es in den Dungeons)";
+  $("ziehen-knopf").textContent = "Ziehen (" + faehigkeiten.ziehenKosten() + " Punkte)";
   $("ziehen-knopf").classList.toggle("matt", f.punkte < faehigkeiten.ziehenKosten());
+  const kachel = (w, marke) =>
+    bildKachel({
+      rund: true,
+      titel: w.name,
+      farbe: w.seltenheit.farbe,
+      glanz: w.seltenheit.glanz,
+      bild: grafik.faehigkeitBild(w.art),
+      sterne: w.sterne,
+      lv: "Lv. " + w.level,
+      marke,
+      punkt: faehigkeiten.mergbar(w.id),
+      gewaehlt: gewaehlteFaehigkeit === w.id,
+      klick: () => {
+        gewaehlteFaehigkeit = gewaehlteFaehigkeit === w.id ? null : w.id;
+        faehigkeitenZeichnen();
+      },
+    });
 
   const plaetze = $("faehigkeit-plaetze");
   plaetze.replaceChildren();
@@ -843,49 +948,96 @@ function faehigkeitenZeichnen() {
   for (let i = 0; i < ab.length; i++) {
     const frei = i < faehigkeiten.plaetze();
     const w = frei ? faehigkeiten.werte(f.sammlung.find((x) => x.id === f.ausgeruestet[i])) : null;
-    const kachel = el("div", "tier" + (w ? "" : " leer"));
-    if (w) {
-      kachel.style.borderColor = w.seltenheit.farbe;
-      kachel.append(el("span", "tier-name", w.name), el("span", "sterne", sterne(w.sterne)));
-    } else {
-      kachel.append(el("span", "tier-marke", frei ? "frei" : "ab Level " + ab[i]));
-    }
-    plaetze.append(kachel);
+    plaetze.append(w ? kachel(w) : bildKachel({ rund: true, leer: true, marke: frei ? "frei" : "ab Lv. " + ab[i] }));
   }
 
   const liste = $("faehigkeit-liste");
   liste.replaceChildren();
   const alle = faehigkeiten.liste();
   if (!alle.length) liste.append(el("p", "hinweis", "Noch keine Fähigkeit. Hol dir Punkte in den Dungeons und ziehe."));
-  for (const w of alle) {
-    const karte = el("div", "dungeon");
-    const name = el("div", "dungeon-name", w.name);
-    name.style.color = w.seltenheit.farbe;
-    karte.append(
-      name,
-      el("div", "sterne", sterne(w.sterne)),
-      el("div", "hinweis", w.seltenheit.name + " · Level " + w.level + " · Kopien " + w.kopien + " · Stärke ×" + zahl(w.faktor)),
-      el("div", "hinweis", w.text)
+  for (const w of alle) liste.append(kachel(w, w.ausgeruestet ? "an" : w.kopien + "/2"));
+
+  const info = $("faehigkeit-info");
+  info.replaceChildren();
+  const w = alle.find((x) => x.id === gewaehlteFaehigkeit);
+  if (!w) return info.append(el("p", "hinweis", "Tippe eine Fähigkeit an."));
+  const name = el("div", "info-name", w.name + " " + "★".repeat(w.sterne));
+  name.style.color = w.seltenheit.farbe;
+  info.append(name, el("div", "hinweis", w.text + " " + w.seltenheit.name + " · Stärke ×" + zahl(w.faktor) + " · Kopien " + w.kopien));
+  const knopf = (text, aus, aktion) => {
+    const k = el("button", "knopf klein", text);
+    k.type = "button";
+    k.disabled = aus;
+    k.addEventListener("click", () => {
+      aktion();
+      faehigkeitGeaendert();
+    });
+    info.append(k);
+  };
+  if (w.ausgeruestet) knopf("Ablegen", false, () => faehigkeiten.ablegen(w.id));
+  else knopf("Ausrüsten", false, () => faehigkeiten.ausruesten(w.id));
+  const e = f.sammlung.find((x) => x.id === w.id);
+  knopf("Level +1 (" + faehigkeiten.levelKosten(e) + ")", f.punkte < faehigkeiten.levelKosten(e), () => faehigkeiten.levelKaufen(w.id));
+  knopf("Mergen (+1 Stern)", !faehigkeiten.mergbar(w.id), () => faehigkeiten.mergen(w.id));
+}
+
+// ---------- Reittiere ----------
+
+function reittierAnzeigen() {
+  const a = reittiere.aktiv();
+  const bild = $("reittier-bild");
+  bild.hidden = !a;
+  $("spieler-box").classList.toggle("reitet", !!a);
+  if (a) bild.style.backgroundImage = grafik.reittierBild(a.id);
+}
+
+function reittiereZeichnen() {
+  const a = reittiere.aktiv();
+  $("reittier-tempo").textContent = a
+    ? "Angriffstempo +" + prozent(a.tempo) + " durch " + a.name + "."
+    : "Noch kein Reittier. Aus Eiern schlüpft manchmal eins statt eines Haustiers.";
+  const liste = reittiere.liste();
+  $("reittier-mergen").hidden = !liste.some((w) => reittiere.mergbar(w.nr));
+  const box = $("reittier-liste");
+  box.replaceChildren();
+  for (const w of liste)
+    box.append(
+      bildKachel({
+        titel: w.name,
+        farbe: w.seltenheit.farbe,
+        glanz: w.seltenheit.glanz,
+        bild: grafik.reittierBild(w.id),
+        sterne: w.sterne,
+        lv: a && a.nr === w.nr ? "an" : "",
+        punkt: reittiere.mergbar(w.nr),
+        gewaehlt: gewaehltesReittier === w.nr,
+        klick: () => {
+          gewaehltesReittier = gewaehltesReittier === w.nr ? null : w.nr;
+          reittiereZeichnen();
+        },
+      })
     );
-    const knopf = (text, aus, aktion) => {
-      const k = el("button", "knopf klein", text);
-      k.type = "button";
-      k.disabled = aus;
-      k.addEventListener("click", () => {
-        aktion();
-        faehigkeitGeaendert();
-      });
-      karte.append(k);
-    };
-    if (w.ausgeruestet) knopf("Ablegen", false, () => faehigkeiten.ablegen(w.id));
-    else knopf("Ausrüsten", false, () => faehigkeiten.ausruesten(w.id));
-    const e = f.sammlung.find((x) => x.id === w.id);
-    knopf("Level +1 (" + faehigkeiten.levelKosten(e) + " Punkte)", f.punkte < faehigkeiten.levelKosten(e), () =>
-      faehigkeiten.levelKaufen(w.id)
-    );
-    knopf("Mergen: 3 gleiche werden +1 Stern", !faehigkeiten.mergbar(w.id), () => faehigkeiten.mergen(w.id));
-    liste.append(karte);
-  }
+  const info = $("reittier-info");
+  info.replaceChildren();
+  const w = liste.find((x) => x.nr === gewaehltesReittier);
+  if (!w) return;
+  const name = el("div", "info-name", w.name + " " + "★".repeat(w.sterne));
+  name.style.color = w.seltenheit.farbe;
+  info.append(name, el("div", "hinweis", w.seltenheit.name + " · Zeitalter " + zeitalterVon(w.zeitalter).nummer + " · Angriffstempo +" + prozent(w.tempo)));
+  const knopf = (text, aus, aktion) => {
+    const k = el("button", "knopf klein", text);
+    k.type = "button";
+    k.disabled = aus;
+    k.addEventListener("click", () => {
+      aktion();
+      reittierAnzeigen();
+      reittiereZeichnen();
+      sichern();
+    });
+    info.append(k);
+  };
+  knopf("Satteln", !!a && a.nr === w.nr, () => reittiere.satteln(w.nr));
+  knopf("Mergen (3 → +1 Stern)", !reittiere.mergbar(w.nr), () => reittiere.mergen(w.nr));
 }
 
 // ---------- Bitcoin und Händler ----------
@@ -1286,11 +1438,15 @@ function kaufen(u) {
 // ---------- Fenster und Meldungen ----------
 
 function fensterZeigen(id) {
-  $(id).hidden = false;
+  const g = gruppeVon(id);
+  if (g) seiteOeffnen(g.id, id);
+  else $(id).hidden = false;
 }
 
 function fensterSchliessen(id) {
-  $(id).hidden = true;
+  if (gruppeVon(id)) {
+    if (offenerReiter === id) seiteSchliessen();
+  } else $(id).hidden = true;
 }
 
 let meldungZeit;
@@ -1379,17 +1535,6 @@ function knoepfeVerbinden() {
     kampf.bossStarten();
     kampfZeichnen();
   });
-  $("dungeons-knopf").addEventListener("click", () => {
-    fensterSchliessen("menue");
-    $("dungeon-ergebnis").textContent = "";
-    dungeonsZeichnen();
-    fensterZeigen("dungeon-fenster");
-  });
-  $("haushalt-knopf").addEventListener("click", () => {
-    fensterSchliessen("menue");
-    haushaltZeichnen();
-    fensterZeigen("haushalt-fenster");
-  });
   $("hh-firma-knopf").addEventListener("click", () => {
     if (haushalt.firmaVoll()) return;
     const neu = seite().haushalt.firma === 0;
@@ -1405,16 +1550,6 @@ function knoepfeVerbinden() {
       farmZeichnen(true);
     });
   }
-  $("tech-knopf").addEventListener("click", () => {
-    fensterSchliessen("menue");
-    techZeichnen();
-    fensterZeigen("tech-fenster");
-  });
-  $("btc-knopf").addEventListener("click", () => {
-    fensterSchliessen("menue");
-    btcZeichnen();
-    fensterZeigen("btc-fenster");
-  });
   $("zaehler-btc").addEventListener("click", () => {
     btcZeichnen();
     fensterZeigen("btc-fenster");
@@ -1426,15 +1561,16 @@ function knoepfeVerbinden() {
       btcGeaendert();
     });
   }
-  $("faehigkeiten-knopf").addEventListener("click", () => {
-    fensterSchliessen("menue");
-    $("faehigkeit-ergebnis").textContent = "";
-    faehigkeitenZeichnen();
-    fensterZeigen("faehigkeiten-fenster");
+  $("reittier-mergen").addEventListener("click", () => {
+    const n = reittiere.allesMergen();
+    kurzMeldung(n + " Mal gemergt.");
+    reittierAnzeigen();
+    reittiereZeichnen();
+    sichern();
   });
   $("ziehen-knopf").addEventListener("click", () => {
     if (seite().faehigkeiten.punkte < faehigkeiten.ziehenKosten()) {
-      kurzMeldung("Zu wenig Punkte. Punkte gibt es in den Dungeons (Menü → Dungeons).");
+      kurzMeldung("Zu wenig Punkte. Punkte gibt es in den Dungeons.");
       return;
     }
     const r = faehigkeiten.ziehen();
@@ -1495,6 +1631,8 @@ async function start() {
     schaden,
     maxLeben,
     schlagZeit: () => daten.einstellungen.kampf.sekundenProSchlag,
+    lauf: () => daten.einstellungen.kampf.lauf,
+    tempo: () => (reittiere ? reittiere.tempo() : 0),
     wellen: () => daten.einstellungen.kampf.wellen,
     gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute"))),
     xpGeben,
@@ -1571,6 +1709,13 @@ async function start() {
     eiChanceFaktor: () => 1 + tech.wert("eier"),
     lagerPlus: () => tech.wert("lager"),
     supporterFaktor: () => 1 + tech.wert("supporter"),
+    reittierAusEi: (ei) => reittiere.ausEi(ei),
+  });
+  reittiere = reittierSystem({
+    daten: () => daten.reittiere,
+    seltenheiten: () => daten.waffen.seltenheiten,
+    seite,
+    zeitalterNummerVon: (id) => (daten.zeitalter.find((z) => z.id === id) || { nummer: 1 }).nummer,
   });
   faehigkeiten = faehigkeitenSystem({
     daten: () => daten.faehigkeiten,
@@ -1583,7 +1728,7 @@ async function start() {
   dungeons = dungeonSystem({
     daten: () => daten.dungeons,
     seite,
-    spieler: () => ({ schaden: schaden(), leben: maxLeben() }),
+    spieler: () => ({ schaden: Math.max(schaden("nah"), schaden("fern")), leben: maxLeben() }),
     gegnerBasis: () => {
       const typen = gegnerDaten().typen;
       return { leben: typen.elite.leben, schaden: typen.elite.schaden, beute: typen.normal.beute };

@@ -139,12 +139,14 @@ export function waffenSystem(api) {
     stufeVoll,
     stufeKosten,
     bonus() {
-      const aktiv = werte(hole(aktiveArt()), aktiveArt());
       const nah = werte(hole("nah"), "nah");
       const fern = werte(hole("fern"), "fern");
+      // Beide Waffen zählen: Fernkampf, solange Gegner weit weg sind, dann Nahkampf. Leben geben beide.
       const bonus = {
-        schaden: aktiv ? aktiv.schaden : 0,
-        leben: aktiv ? aktiv.leben : 0,
+        schaden: 0,
+        schadenNah: nah ? nah.schaden : 0,
+        schadenFern: fern ? fern.schaden : 0,
+        leben: (nah ? nah.leben : 0) + (fern ? fern.leben : 0),
         set: nah && fern && nah.zeitalter === fern.zeitalter ? d().setBonusSchaden : 0,
         ruestungTeile: 0,
         lebenProzent: 0,

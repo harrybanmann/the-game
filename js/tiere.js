@@ -54,6 +54,9 @@ export function tierSystem(api) {
   }
 
   function schluepfen(ei) {
+    // Manchmal schlüpft ein Reittier statt eines Haustiers.
+    const reittier = api.reittierAusEi ? api.reittierAusEi(ei) : null;
+    if (reittier) return reittier;
     let auswahl = d().tiere.filter((x) => x.zeitalter === ei.zeitalter);
     if (!auswahl.length) auswahl = d().tiere;
     const vorlage = auswahl[Math.floor(Math.random() * auswahl.length)];

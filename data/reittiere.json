@@ -1,0 +1,32 @@
+{
+  "_hinweis": "Harry 16.11.2026: Reittiere mit Seltenheit und Sternen, je Zeitalter eigene, geben Angriffstempo. Namen, Zahlen und die Ei-Chance sind Vorschläge.",
+  "eiChance": 0.25,
+  "tempo": { "grund": 0.05, "jeZeitalter": 0.02, "jeSeltenheit": 0.5, "jeStern": 0.2, "max": 2 },
+  "maxSterne": 5,
+  "liste": [
+    { "id": "wollnashorn", "zeitalter": "steinzeit", "name": "Wollnashorn" },
+    { "id": "riesenhirsch", "zeitalter": "steinzeit", "name": "Riesenhirsch" },
+    { "id": "reitochse", "zeitalter": "muscheln", "name": "Reit-Ochse" },
+    { "id": "pony", "zeitalter": "muscheln", "name": "Pony" },
+    { "id": "onager", "zeitalter": "bronzezeit", "name": "Wildesel" },
+    { "id": "dromedar", "zeitalter": "bronzezeit", "name": "Dromedar" },
+    { "id": "lydischesross", "zeitalter": "muenzen", "name": "Lydisches Ross" },
+    { "id": "maultier", "zeitalter": "muenzen", "name": "Maultier" },
+    { "id": "roemerross", "zeitalter": "rom", "name": "Römer-Ross" },
+    { "id": "kriegselefant", "zeitalter": "rom", "name": "Kriegselefant" },
+    { "id": "schlachtross", "zeitalter": "mittelalter", "name": "Schlachtross" },
+    { "id": "steppenpony", "zeitalter": "mittelalter", "name": "Steppenpony" },
+    { "id": "schimmel", "zeitalter": "banken", "name": "Schimmel" },
+    { "id": "kutschpferd", "zeitalter": "banken", "name": "Kutschpferd" },
+    { "id": "mustang", "zeitalter": "entdeckungen", "name": "Mustang" },
+    { "id": "lama", "zeitalter": "entdeckungen", "name": "Lama" },
+    { "id": "rennpferd", "zeitalter": "aktien", "name": "Rennpferd" },
+    { "id": "postpferd", "zeitalter": "aktien", "name": "Postpferd" },
+    { "id": "dampfross", "zeitalter": "industrie", "name": "Dampfross" },
+    { "id": "eisenochse", "zeitalter": "industrie", "name": "Eisen-Ochse" },
+    { "id": "rennkamel", "zeitalter": "fiat", "name": "Rennkamel" },
+    { "id": "stahlhengst", "zeitalter": "fiat", "name": "Stahl-Hengst" },
+    { "id": "neonross", "zeitalter": "digital", "name": "Neon-Ross" },
+    { "id": "hoverwolf", "zeitalter": "digital", "name": "Hover-Wolf" }
+  ]
+}
