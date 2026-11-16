@@ -39,44 +39,45 @@ function person(o) {
       ? `<path d="M58,104 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M58,106 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
       : `<path d="M58,112 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
   } else {
-    t += `<rect x="33" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="6" fill="${o.kleid2}" ${S}/>`;
+    t += `<rect x="33" y="86" width="14" height="24" rx="3" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="3" fill="${o.kleid2}" ${S}/>`;
     t += o.stiefel
-      ? `<path d="M30,98 h18 v14 h-18 z M52,98 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M30,100 h18 M52,100 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
-      : `<path d="M30,106 h20 v6 h-20 z M52,106 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
+      ? `<rect x="29" y="98" width="20" height="14" rx="3" fill="${o.stiefel}" ${S3}/><rect x="51" y="98" width="25" height="14" rx="3" fill="${o.stiefel}" ${S3}/><path d="M30,101 h18 M52,101 h23" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
+      : `<rect x="29" y="104" width="20" height="8" rx="3" fill="#5a3a22" ${S3}/><rect x="51" y="104" width="24" height="8" rx="3" fill="#5a3a22" ${S3}/>`;
   }
   // Körper
-  t += `<rect x="26" y="52" width="48" height="42" rx="17" fill="${o.kleid}" ${S}/>`;
+  // Stil C (Harry 16.11.2026): klein und kantig – eckiger Körper, großer eckiger Kopf, dicke Platten.
+  t += `<rect x="27" y="54" width="46" height="40" rx="8" fill="${o.kleid}" ${S}/>`;
   if (o.fell) t += `<circle cx="38" cy="66" r="3.5" fill="${o.kleid2}"/><circle cx="58" cy="78" r="4" fill="${o.kleid2}"/><circle cx="62" cy="62" r="3" fill="${o.kleid2}"/><path d="M26,88 l6,7 l6,-6 l6,7 l6,-6 l6,7 l6,-6 l6,7 l6,-7" fill="none" ${S3}/>`;
   else t += `<rect x="27" y="76" width="46" height="8" fill="${o.kleid2}" ${S3}/><rect x="45" y="75" width="10" height="10" rx="2" fill="${o.akzent}" ${S3}/>`;
   // Brustplatte der angelegten Rüstung
-  if (o.platte) t += `<path d="M32,56 h36 v12 q-18,14 -36,0 z" fill="${o.platte}" ${S3}/><path d="M50,56 v18" ${S3}/><circle cx="50" cy="62" r="3.5" fill="${o.platteRand || o.akzent}" ${S3}/><circle cx="29" cy="58" r="7" fill="${o.platte}" ${S3}/><circle cx="71" cy="58" r="7" fill="${o.platte}" ${S3}/>`;
+  if (o.platte) t += `<rect x="31" y="56" width="38" height="19" rx="5" fill="${o.platte}" ${S3}/><path d="M50,56 v19" ${S3}/><circle cx="50" cy="65" r="3.5" fill="${o.platteRand || o.akzent}" ${S3}/><rect x="19" y="52" width="18" height="14" rx="5" fill="${o.platte}" ${S3}/><rect x="63" y="52" width="18" height="14" rx="5" fill="${o.platte}" ${S3}/>`;
   // Hände (mit Handschuhen in deren Farbe)
-  t += `<circle cx="22" cy="74" r="8" fill="${o.handschuh || haut}" ${S}/><circle cx="80" cy="74" r="8" fill="${o.handschuh || haut}" ${S}/>`;
+  t += `<rect x="14" y="65" width="15" height="18" rx="6" fill="${o.handschuh || haut}" ${S}/><rect x="72" y="65" width="15" height="18" rx="6" fill="${o.handschuh || haut}" ${S}/>`;
   if (o.handschuh) t += `<path d="M15,69 h14 M73,69 h14" stroke="${o.handschuhRand || U}" stroke-width="3" stroke-linecap="round"/>`;
   // Kopf
   if (o.kopf === "kapuze") {
     t += `<path d="M20,44 Q18,4 50,4 Q82,4 80,44 Q80,54 50,56 Q20,54 20,44 Z" fill="${o.kapuze}" ${S}/><path d="M50,4 Q62,-4 70,8" fill="none" ${S}/>`;
-    t += `<ellipse cx="54" cy="36" rx="19" ry="17" fill="${haut}" ${S3}/>`;
+    t += `<rect x="36" y="20" width="38" height="32" rx="10" fill="${haut}" ${S3}/>`;
   } else {
-    t += `<circle cx="50" cy="32" r="25" fill="${haut}" ${S}/>`;
+    t += `<rect x="22" y="6" width="56" height="50" rx="14" fill="${haut}" ${S}/>`;
   }
   // Gesicht (schaut nach rechts)
-  if (o.maske) t += `<path d="M36,28 h37 v10 q-18,6 -37,0 z" fill="#2b2b33" ${S3}/><ellipse cx="50" cy="33" rx="4" ry="3" fill="#fff"/><ellipse cx="64" cy="33" rx="4" ry="3" fill="#fff"/>`;
+  if (o.maske) t += `<rect x="38" y="26" width="38" height="13" rx="5" fill="#2b2b33" ${S3}/><rect x="49" y="29.5" width="8" height="6" rx="2.5" fill="#fff"/><rect x="63" y="29.5" width="8" height="6" rx="2.5" fill="#fff"/>`;
   else if (o.augen) t += `<ellipse cx="50" cy="33" rx="5" ry="3.4" fill="${o.augen}"/><ellipse cx="65" cy="33" rx="5" ry="3.4" fill="${o.augen}"/>`;
-  else t += `<ellipse cx="51" cy="33" rx="3.2" ry="4.6" fill="${U}"/><ellipse cx="65" cy="33" rx="3.2" ry="4.6" fill="${U}"/><circle cx="52" cy="31.5" r="1.2" fill="#fff"/><circle cx="66" cy="31.5" r="1.2" fill="#fff"/>`;
+  else t += `<rect x="50" y="27" width="6.5" height="11" rx="3" fill="${U}"/><rect x="64" y="27" width="6.5" height="11" rx="3" fill="${U}"/><rect x="51.5" y="28.5" width="2.6" height="3.6" rx="1.2" fill="#fff"/><rect x="65.5" y="28.5" width="2.6" height="3.6" rx="1.2" fill="#fff"/>`;
   if (o.augen) t += "";
-  else if (o.boese) t += `<path d="M44,24 l10,4 M72,24 l-10,4" fill="none" ${S3}/><path d="M52,45 q6,-4 12,0" fill="none" ${S3}/>`;
-  else t += `<path d="M52,43 q6,5 12,0" fill="none" ${S3}/><ellipse cx="42" cy="40" rx="4" ry="2.5" fill="#f08a7a" opacity="0.6"/>`;
+  else if (o.boese) t += `<path d="M46,22 l11,4 M74,22 l-11,4" fill="none" ${S3}/><path d="M53,46 h14" fill="none" ${S3}/>`;
+  else t += `<path d="M54,45 h13" fill="none" ${S3}/><ellipse cx="41" cy="42" rx="5" ry="3" fill="#f08a7a" opacity="0.6"/>`;
   // Kopfbedeckung
   if (o.kopf === "haare")
-    t += `<path d="M24,30 Q20,4 50,5 Q80,4 76,26 Q66,14 54,20 Q44,12 36,22 Q30,22 24,30 Z" fill="${o.haare || "#5a3a22"}" ${S}/>`;
+    t += `<path d="M20,32 V20 Q20,3 50,3 Q80,3 80,20 V30 L69,22 L60,29 L50,21 L40,29 L31,23 Z" fill="${o.haare || "#5a3a22"}" ${S}/>`;
   if (o.kopf === "helm")
-    t += `<path d="M24,24 Q22,2 50,2 Q78,2 76,24 Z" fill="${o.helm || "#b9bfc8"}" ${S}/><rect x="20" y="18" width="60" height="8" rx="4" fill="${o.akzent}" ${S3}/><path d="M50,4 v-8" ${S}/><circle cx="50" cy="-4" r="4" fill="${o.akzent}" ${S3}/>`;
+    t += `<path d="M20,24 V18 Q20,2 50,2 Q80,2 80,18 V24 Z" fill="${o.helm || "#b9bfc8"}" ${S}/><rect x="17" y="18" width="66" height="8" rx="4" fill="${o.akzent}" ${S3}/><path d="M50,4 v-8" ${S}/><circle cx="50" cy="-4" r="4" fill="${o.akzent}" ${S3}/>`;
   if (o.kopf === "krone")
-    t += `<path d="M26,22 L24,0 L37,10 L50,-4 L63,10 L76,0 L74,22 Z" fill="#f2c230" ${S}/><circle cx="50" cy="12" r="4" fill="${o.akzent}" ${S3}/>`;
+    t += `<path d="M21,22 L19,-2 L34,10 L50,-6 L66,10 L81,-2 L79,22 Z" fill="#f2c230" ${S}/><circle cx="50" cy="12" r="4" fill="${o.akzent}" ${S3}/>`;
   if (o.kopf === "flammen")
     t += `<path d="M24,26 Q14,10 26,2 Q26,12 34,10 Q32,-4 46,-10 Q44,2 54,4 Q58,-6 70,-6 Q64,4 72,10 Q80,6 80,-2 Q90,12 76,26 Q50,10 24,26 Z" fill="#f2761e" ${S}/><path d="M38,20 Q36,10 46,4 Q46,12 54,12 Q60,6 64,8 Q60,14 64,20 Q50,12 38,20 Z" fill="#ffd54a"/>`;
-  const haar = `<path d="M24,30 Q20,4 50,5 Q80,4 76,26 Q66,14 54,20 Q44,12 36,22 Q30,22 24,30 Z" fill="${o.haare || "#5a3a22"}" ${S}/>`;
+  const haar = `<path d="M20,32 V20 Q20,3 50,3 Q80,3 80,20 V30 L69,22 L60,29 L50,21 L40,29 L31,23 Z" fill="${o.haare || "#5a3a22"}" ${S}/>`;
   if (o.bart) t += `<path d="M34,42 Q40,68 56,66 Q72,64 74,42 Q56,52 34,42 Z" fill="${o.bart}" ${S3}/>`;
   if (o.kopf === "lorbeer") t += haar + `<path d="M22,24 Q50,4 78,24" fill="none" stroke="${U}" stroke-width="10" stroke-linecap="round"/><path d="M22,24 Q50,4 78,24" fill="none" stroke="#f2c230" stroke-width="5" stroke-linecap="round" stroke-dasharray="7 4"/>`;
   if (o.kopf === "hut") t += `<path d="M30,14 Q30,-10 50,-10 Q70,-10 70,14 Z" fill="${o.hut || "#7a4b26"}" ${S}/><ellipse cx="50" cy="14" rx="35" ry="7" fill="${o.hut || "#7a4b26"}" ${S}/><path d="M31,8 h38" stroke="${o.akzent}" stroke-width="5"/>`;
