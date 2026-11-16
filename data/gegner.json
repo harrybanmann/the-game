@@ -207,5 +207,422 @@
       "xp": 400,
       "naechstesZeitalter": "rom"
     }
+  },
+  "rom": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Straßendieb",
+          "boese": "Legionär"
+        },
+        "leben": 540,
+        "schaden": 39,
+        "beute": 1,
+        "xp": 50
+      },
+      "normal": {
+        "name": {
+          "gut": "Straßenräuber",
+          "boese": "Zenturio"
+        },
+        "leben": 990,
+        "schaden": 62,
+        "beute": 2,
+        "xp": 88
+      },
+      "elite": {
+        "name": {
+          "gut": "Gladiator-Räuber",
+          "boese": "Prätorianer"
+        },
+        "leben": 1800,
+        "schaden": 95,
+        "beute": 5,
+        "xp": 150
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "Julius Caesar",
+        "boese": "Julius Caesar"
+      },
+      "leben": 6300,
+      "schaden": 168,
+      "beute": 40,
+      "xp": 1000,
+      "naechstesZeitalter": "mittelalter"
+    }
+  },
+  "mittelalter": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Beutelschneider",
+          "boese": "Torwache"
+        },
+        "leben": 1620,
+        "schaden": 109,
+        "beute": 1,
+        "xp": 125
+      },
+      "normal": {
+        "name": {
+          "gut": "Wegelagerer",
+          "boese": "Burgwache"
+        },
+        "leben": 2970,
+        "schaden": 174,
+        "beute": 2,
+        "xp": 220
+      },
+      "elite": {
+        "name": {
+          "gut": "Ritter-Räuber",
+          "boese": "Ritter"
+        },
+        "leben": 5400,
+        "schaden": 266,
+        "beute": 5,
+        "xp": 375
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "Dschingis Khan",
+        "boese": "Dschingis Khan"
+      },
+      "leben": 18900,
+      "schaden": 470,
+      "beute": 40,
+      "xp": 2500,
+      "naechstesZeitalter": "banken"
+    }
+  },
+  "banken": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Schein-Dieb",
+          "boese": "Schalterwache"
+        },
+        "leben": 4860,
+        "schaden": 305,
+        "beute": 1,
+        "xp": 312
+      },
+      "normal": {
+        "name": {
+          "gut": "Wechsel-Fälscher",
+          "boese": "Bankwächter"
+        },
+        "leben": 8910,
+        "schaden": 487,
+        "beute": 2,
+        "xp": 550
+      },
+      "elite": {
+        "name": {
+          "gut": "Tresor-Knacker",
+          "boese": "Tresor-Vogt"
+        },
+        "leben": 16200,
+        "schaden": 745,
+        "beute": 5,
+        "xp": 938
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "Cosimo de' Medici",
+        "boese": "Cosimo de' Medici"
+      },
+      "leben": 56700,
+      "schaden": 1316,
+      "beute": 40,
+      "xp": 6250,
+      "naechstesZeitalter": "entdeckungen"
+    }
+  },
+  "entdeckungen": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Schiffsjunge-Dieb",
+          "boese": "Hafenwache"
+        },
+        "leben": 14580,
+        "schaden": 854,
+        "beute": 1,
+        "xp": 780
+      },
+      "normal": {
+        "name": {
+          "gut": "Pirat",
+          "boese": "Marinesoldat"
+        },
+        "leben": 26730,
+        "schaden": 1364,
+        "beute": 2,
+        "xp": 1375
+      },
+      "elite": {
+        "name": {
+          "gut": "Enterhaken-Pirat",
+          "boese": "Kanonier"
+        },
+        "leben": 48600,
+        "schaden": 2086,
+        "beute": 5,
+        "xp": 2345
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "Pirat Blackbeard",
+        "boese": "Pirat Blackbeard"
+      },
+      "leben": 170100,
+      "schaden": 3685,
+      "beute": 40,
+      "xp": 15625,
+      "naechstesZeitalter": "aktien"
+    }
+  },
+  "aktien": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Börsen-Dieb",
+          "boese": "Börsendiener"
+        },
+        "leben": 43740,
+        "schaden": 2391,
+        "beute": 1,
+        "xp": 1950
+      },
+      "normal": {
+        "name": {
+          "gut": "Börsenschwindler",
+          "boese": "Aufseher"
+        },
+        "leben": 80190,
+        "schaden": 3819,
+        "beute": 2,
+        "xp": 3438
+      },
+      "elite": {
+        "name": {
+          "gut": "Bilanz-Fälscher",
+          "boese": "Prüfer"
+        },
+        "leben": 145800,
+        "schaden": 5841,
+        "beute": 5,
+        "xp": 5862
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "John Law",
+        "boese": "John Law"
+      },
+      "leben": 510300,
+      "schaden": 10318,
+      "beute": 40,
+      "xp": 39062,
+      "naechstesZeitalter": "industrie"
+    }
+  },
+  "industrie": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Kohle-Dieb",
+          "boese": "Pförtner"
+        },
+        "leben": 131220,
+        "schaden": 6695,
+        "beute": 1,
+        "xp": 4875
+      },
+      "normal": {
+        "name": {
+          "gut": "Fabrik-Saboteur",
+          "boese": "Werkschutz"
+        },
+        "leben": 240570,
+        "schaden": 10693,
+        "beute": 2,
+        "xp": 8595
+      },
+      "elite": {
+        "name": {
+          "gut": "Dampf-Gauner",
+          "boese": "Vorarbeiter-Wächter"
+        },
+        "leben": 437400,
+        "schaden": 16355,
+        "beute": 5,
+        "xp": 14655
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "John D. Rockefeller",
+        "boese": "John D. Rockefeller"
+      },
+      "leben": 1530900,
+      "schaden": 28890,
+      "beute": 40,
+      "xp": 97655,
+      "naechstesZeitalter": "fiat"
+    }
+  },
+  "fiat": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Taschendieb",
+          "boese": "Wachmann"
+        },
+        "leben": 393660,
+        "schaden": 18746,
+        "beute": 1,
+        "xp": 12188
+      },
+      "normal": {
+        "name": {
+          "gut": "Bankräuber",
+          "boese": "Sicherheitsdienst"
+        },
+        "leben": 721710,
+        "schaden": 29940,
+        "beute": 2,
+        "xp": 21488
+      },
+      "elite": {
+        "name": {
+          "gut": "Panzerknacker",
+          "boese": "Tresor-Wächter"
+        },
+        "leben": 1312200,
+        "schaden": 45794,
+        "beute": 5,
+        "xp": 36638
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "Richard Nixon",
+        "boese": "Richard Nixon"
+      },
+      "leben": 4592700,
+      "schaden": 80892,
+      "beute": 40,
+      "xp": 244138,
+      "naechstesZeitalter": "digital"
+    }
+  },
+  "digital": {
+    "reihenfolge": [
+      "schwach",
+      "schwach",
+      "normal",
+      "normal",
+      "elite"
+    ],
+    "typen": {
+      "schwach": {
+        "name": {
+          "gut": "Skript-Kiddie",
+          "boese": "Firewall-Wächter"
+        },
+        "leben": 1180980,
+        "schaden": 52489,
+        "beute": 1,
+        "xp": 30470
+      },
+      "normal": {
+        "name": {
+          "gut": "Hacker",
+          "boese": "Security-Profi"
+        },
+        "leben": 2165130,
+        "schaden": 83832,
+        "beute": 2,
+        "xp": 53720
+      },
+      "elite": {
+        "name": {
+          "gut": "Elite-Hacker",
+          "boese": "Cyber-Security-Chef"
+        },
+        "leben": 3936600,
+        "schaden": 128223,
+        "beute": 5,
+        "xp": 91595
+      }
+    },
+    "boss": {
+      "name": {
+        "gut": "der Satoshi-Schatten",
+        "boese": "der Satoshi-Schatten"
+      },
+      "leben": 13778100,
+      "schaden": 226498,
+      "beute": 40,
+      "xp": 610345,
+      "naechstesZeitalter": null,
+      "endboss": true
+    }
   }
 }

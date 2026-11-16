@@ -546,6 +546,974 @@
       },
       "schaden": 0,
       "leben": 12
+    },
+    {
+      "id": "rom-w0",
+      "zeitalter": "rom",
+      "art": "nah",
+      "name": {
+        "gut": "Gladius",
+        "boese": "Gladius"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "rom-w1",
+      "zeitalter": "rom",
+      "art": "nah",
+      "name": {
+        "gut": "Pugio",
+        "boese": "Pugio"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "rom-w2",
+      "zeitalter": "rom",
+      "art": "fern",
+      "name": {
+        "gut": "Pilum",
+        "boese": "Pilum"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "rom-w3",
+      "zeitalter": "rom",
+      "art": "fern",
+      "name": {
+        "gut": "Handballiste",
+        "boese": "Handballiste"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "rom-r0",
+      "zeitalter": "rom",
+      "art": "helm",
+      "name": {
+        "gut": "Römerhelm",
+        "boese": "Römerhelm"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "rom-r1",
+      "zeitalter": "rom",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Lederarmschutz",
+        "boese": "Lederarmschutz"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "rom-r2",
+      "zeitalter": "rom",
+      "art": "ruestung",
+      "name": {
+        "gut": "Schienenpanzer",
+        "boese": "Schienenpanzer"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "rom-r3",
+      "zeitalter": "rom",
+      "art": "stiefel",
+      "name": {
+        "gut": "Caligae",
+        "boese": "Caligae"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "rom-s0",
+      "zeitalter": "rom",
+      "art": "ring",
+      "name": {
+        "gut": "Siegelring",
+        "boese": "Siegelring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "rom-s1",
+      "zeitalter": "rom",
+      "art": "amulett",
+      "name": {
+        "gut": "Bulla",
+        "boese": "Bulla"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "rom-s2",
+      "zeitalter": "rom",
+      "art": "guertel",
+      "name": {
+        "gut": "Cingulum",
+        "boese": "Cingulum"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "mittelalter-w0",
+      "zeitalter": "mittelalter",
+      "art": "nah",
+      "name": {
+        "gut": "Langschwert",
+        "boese": "Langschwert"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "mittelalter-w1",
+      "zeitalter": "mittelalter",
+      "art": "nah",
+      "name": {
+        "gut": "Streitkolben",
+        "boese": "Streitkolben"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "mittelalter-w2",
+      "zeitalter": "mittelalter",
+      "art": "fern",
+      "name": {
+        "gut": "Langbogen",
+        "boese": "Langbogen"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "mittelalter-w3",
+      "zeitalter": "mittelalter",
+      "art": "fern",
+      "name": {
+        "gut": "Armbrust",
+        "boese": "Armbrust"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "mittelalter-r0",
+      "zeitalter": "mittelalter",
+      "art": "helm",
+      "name": {
+        "gut": "Topfhelm",
+        "boese": "Topfhelm"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "mittelalter-r1",
+      "zeitalter": "mittelalter",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Kettenhandschuhe",
+        "boese": "Kettenhandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "mittelalter-r2",
+      "zeitalter": "mittelalter",
+      "art": "ruestung",
+      "name": {
+        "gut": "Kettenhemd",
+        "boese": "Kettenhemd"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "mittelalter-r3",
+      "zeitalter": "mittelalter",
+      "art": "stiefel",
+      "name": {
+        "gut": "Reiterstiefel",
+        "boese": "Reiterstiefel"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "mittelalter-s0",
+      "zeitalter": "mittelalter",
+      "art": "ring",
+      "name": {
+        "gut": "Seidenring",
+        "boese": "Seidenring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "mittelalter-s1",
+      "zeitalter": "mittelalter",
+      "art": "amulett",
+      "name": {
+        "gut": "Reliquien-Amulett",
+        "boese": "Reliquien-Amulett"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "mittelalter-s2",
+      "zeitalter": "mittelalter",
+      "art": "guertel",
+      "name": {
+        "gut": "Seidengürtel",
+        "boese": "Seidengürtel"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "banken-w0",
+      "zeitalter": "banken",
+      "art": "nah",
+      "name": {
+        "gut": "Degen",
+        "boese": "Degen"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "banken-w1",
+      "zeitalter": "banken",
+      "art": "nah",
+      "name": {
+        "gut": "Hellebarde",
+        "boese": "Hellebarde"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "banken-w2",
+      "zeitalter": "banken",
+      "art": "fern",
+      "name": {
+        "gut": "Handrohr",
+        "boese": "Handrohr"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "banken-w3",
+      "zeitalter": "banken",
+      "art": "fern",
+      "name": {
+        "gut": "Wurfmesser",
+        "boese": "Wurfmesser"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "banken-r0",
+      "zeitalter": "banken",
+      "art": "helm",
+      "name": {
+        "gut": "Barett",
+        "boese": "Barett"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "banken-r1",
+      "zeitalter": "banken",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Samthandschuhe",
+        "boese": "Samthandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "banken-r2",
+      "zeitalter": "banken",
+      "art": "ruestung",
+      "name": {
+        "gut": "Brustharnisch",
+        "boese": "Brustharnisch"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "banken-r3",
+      "zeitalter": "banken",
+      "art": "stiefel",
+      "name": {
+        "gut": "Schnabelschuhe",
+        "boese": "Schnabelschuhe"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "banken-s0",
+      "zeitalter": "banken",
+      "art": "ring",
+      "name": {
+        "gut": "Siegelring der Bank",
+        "boese": "Siegelring der Bank"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "banken-s1",
+      "zeitalter": "banken",
+      "art": "amulett",
+      "name": {
+        "gut": "Medaillon",
+        "boese": "Medaillon"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "banken-s2",
+      "zeitalter": "banken",
+      "art": "guertel",
+      "name": {
+        "gut": "Gürteltasche",
+        "boese": "Gürteltasche"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "entdeckungen-w0",
+      "zeitalter": "entdeckungen",
+      "art": "nah",
+      "name": {
+        "gut": "Säbel",
+        "boese": "Säbel"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "entdeckungen-w1",
+      "zeitalter": "entdeckungen",
+      "art": "nah",
+      "name": {
+        "gut": "Entermesser",
+        "boese": "Entermesser"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "entdeckungen-w2",
+      "zeitalter": "entdeckungen",
+      "art": "fern",
+      "name": {
+        "gut": "Muskete",
+        "boese": "Muskete"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "entdeckungen-w3",
+      "zeitalter": "entdeckungen",
+      "art": "fern",
+      "name": {
+        "gut": "Steinschlosspistole",
+        "boese": "Steinschlosspistole"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "entdeckungen-r0",
+      "zeitalter": "entdeckungen",
+      "art": "helm",
+      "name": {
+        "gut": "Dreispitz",
+        "boese": "Dreispitz"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "entdeckungen-r1",
+      "zeitalter": "entdeckungen",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Fechthandschuhe",
+        "boese": "Fechthandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "entdeckungen-r2",
+      "zeitalter": "entdeckungen",
+      "art": "ruestung",
+      "name": {
+        "gut": "Lederwams",
+        "boese": "Lederwams"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "entdeckungen-r3",
+      "zeitalter": "entdeckungen",
+      "art": "stiefel",
+      "name": {
+        "gut": "Seestiefel",
+        "boese": "Seestiefel"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "entdeckungen-s0",
+      "zeitalter": "entdeckungen",
+      "art": "ring",
+      "name": {
+        "gut": "Totenkopfring",
+        "boese": "Totenkopfring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "entdeckungen-s1",
+      "zeitalter": "entdeckungen",
+      "art": "amulett",
+      "name": {
+        "gut": "Kompass-Amulett",
+        "boese": "Kompass-Amulett"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "entdeckungen-s2",
+      "zeitalter": "entdeckungen",
+      "art": "guertel",
+      "name": {
+        "gut": "Schärpe",
+        "boese": "Schärpe"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "aktien-w0",
+      "zeitalter": "aktien",
+      "art": "nah",
+      "name": {
+        "gut": "Stockdegen",
+        "boese": "Stockdegen"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "aktien-w1",
+      "zeitalter": "aktien",
+      "art": "nah",
+      "name": {
+        "gut": "Spazierstock",
+        "boese": "Spazierstock"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "aktien-w2",
+      "zeitalter": "aktien",
+      "art": "fern",
+      "name": {
+        "gut": "Duellpistole",
+        "boese": "Duellpistole"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "aktien-w3",
+      "zeitalter": "aktien",
+      "art": "fern",
+      "name": {
+        "gut": "Büchse",
+        "boese": "Büchse"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "aktien-r0",
+      "zeitalter": "aktien",
+      "art": "helm",
+      "name": {
+        "gut": "Zylinder",
+        "boese": "Zylinder"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "aktien-r1",
+      "zeitalter": "aktien",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Glacéhandschuhe",
+        "boese": "Glacéhandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "aktien-r2",
+      "zeitalter": "aktien",
+      "art": "ruestung",
+      "name": {
+        "gut": "Gehrock",
+        "boese": "Gehrock"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "aktien-r3",
+      "zeitalter": "aktien",
+      "art": "stiefel",
+      "name": {
+        "gut": "Gamaschen",
+        "boese": "Gamaschen"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "aktien-s0",
+      "zeitalter": "aktien",
+      "art": "ring",
+      "name": {
+        "gut": "Taschenuhr-Ring",
+        "boese": "Taschenuhr-Ring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "aktien-s1",
+      "zeitalter": "aktien",
+      "art": "amulett",
+      "name": {
+        "gut": "Monokel-Kette",
+        "boese": "Monokel-Kette"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "aktien-s2",
+      "zeitalter": "aktien",
+      "art": "guertel",
+      "name": {
+        "gut": "Westengürtel",
+        "boese": "Westengürtel"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "industrie-w0",
+      "zeitalter": "industrie",
+      "art": "nah",
+      "name": {
+        "gut": "Schraubenschlüssel",
+        "boese": "Schraubenschlüssel"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "industrie-w1",
+      "zeitalter": "industrie",
+      "art": "nah",
+      "name": {
+        "gut": "Brecheisen",
+        "boese": "Brecheisen"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "industrie-w2",
+      "zeitalter": "industrie",
+      "art": "fern",
+      "name": {
+        "gut": "Revolver",
+        "boese": "Revolver"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "industrie-w3",
+      "zeitalter": "industrie",
+      "art": "fern",
+      "name": {
+        "gut": "Dampfgewehr",
+        "boese": "Dampfgewehr"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "industrie-r0",
+      "zeitalter": "industrie",
+      "art": "helm",
+      "name": {
+        "gut": "Schiebermütze",
+        "boese": "Schiebermütze"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "industrie-r1",
+      "zeitalter": "industrie",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Arbeitshandschuhe",
+        "boese": "Arbeitshandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "industrie-r2",
+      "zeitalter": "industrie",
+      "art": "ruestung",
+      "name": {
+        "gut": "Lederschürze",
+        "boese": "Lederschürze"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "industrie-r3",
+      "zeitalter": "industrie",
+      "art": "stiefel",
+      "name": {
+        "gut": "Stahlkappen-Stiefel",
+        "boese": "Stahlkappen-Stiefel"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "industrie-s0",
+      "zeitalter": "industrie",
+      "art": "ring",
+      "name": {
+        "gut": "Zahnrad-Ring",
+        "boese": "Zahnrad-Ring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "industrie-s1",
+      "zeitalter": "industrie",
+      "art": "amulett",
+      "name": {
+        "gut": "Taschenuhr",
+        "boese": "Taschenuhr"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "industrie-s2",
+      "zeitalter": "industrie",
+      "art": "guertel",
+      "name": {
+        "gut": "Werkzeuggürtel",
+        "boese": "Werkzeuggürtel"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "fiat-w0",
+      "zeitalter": "fiat",
+      "art": "nah",
+      "name": {
+        "gut": "Schlagstock",
+        "boese": "Schlagstock"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "fiat-w1",
+      "zeitalter": "fiat",
+      "art": "nah",
+      "name": {
+        "gut": "Elektroschocker",
+        "boese": "Elektroschocker"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "fiat-w2",
+      "zeitalter": "fiat",
+      "art": "fern",
+      "name": {
+        "gut": "Netzwerfer",
+        "boese": "Netzwerfer"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "fiat-w3",
+      "zeitalter": "fiat",
+      "art": "fern",
+      "name": {
+        "gut": "Farbpistole",
+        "boese": "Farbpistole"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "fiat-r0",
+      "zeitalter": "fiat",
+      "art": "helm",
+      "name": {
+        "gut": "Sicherheitshelm",
+        "boese": "Sicherheitshelm"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "fiat-r1",
+      "zeitalter": "fiat",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Lederhandschuhe",
+        "boese": "Lederhandschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "fiat-r2",
+      "zeitalter": "fiat",
+      "art": "ruestung",
+      "name": {
+        "gut": "Schutzweste",
+        "boese": "Schutzweste"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "fiat-r3",
+      "zeitalter": "fiat",
+      "art": "stiefel",
+      "name": {
+        "gut": "Turnschuhe",
+        "boese": "Turnschuhe"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "fiat-s0",
+      "zeitalter": "fiat",
+      "art": "ring",
+      "name": {
+        "gut": "Kreditkarten-Ring",
+        "boese": "Kreditkarten-Ring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "fiat-s1",
+      "zeitalter": "fiat",
+      "art": "amulett",
+      "name": {
+        "gut": "Dollar-Kette",
+        "boese": "Dollar-Kette"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "fiat-s2",
+      "zeitalter": "fiat",
+      "art": "guertel",
+      "name": {
+        "gut": "Gürtelschnalle",
+        "boese": "Gürtelschnalle"
+      },
+      "schaden": 0,
+      "leben": 12
+    },
+    {
+      "id": "digital-w0",
+      "zeitalter": "digital",
+      "art": "nah",
+      "name": {
+        "gut": "Plasmaklinge",
+        "boese": "Plasmaklinge"
+      },
+      "schaden": 2,
+      "leben": 15
+    },
+    {
+      "id": "digital-w1",
+      "zeitalter": "digital",
+      "art": "nah",
+      "name": {
+        "gut": "Daten-Peitsche",
+        "boese": "Daten-Peitsche"
+      },
+      "schaden": 3,
+      "leben": 10
+    },
+    {
+      "id": "digital-w2",
+      "zeitalter": "digital",
+      "art": "fern",
+      "name": {
+        "gut": "Laser-Blaster",
+        "boese": "Laser-Blaster"
+      },
+      "schaden": 4,
+      "leben": 5
+    },
+    {
+      "id": "digital-w3",
+      "zeitalter": "digital",
+      "art": "fern",
+      "name": {
+        "gut": "Kampfdrohne",
+        "boese": "Kampfdrohne"
+      },
+      "schaden": 5,
+      "leben": 0
+    },
+    {
+      "id": "digital-r0",
+      "zeitalter": "digital",
+      "art": "helm",
+      "name": {
+        "gut": "VR-Brille",
+        "boese": "VR-Brille"
+      },
+      "schaden": 0,
+      "leben": 10
+    },
+    {
+      "id": "digital-r1",
+      "zeitalter": "digital",
+      "art": "handschuhe",
+      "name": {
+        "gut": "Smart-Handschuhe",
+        "boese": "Smart-Handschuhe"
+      },
+      "schaden": 1,
+      "leben": 4
+    },
+    {
+      "id": "digital-r2",
+      "zeitalter": "digital",
+      "art": "ruestung",
+      "name": {
+        "gut": "Neon-Jacke",
+        "boese": "Neon-Jacke"
+      },
+      "schaden": 0,
+      "leben": 16
+    },
+    {
+      "id": "digital-r3",
+      "zeitalter": "digital",
+      "art": "stiefel",
+      "name": {
+        "gut": "Hover-Schuhe",
+        "boese": "Hover-Schuhe"
+      },
+      "schaden": 0,
+      "leben": 8
+    },
+    {
+      "id": "digital-s0",
+      "zeitalter": "digital",
+      "art": "ring",
+      "name": {
+        "gut": "Hardware-Wallet-Ring",
+        "boese": "Hardware-Wallet-Ring"
+      },
+      "schaden": 1,
+      "leben": 5
+    },
+    {
+      "id": "digital-s1",
+      "zeitalter": "digital",
+      "art": "amulett",
+      "name": {
+        "gut": "Seed-Phrase-Amulett",
+        "boese": "Seed-Phrase-Amulett"
+      },
+      "schaden": 2,
+      "leben": 5
+    },
+    {
+      "id": "digital-s2",
+      "zeitalter": "digital",
+      "art": "guertel",
+      "name": {
+        "gut": "Kabel-Gürtel",
+        "boese": "Kabel-Gürtel"
+      },
+      "schaden": 0,
+      "leben": 12
     }
   ],
   "schmuckSet": 0.1

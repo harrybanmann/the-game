@@ -77,5 +77,165 @@
     "umtauschVonVorher": 0.1,
     "verdienKnopf": "Stater prägen",
     "klickGrundwert": 1
+  },
+  {
+    "id": "rom",
+    "nummer": 5,
+    "staerke": 81,
+    "name": "Rom",
+    "farben": {
+      "haupt": "#7B2A6B",
+      "zweit": "#F1EEE6",
+      "akzent": "#D9A526",
+      "symbol": "#C6CDD4"
+    },
+    "waehrung": {
+      "id": "rom-geld",
+      "name": "Denar",
+      "btcProStueck": 0.0001
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Denare verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "mittelalter",
+    "nummer": 6,
+    "staerke": 243,
+    "name": "Seidenstraße und Mittelalter",
+    "farben": {
+      "haupt": "#A63A32",
+      "zweit": "#E9E2D6",
+      "akzent": "#3E7CB1",
+      "symbol": "#8A8D91"
+    },
+    "waehrung": {
+      "id": "mittelalter-geld",
+      "name": "Silberpfennig",
+      "btcProStueck": 0.001
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Pfennige verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "banken",
+    "nummer": 7,
+    "staerke": 729,
+    "name": "Papiergeld und erste Banken",
+    "farben": {
+      "haupt": "#25355E",
+      "zweit": "#EFE3C2",
+      "akzent": "#B3342E",
+      "symbol": "#EFE3C2"
+    },
+    "waehrung": {
+      "id": "banken-geld",
+      "name": "Florin",
+      "btcProStueck": 0.01
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Florin verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "entdeckungen",
+    "nummer": 8,
+    "staerke": 2187,
+    "name": "Entdeckungen und Kolonien",
+    "farben": {
+      "haupt": "#1E8C93",
+      "zweit": "#E8DCC4",
+      "akzent": "#7A4B26",
+      "symbol": "#C6CDD4"
+    },
+    "waehrung": {
+      "id": "entdeckungen-geld",
+      "name": "Silberdollar",
+      "btcProStueck": 0.1
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Silberdollar verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "aktien",
+    "nummer": 9,
+    "staerke": 6561,
+    "name": "Banknoten und Aktien",
+    "farben": {
+      "haupt": "#2E7D4F",
+      "zweit": "#F0EAD6",
+      "akzent": "#B8892B",
+      "symbol": "#F0EAD6"
+    },
+    "waehrung": {
+      "id": "aktien-geld",
+      "name": "Banknote",
+      "btcProStueck": 1.0
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Banknoten verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "industrie",
+    "nummer": 10,
+    "staerke": 19683,
+    "name": "Industrie und Goldstandard",
+    "farben": {
+      "haupt": "#5F6B76",
+      "zweit": "#D8D2C8",
+      "akzent": "#E8751A",
+      "symbol": "#F2B632"
+    },
+    "waehrung": {
+      "id": "industrie-geld",
+      "name": "Goldmark",
+      "btcProStueck": 10.0
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Goldmark verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "fiat",
+    "nummer": 11,
+    "staerke": 59049,
+    "name": "Fiat-Zeit",
+    "farben": {
+      "haupt": "#3FA34D",
+      "zweit": "#D8DCE0",
+      "akzent": "#3C6FB5",
+      "symbol": "#3FA34D"
+    },
+    "waehrung": {
+      "id": "fiat-geld",
+      "name": "Dollar",
+      "btcProStueck": 100.0
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Dollar verdienen",
+    "klickGrundwert": 1
+  },
+  {
+    "id": "digital",
+    "nummer": 12,
+    "staerke": 177147,
+    "name": "Digital und Bitcoin",
+    "farben": {
+      "haupt": "#0F1230",
+      "zweit": "#1FE3E3",
+      "akzent": "#A24BFF",
+      "symbol": "#F7931A"
+    },
+    "waehrung": {
+      "id": "digital-geld",
+      "name": "Stablecoin",
+      "btcProStueck": 1000.0
+    },
+    "umtauschVonVorher": 0.1,
+    "verdienKnopf": "Stablecoins verdienen",
+    "klickGrundwert": 1
   }
 ]

@@ -25,6 +25,7 @@ export function kampfSystem(api) {
       beute: vorlage.beute * beuteFaktor,
       xp: vorlage.xp * beuteFaktor,
       naechstesZeitalter: vorlage.naechstesZeitalter,
+      endboss: !!vorlage.endboss,
     };
   }
 

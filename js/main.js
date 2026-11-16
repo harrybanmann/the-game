@@ -1,14 +1,14 @@
-import { zahl, btc, dauer } from "./format.js?v=18";
-import * as speicher from "./speicher.js?v=18";
-import { kampfSystem } from "./kampf.js?v=18";
-import { waffenSystem } from "./waffen.js?v=18";
-import { tierSystem } from "./tiere.js?v=18";
-import { dungeonSystem } from "./dungeons.js?v=18";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=18";
-import { bitcoinSystem } from "./bitcoin.js?v=18";
-import { techSystem } from "./tech.js?v=18";
-import { haushaltSystem } from "./haushalt.js?v=18";
-import { farmSystem } from "./farm.js?v=18";
+import { zahl, btc, dauer } from "./format.js?v=19";
+import * as speicher from "./speicher.js?v=19";
+import { kampfSystem } from "./kampf.js?v=19";
+import { waffenSystem } from "./waffen.js?v=19";
+import { tierSystem } from "./tiere.js?v=19";
+import { dungeonSystem } from "./dungeons.js?v=19";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=19";
+import { bitcoinSystem } from "./bitcoin.js?v=19";
+import { techSystem } from "./tech.js?v=19";
+import { haushaltSystem } from "./haushalt.js?v=19";
+import { farmSystem } from "./farm.js?v=19";
 
 const $ = (id) => document.getElementById(id);
 
@@ -283,7 +283,7 @@ function kampfZeichnen() {
 // null = es gibt noch kein nächstes Zeitalter; [] = alles erfüllt.
 function aufstiegFehlt() {
   const boss = gegnerDaten().boss;
-  if (!boss || !daten.zeitalter.some((x) => x.id === boss.naechstesZeitalter)) return null;
+  if (!boss || (!boss.endboss && !daten.zeitalter.some((x) => x.id === boss.naechstesZeitalter))) return null;
   const a = daten.einstellungen.aufstieg;
   const nr = zeitalter().nummer;
   const s = seite();
@@ -1148,6 +1148,15 @@ function kampfEreignis(name, gegner) {
 }
 
 function aufsteigen(boss) {
+  if (boss.endboss) {
+    seite().endbossBesiegt = true;
+    sichern();
+    return hinweis(
+      "Geschafft!",
+      boss.name + " ist besiegt. Du hast die ganze Geschichte des Geldes durchgespielt – von Feuerstein bis Bitcoin. Du kannst weiter aufrüsten, Stufen klettern und die andere Seite spielen.",
+      "🏆"
+    );
+  }
   const neu = daten.zeitalter.find((z) => z.id === boss.naechstesZeitalter);
   if (!neu) return;
   const s = seite();

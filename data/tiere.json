@@ -204,6 +204,358 @@
         "art": "leben",
         "prozent": 0.05
       }
+    },
+    {
+      "id": "woelfin",
+      "zeitalter": "rom",
+      "name": "Wölfin",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "elefant",
+      "zeitalter": "rom",
+      "name": "Elefant",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "gans",
+      "zeitalter": "rom",
+      "name": "Gans",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "falke",
+      "zeitalter": "rom",
+      "name": "Falke",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "kamel",
+      "zeitalter": "mittelalter",
+      "name": "Kamel",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "seidenraupe",
+      "zeitalter": "mittelalter",
+      "name": "Seidenraupe",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "panda",
+      "zeitalter": "mittelalter",
+      "name": "Panda",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "greif",
+      "zeitalter": "mittelalter",
+      "name": "Greif",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "drache",
+      "zeitalter": "banken",
+      "name": "Drache",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "karpfen",
+      "zeitalter": "banken",
+      "name": "Karpfen",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "tiger",
+      "zeitalter": "banken",
+      "name": "Tiger",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "fuchs",
+      "zeitalter": "banken",
+      "name": "Fuchs",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "papagei",
+      "zeitalter": "entdeckungen",
+      "name": "Papagei",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "jaguar",
+      "zeitalter": "entdeckungen",
+      "name": "Jaguar",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "seehund",
+      "zeitalter": "entdeckungen",
+      "name": "Seehund",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "krokodil",
+      "zeitalter": "entdeckungen",
+      "name": "Krokodil",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "bulle",
+      "zeitalter": "aktien",
+      "name": "Bulle",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "baer",
+      "zeitalter": "aktien",
+      "name": "Bär",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "biber",
+      "zeitalter": "aktien",
+      "name": "Biber",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "pfau",
+      "zeitalter": "aktien",
+      "name": "Pfau",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "dampfpferd",
+      "zeitalter": "industrie",
+      "name": "Dampf-Lokomotiven-Pferd",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "maulwurf",
+      "zeitalter": "industrie",
+      "name": "Maulwurf",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "ratte",
+      "zeitalter": "industrie",
+      "name": "Ratte",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "stahlnashorn",
+      "zeitalter": "industrie",
+      "name": "Stahl-Nashorn",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "adleranzug",
+      "zeitalter": "fiat",
+      "name": "Adler im Anzug",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "gepard",
+      "zeitalter": "fiat",
+      "name": "Gepard",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "roboterhund",
+      "zeitalter": "fiat",
+      "name": "Roboterhund",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "chamaeleon",
+      "zeitalter": "fiat",
+      "name": "Chamäleon",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "robofuchs",
+      "zeitalter": "digital",
+      "name": "Robo-Fuchs",
+      "schaden": 3,
+      "leben": 15,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "kryptowal",
+      "zeitalter": "digital",
+      "name": "Krypto-Wal",
+      "schaden": 2,
+      "leben": 30,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.05
+      }
+    },
+    {
+      "id": "neonphoenix",
+      "zeitalter": "digital",
+      "name": "Neon-Phönix",
+      "schaden": 2,
+      "leben": 25,
+      "supporter": {
+        "art": "leben",
+        "prozent": 0.06
+      }
+    },
+    {
+      "id": "btcdrache",
+      "zeitalter": "digital",
+      "name": "Bitcoin-Drache",
+      "schaden": 5,
+      "leben": 10,
+      "supporter": {
+        "art": "schaden",
+        "prozent": 0.05
+      }
     }
   ]
 }

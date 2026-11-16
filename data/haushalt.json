@@ -51,6 +51,62 @@
       "rechnungen": "Essen und Steinhaus",
       "rechnungProStunde": 30,
       "firma": "Münzprägerei"
+    },
+    "rom": {
+      "job": "Marktschreier",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Brot und Mietwohnung",
+      "rechnungProStunde": 30,
+      "firma": "Garum-Manufaktur"
+    },
+    "mittelalter": {
+      "job": "Kaufmann",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Gasthof",
+      "rechnungProStunde": 30,
+      "firma": "Seidenhandel"
+    },
+    "banken": {
+      "job": "Bankier",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Stadthaus",
+      "rechnungProStunde": 30,
+      "firma": "Privatbank"
+    },
+    "entdeckungen": {
+      "job": "Seefahrer",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Proviant und Koje",
+      "rechnungProStunde": 30,
+      "firma": "Handelskompanie"
+    },
+    "aktien": {
+      "job": "Börsenmakler",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Wohnung",
+      "rechnungProStunde": 30,
+      "firma": "Aktiengesellschaft"
+    },
+    "industrie": {
+      "job": "Fabrikarbeiter",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Essen und Mietskaserne",
+      "rechnungProStunde": 30,
+      "firma": "Stahlwerk"
+    },
+    "fiat": {
+      "job": "Büroangestellter",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Miete, Strom und Essen",
+      "rechnungProStunde": 30,
+      "firma": "Konzern"
+    },
+    "digital": {
+      "job": "Krypto-Unternehmer",
+      "gehaltProMinute": 0.4,
+      "rechnungen": "Strom, Internet und Essen",
+      "rechnungProStunde": 30,
+      "firma": "Krypto-Börse"
     }
   },
   "aussehen": [
