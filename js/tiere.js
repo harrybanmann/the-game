@@ -26,8 +26,11 @@ export function tierSystem(api) {
     const selten = api.seltenheiten()[tier.seltenheit] || api.seltenheiten()[0];
     const sterne = tier.sterne || 0;
     const stern = 1 + sterne * d().sternBonus;
-    const faktor = selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * stern;
+    // Harry 17.11.2026: Jedes Haustier hat seine eigene Händler-Stufe (bis 100, je Zeitalter +100).
+    const hf = api.haendlerFaktor ? api.haendlerFaktor(tier.nr) : 1;
+    const faktor = selten.faktor * api.zeitalterStaerke(vorlage.zeitalter) * stern * hf;
     return {
+      haendler: hf,
       nr: tier.nr,
       sterne,
       rang: tier.seltenheit,
@@ -38,7 +41,7 @@ export function tierSystem(api) {
       schaden: vorlage.schaden * faktor,
       leben: vorlage.leben * faktor,
       supporterArt: vorlage.supporter.art,
-      supporterProzent: vorlage.supporter.prozent * (selten.prozent || selten.faktor) * stern, // Prozent-Boni bleiben flach
+      supporterProzent: vorlage.supporter.prozent * (selten.prozent || selten.faktor) * stern * hf, // Prozent-Boni bleiben flach
       staerke: (vorlage.schaden * 5 + vorlage.leben) * faktor,
     };
   }
@@ -136,8 +139,7 @@ export function tierSystem(api) {
     },
     bonus() {
       const k = werte(finde(t().kaempfer));
-      const hf = api.haendlerFaktor ? api.haendlerFaktor() : 1; // Händler-Stufe für das Kämpfer-Tier
-      const bonus = { schaden: k ? k.schaden * hf : 0, leben: k ? k.leben * hf : 0, schadenProzent: 0, lebenProzent: 0 };
+      const bonus = { schaden: k ? k.schaden : 0, leben: k ? k.leben : 0, schadenProzent: 0, lebenProzent: 0 };
       for (const nr of t().supporter.slice(0, plaetze())) {
         const s = werte(finde(nr));
         if (!s) continue;

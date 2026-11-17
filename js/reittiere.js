@@ -16,12 +16,12 @@ export function reittierSystem(api) {
     const tempo = Math.min(
       c.max,
       (c.grund + c.jeZeitalter * (api.zeitalterNummerVon(vorlage.zeitalter) - 1)) * (1 + c.jeSeltenheit * tier.seltenheit) * (1 + c.jeStern * sterne) *
-        (api.haendlerFaktor ? api.haendlerFaktor() : 1)
+        (api.haendlerFaktor ? api.haendlerFaktor(tier.nr) : 1)
     );
     // Zweiter Bonus (Harry 16.11.2026): Heilung oder mehr Drop-Chance, wächst wie das Tempo.
     const zb = d().zweitBonus || { werte: {} };
     const bonusArt = vorlage.bonus || null;
-    const bonusWert = bonusArt ? (zb.werte[bonusArt] || 0) * (1 + zb.jeSeltenheit * tier.seltenheit) * (1 + zb.jeStern * sterne) * (api.haendlerFaktor ? api.haendlerFaktor() : 1) : 0;
+    const bonusWert = bonusArt ? (zb.werte[bonusArt] || 0) * (1 + zb.jeSeltenheit * tier.seltenheit) * (1 + zb.jeStern * sterne) * (api.haendlerFaktor ? api.haendlerFaktor(tier.nr) : 1) : 0;
     return {
       nr: tier.nr,
       id: vorlage.id,

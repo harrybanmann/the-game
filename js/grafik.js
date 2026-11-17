@@ -335,12 +335,40 @@ export function stueckeMelden(liste) {
 
 // platz: nah, fern, helm, handschuhe, ruestung, stiefel, ring1, ring2, amulett, guertel. id = Stück (für die Variante).
 // Set-Teile aus den Dungeons: dieselben Formen, aber in den Farben des Sets (set = null: leerer Platz).
-export function setTeilBild(teil, set) {
+export function setTeilBild(teil, set, q = 0) {
   const art = teil === "waffe" ? "nah" : teil;
-  return alsBild(["setteil", art, set ? set.zeitalter : "-"].join("|"), () => {
+  return alsBild(["setteil", art, set ? set.zeitalter : "-", set ? q : 0].join("|"), () => {
     const m = set ? { frueh: false, metall: set.farbe, akzent: set.rand, gold: set.rand } : { frueh: false, metall: "#b9bec7", akzent: "#a3a8b2", gold: "#b9bec7" };
-    return svg(64, 64, `<g opacity="${set ? 1 : 0.55}">${stueck(art, 0, m)}</g>`);
+    const kraft = set ? Math.max(0, q) : 0;
+    return svg(64, 64, `${kraft >= 6 ? aura() : ""}<g opacity="${set ? 1 : 0.55}">${stueck(art, 0, m)}</g>${set ? veredelung(art, kraft, set) : ""}`);
   });
+}
+// Je höher die Qualität, desto mächtiger sieht das Set-Teil aus (Harry 17.11.2026): Funken, dann dicke Auflagen und Zacken,
+// und erst bei Göttlich Hörner beziehungsweise goldene Stacheln mit Strahlenkranz.
+const funke = (x, y, r) => `<path d="M${x},${y - r} L${x + r * 0.3},${y - r * 0.3} L${x + r},${y} L${x + r * 0.3},${y + r * 0.3} L${x},${y + r} L${x - r * 0.3},${y + r * 0.3} L${x - r},${y} L${x - r * 0.3},${y - r * 0.3} Z" fill="#fff" stroke="#fff6" stroke-width="1"/>`;
+const aura = () => `<circle cx="32" cy="32" r="30" fill="#ffd54a" opacity="0.28"/><path d="M32,0 L36,12 L48,4 L44,18 L62,18 L50,28 L62,40 L46,40 L48,56 L36,48 L32,62 L28,48 L16,56 L18,40 L2,40 L14,28 L2,18 L20,18 L16,4 L28,12 Z" fill="#ffd54a" opacity="0.35"/>`;
+function veredelung(art, q, set) {
+  if (q <= 0) return "";
+  const f = set.farbe;
+  const rand = set.rand;
+  let t = "";
+  const orte = [[10, 12], [54, 10], [8, 50], [56, 52], [32, 6], [32, 58]];
+  for (let i = 0; i < Math.min(q, 6); i++) t += funke(orte[i][0], orte[i][1], 3 + q * 0.5);
+  if (q >= 2) t += `<path d="M6,60 H58" stroke="${rand}" stroke-width="3" stroke-linecap="round" opacity="0.8"/>`;
+  if (q >= 3) {
+    if (art === "ruestung") t += `<ellipse cx="9" cy="20" rx="9" ry="8" fill="${f}" ${S3}/><ellipse cx="55" cy="20" rx="9" ry="8" fill="${f}" ${S3}/><path d="M5,18 h8 M51,18 h8" stroke="${rand}" stroke-width="2.5" stroke-linecap="round"/>`;
+    else if (art === "helm") t += `<path d="M32,2 Q22,4 24,14 L40,14 Q42,4 32,2 Z" fill="${rand}" ${S3}/>`;
+    else if (art === "handschuhe") t += `<path d="M14,10 l4,-8 l4,8 M24,8 l4,-8 l4,8 M34,10 l4,-8 l4,8" fill="${rand}" ${S3}/>`;
+    else if (art === "stiefel") t += `<path d="M6,34 L-2,26 L10,28 Z" fill="${rand}" ${S3}/>`;
+    else if (art === "amulett") t += `<circle cx="32" cy="46" r="9" fill="${rand}" ${S3}/><circle cx="32" cy="46" r="4" fill="#fff" opacity="0.8"/>`;
+    else t += `<path d="M30,0 L34,0 L36,16 L28,16 Z" fill="${rand}" ${S3}/>`;
+  }
+  if (q >= 4) t += `<path d="M2,32 L10,28 L10,36 Z M62,32 L54,28 L54,36 Z" fill="${rand}" ${S3}/>`;
+  if (q >= 6) {
+    if (art === "helm") t += `<path d="M14,18 Q2,14 4,0 Q12,6 18,12 Z M50,18 Q62,14 60,0 Q52,6 46,12 Z" fill="#ffd54a" ${S3}/>`;
+    else t += `<path d="M32,-2 L36,8 L28,8 Z M-2,32 L8,28 L8,36 Z M66,32 L56,28 L56,36 Z M32,66 L36,56 L28,56 Z" fill="#ffd54a" ${S3}/>`;
+  }
+  return t;
 }
 // Die getragene Waffe mit dem Aussehen der Set-Waffe (Form der Waffe, Farben des Sets).
 export function setWaffeBild(art, set, id) {

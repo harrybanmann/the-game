@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=66">
+  <link rel="stylesheet" href="css/style.css?v=68">
 </head>
 <body>
   <div id="spiel">
@@ -204,6 +204,12 @@
         <div class="titel-zeile"><h3>Fähigkeiten</h3><span id="punkte-text" class="zahl-chip"></span></div>
         <div id="faehigkeit-plaetze" class="kachel-raster"></div>
         <button id="ziehen-knopf" class="knopf" type="button"></button>
+        <div class="stil-reihe">
+          <button class="knopf klein" type="button" data-ziehen="10">×10</button>
+          <button class="knopf klein" type="button" data-ziehen="50">×50</button>
+          <button class="knopf klein" type="button" data-ziehen="100">×100</button>
+          <button id="faehigkeiten-alle-mergen" class="knopf klein" type="button">Alle mergen</button>
+        </div>
         <p id="faehigkeit-ergebnis" class="ergebnis"></p>
         <div id="faehigkeit-liste" class="kachel-raster"></div>
       </div>
@@ -306,7 +312,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=66"></script>
+  <script type="module" src="js/main.js?v=68"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

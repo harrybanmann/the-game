@@ -19,15 +19,15 @@
         "gut": "Schmied",
         "boese": "Hehler"
       },
-      "text": "Verbessert Waffe, Kämpfer-Tier, Reittier und Set-Teile dauerhaft.",
+      "text": "Verbessert Waffe und Set-Teile dauerhaft. Haustiere und Reittiere verbesserst du in ihrem eigenen Fenster.",
       "plaetze": [
         "waffe",
-        "tier",
-        "reittier",
         "set-helm",
         "set-ruestung",
         "set-handschuhe",
-        "set-waffe"
+        "set-waffe",
+        "set-stiefel",
+        "set-amulett"
       ]
     },
     {

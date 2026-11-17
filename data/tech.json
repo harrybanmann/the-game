@@ -49,8 +49,8 @@
         {
           "id": "brutplatz",
           "name": "Brutplatz",
-          "text": "5 Stufen = +1 Brutplatz (höchstens 5 Plätze)",
-          "wert": 0.2
+          "text": "Jede Stufe = +1 Brutplatz (höchstens 5 Plätze)",
+          "wert": 1
         },
         {
           "id": "tempo",

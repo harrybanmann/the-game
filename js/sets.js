@@ -10,8 +10,10 @@ export function setSystem(api) {
   const setVon = (z) => d().sets.find((x) => x.zeitalter === z);
   const hoechste = () => api.seltenheiten().length - 1;
 
+  // Harry 17.11.2026: Qualität nach Zeitalter – Zeitalter 1 nur grau, jedes weitere Zeitalter schaltet eine Qualität frei.
+  const maxQ = () => Math.min(hoechste(), (api.zeitalterNummer ? api.zeitalterNummer() : 99) - 1);
   function wuerfeln(ratio) {
-    const gewichte = api.seltenheiten().map((_, i) => Math.pow(ratio, -i));
+    const gewichte = api.seltenheiten().map((_, i) => (i <= maxQ() ? Math.pow(ratio, -i) : 0));
     let r = Math.random() * gewichte.reduce((a, b) => a + b, 0);
     for (let i = 0; i < gewichte.length; i++) {
       r -= gewichte[i];
@@ -58,7 +60,7 @@ export function setSystem(api) {
     return false;
   }
 
-  const mergbar = (teil) => teil.seltenheit < hoechste() && (st().sammlung.find((x) => gleich(x, teil)) || { anzahl: 0 }).anzahl >= 3;
+  const mergbar = (teil) => teil.seltenheit < maxQ() && (st().sammlung.find((x) => gleich(x, teil)) || { anzahl: 0 }).anzahl >= 3;
 
   return {
     werte,

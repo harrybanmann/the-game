@@ -27,7 +27,7 @@ export function neueSeite(startZeitalter) {
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { schluessel: 0, stufe: {} },
-    sets: { sammlung: [], an: { helm: null, ruestung: null, handschuhe: null, waffe: null } },
+    sets: { sammlung: [], an: { helm: null, ruestung: null, handschuhe: null, waffe: null, stiefel: null, amulett: null } },
     tiere: { eier: [], brueten: [], sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
     reittiere: { sammlung: [], naechsteNr: 1, aktiv: null },
   };
@@ -214,7 +214,7 @@ export function pruefen(stand) {
           return t && n > 0 ? { ...t, anzahl: n } : null;
         })
         .filter(Boolean),
-      an: { helm: teil(an.helm), ruestung: teil(an.ruestung), handschuhe: teil(an.handschuhe), waffe: teil(an.waffe) },
+      an: { helm: teil(an.helm), ruestung: teil(an.ruestung), handschuhe: teil(an.handschuhe), waffe: teil(an.waffe), stiefel: teil(an.stiefel), amulett: teil(an.amulett) },
     };
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
