@@ -230,8 +230,15 @@ export function kampfSystem(api) {
     else if (heldX > zielX && !sichtbar) heldX = Math.max(zielX, heldX - l.heldZurueck * dt);
     heldLaeuft = Math.abs(heldX - altX) > 1e-6;
     // Gegner: Nahkämpfer laufen bis vor den Helden, Fernkämpfer bleiben auf Abstand stehen.
+    // Nahkämpfer rücken auf: Fällt der vordere, nimmt der nächste seinen Platz ein (sonst käme der Held nie an ihn heran).
+    const naheReihe = lebende().filter((g) => g.art !== "fern").sort((a, b) => a.x - b.x);
+    const ferneReihe = lebende().filter((g) => g.art === "fern").sort((a, b) => a.x - b.x);
     for (const g of lebende()) {
-      const halt = g.art === "fern" ? g.halt : heldX + g.halt;
+      const platz = naheReihe.indexOf(g);
+      const halt =
+        g.art === "fern"
+          ? l.fernHalt + l.fernAbstand * ferneReihe.indexOf(g)
+          : heldX + (g.boss || g.zwischen ? g.halt : l.nahHalt + l.nahAbstand * platz);
       g.laeuft = g.x > halt + 1e-6;
       if (g.laeuft) g.x = Math.max(halt, g.x - l.tempo * dt);
     }

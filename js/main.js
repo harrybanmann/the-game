@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=48";
-import * as speicher from "./speicher.js?v=48";
-import { kampfSystem } from "./kampf.js?v=48";
-import { waffenSystem } from "./waffen.js?v=48";
-import { tierSystem } from "./tiere.js?v=48";
-import { dungeonSystem } from "./dungeons.js?v=48";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=48";
-import { bitcoinSystem } from "./bitcoin.js?v=48";
-import { techSystem } from "./tech.js?v=48";
-import * as grafik from "./grafik.js?v=48";
-import { haushaltSystem } from "./haushalt.js?v=48";
-import { farmSystem } from "./farm.js?v=48";
-import { reittierSystem } from "./reittiere.js?v=48";
-import { setSystem } from "./sets.js?v=48";
-import { permaSystem } from "./perma.js?v=48";
+import { zahl, btc, dauer } from "./format.js?v=49";
+import * as speicher from "./speicher.js?v=49";
+import { kampfSystem } from "./kampf.js?v=49";
+import { waffenSystem } from "./waffen.js?v=49";
+import { tierSystem } from "./tiere.js?v=49";
+import { dungeonSystem } from "./dungeons.js?v=49";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=49";
+import { bitcoinSystem } from "./bitcoin.js?v=49";
+import { techSystem } from "./tech.js?v=49";
+import * as grafik from "./grafik.js?v=49";
+import { haushaltSystem } from "./haushalt.js?v=49";
+import { farmSystem } from "./farm.js?v=49";
+import { reittierSystem } from "./reittiere.js?v=49";
+import { setSystem } from "./sets.js?v=49";
+import { permaSystem } from "./perma.js?v=49";
 
 const $ = (id) => document.getElementById(id);
 
@@ -354,7 +354,7 @@ function spielerBildSetzen() {
     if (daten.waffen.seltenheiten.indexOf(schwach.seltenheit) >= 3) tragen.aura = schwach.seltenheit.farbe;
   }
   const farbe = getComputedStyle(document.documentElement).getPropertyValue("--spieler").trim() || "#3c8fe0";
-  document.querySelector(".figur.spieler").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, tragen);
+  document.querySelector(".figur.spieler").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, tragen, true);
   $("chip-held-bild").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, { ...tragen, sitzt: false });
 }
 
@@ -562,7 +562,7 @@ function kampfZeichnen() {
     z.gegner.forEach((g, i) => {
       const box = el("div", "gegner" + (g.boss ? " boss" : "") + (g.zwischen ? " boss zwischen" : ""));
       const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
-      figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss, g.art);
+      figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss, g.art, true);
       const balken = el("div", "balken klein");
       balken.append(el("div", "fuellung rot"));
       if (g.boss || g.zwischen) box.append(el("div", "gegner-name", g.name));

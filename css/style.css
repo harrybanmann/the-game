@@ -922,3 +922,49 @@ h3 { font-size: 15px; margin-top: 2px; }
 .gegner.zwischen .figur { transform: scale(1.3); transform-origin: 50% 100%; }
 .gegner.zwischen .gegner-waffe { transform: scale(1.3); }
 #perma-punkte { font-size: 14px; }
+
+/* ---------- Version 36: fließende Animationen, schönere Knöpfe und Kacheln (Harry 16.11.2026) ---------- */
+/* Figuren sind jetzt vier Lauf-Bilder nebeneinander; gezeigt wird immer eins. */
+.figur, .figur.spieler, .figur.gegner-figur, .figur.gegner-figur.elite, .figur.gegner-figur.boss { background-size: 400% 100%; background-position: 0 0; }
+@keyframes schritte { from { background-position-x: 0%; } to { background-position-x: 133.333%; } }
+@keyframes huepf { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+@keyframes wippen { 0%, 100% { scale: 1 1; } 50% { scale: 1.025 0.965; } }
+.gegner.laeuft .figur, #spieler-box.laeuft .figur.spieler { animation: schritte 0.46s steps(4) infinite, huepf 0.23s ease-in-out infinite; }
+#spieler-box.laeuft .figur.getroffen { animation: schritte 0.46s steps(4) infinite, zucken 0.16s ease-out; }
+@keyframes laufen { 0%, 100% { translate: 0 0; rotate: -2deg; } 50% { translate: 0 -3px; rotate: 2deg; } }
+/* Angriff mit Ausholen und Nachschwingen */
+@keyframes schlag { 0% { translate: 0 0; rotate: 0deg; } 22% { translate: -5px 0; rotate: -6deg; } 55% { translate: 15px -3px; rotate: 9deg; } 100% { translate: 0 0; rotate: 0deg; } }
+@keyframes hieb { 0% { translate: 0 0; rotate: 0deg; } 22% { translate: 5px 0; rotate: 6deg; } 55% { translate: -15px -3px; rotate: -9deg; } 100% { translate: 0 0; rotate: 0deg; } }
+.figur.spieler.schlag { animation: wippen 1.8s ease-in-out infinite, schlag 0.34s cubic-bezier(0.3, 0.9, 0.4, 1); }
+.figur.hieb { animation: wippen 1.8s ease-in-out infinite, hieb 0.34s cubic-bezier(0.3, 0.9, 0.4, 1); }
+/* Treffer: kurzer Rückstoß mit Aufblitzen */
+@keyframes getroffen { 0% { filter: brightness(2.6) saturate(0.3); translate: 7px 0; scale: 0.94 1.05; } 45% { filter: brightness(1.3); translate: 3px 0; scale: 1.03 0.98; } 100% { filter: none; translate: 0 0; scale: 1 1; } }
+.figur.getroffen { animation: wippen 1.8s ease-in-out infinite, getroffen 0.3s ease-out; }
+/* Besiegt: kippt nach hinten, federt kurz und verblasst */
+@keyframes sterben { 0% { translate: 0 0; rotate: 0deg; } 30% { translate: 8px -10px; rotate: 25deg; } 60% { translate: 14px 2px; rotate: 82deg; } 75% { translate: 15px -2px; rotate: 78deg; } 100% { translate: 16px 3px; rotate: 86deg; } }
+.gegner.weg .figur { animation: sterben 0.5s ease-in forwards; transform: none; }
+.gegner.weg { transition: opacity 0.45s 0.35s; }
+/* Schadenszahlen ploppen auf */
+@keyframes hoch { 0% { opacity: 0; translate: 0 6px; scale: 0.5; } 14% { opacity: 1; scale: 1.3; } 28% { scale: 1; } 100% { opacity: 0; translate: 0 -34px; scale: 1; } }
+/* Waffen-Schwung etwas weicher */
+.held-waffe.schwung { animation: schwung 0.32s cubic-bezier(0.3, 0.9, 0.4, 1); }
+
+/* Knöpfe: Glanz oben, Schatten unten, weiches Drücken */
+.knopf, #amboss-knopf, #auto-knopf, #schmiede-stufe-knopf, #boss-knopf, .reiter-knopf, .kachel, .chip, .ast-knopf {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.1) 46%, rgba(0, 0, 0, 0.05) 54%, rgba(0, 0, 0, 0.18) 100%) !important;
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.15s;
+}
+.ast-knopf { background-image: none !important; }
+.knopf:active, .kachel:active, .reiter-knopf:active, .chip:active { filter: brightness(0.92); }
+.kachel:active { transform: translateY(2px) scale(0.97); }
+.kachel { border-radius: 12px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1.5px rgba(255, 255, 255, 0.28); }
+.kachel.glanz { box-shadow: 0 0 12px 2px #ffd54a, 0 3px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1.5px rgba(255, 255, 255, 0.45); animation: glanz 2.4s ease-in-out infinite; }
+@keyframes glanz { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.14); } }
+.kachel.leer { background-color: #d9dce2; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.18); }
+.kachel-bild { filter: drop-shadow(0 2px 0 rgba(46, 28, 18, 0.28)); }
+.kachel.leer .kachel-bild { filter: none; }
+.rund-symbol { box-shadow: 0 3px 0 var(--umriss), inset 0 2px 0 rgba(255, 255, 255, 0.28), inset 0 -4px 0 rgba(0, 0, 0, 0.22); transition: transform 0.1s ease-out; }
+.rund:active .rund-symbol { transform: translateY(2px) scale(0.95); }
+.rund.an .rund-symbol { transform: translateY(-3px); }
+.knopf { letter-spacing: 0.2px; }
+@media (prefers-reduced-motion: reduce) { .gegner.laeuft .figur, #spieler-box.laeuft .figur.spieler, .kachel.glanz { animation: none; } }

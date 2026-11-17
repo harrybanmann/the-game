@@ -39,11 +39,20 @@ function person(o) {
       ? `<path d="M58,104 h18 v8 h6 v6 h-24 z" fill="${o.stiefel}" ${S3}/><path d="M58,106 h18" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
       : `<path d="M58,112 h22 v6 h-22 z" fill="#5a3a22" ${S3}/>`;
   } else {
-    t += `<rect x="33" y="86" width="14" height="24" rx="3" fill="${o.kleid2}" ${S}/><rect x="53" y="86" width="14" height="24" rx="3" fill="${o.kleid2}" ${S}/>`;
-    t += o.stiefel
-      ? `<rect x="29" y="98" width="20" height="14" rx="3" fill="${o.stiefel}" ${S3}/><rect x="51" y="98" width="25" height="14" rx="3" fill="${o.stiefel}" ${S3}/><path d="M30,101 h18 M52,101 h23" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
-      : `<rect x="29" y="104" width="20" height="8" rx="3" fill="#5a3a22" ${S3}/><rect x="51" y="104" width="24" height="8" rx="3" fill="#5a3a22" ${S3}/>`;
+    // Jedes Bein ist eine eigene Gruppe (Bein + Schuh), damit es beim Laufen schwingen kann.
+    const bein = (x, schuhX, schuhB, [dx, dy, rot]) =>
+      `<g transform="translate(${dx},${dy}) rotate(${rot} ${x + 7} 88)"><rect x="${x}" y="86" width="14" height="24" rx="3" fill="${o.kleid2}" ${S}/>` +
+      (o.stiefel
+        ? `<rect x="${schuhX}" y="98" width="${schuhB}" height="14" rx="3" fill="${o.stiefel}" ${S3}/><path d="M${schuhX + 1},101 h${schuhB - 2}" stroke="${o.stiefelRand || U}" stroke-width="3"/>`
+        : `<rect x="${schuhX}" y="104" width="${schuhB}" height="8" rx="3" fill="#5a3a22" ${S3}/>`) +
+      `</g>`;
+    const p = SCHRITT[o.schritt || 0];
+    t += bein(33, 29, 20, p.hinten) + bein(53, 51, 24, p.vorn);
   }
+  // Alles über den Beinen wippt beim Laufen leicht mit.
+  const lauf = SCHRITT[o.schritt || 0];
+  t += `<g transform="translate(0,${o.sitzt ? lauf.sitz : lauf.koerper})">`;
+  const hl = o.sitzt ? 0 : lauf.hand, hr = o.sitzt ? 0 : -lauf.hand;
   // Körper
   // Stil C (Harry 16.11.2026): klein und kantig – eckiger Körper, großer eckiger Kopf, dicke Platten.
   t += `<rect x="27" y="54" width="46" height="40" rx="8" fill="${o.kleid}" ${S}/>`;
@@ -52,8 +61,8 @@ function person(o) {
   // Brustplatte der angelegten Rüstung
   if (o.platte) t += `<rect x="31" y="56" width="38" height="19" rx="5" fill="${o.platte}" ${S3}/><path d="M50,56 v19" ${S3}/><circle cx="50" cy="65" r="3.5" fill="${o.platteRand || o.akzent}" ${S3}/><rect x="19" y="52" width="18" height="14" rx="5" fill="${o.platte}" ${S3}/><rect x="63" y="52" width="18" height="14" rx="5" fill="${o.platte}" ${S3}/>`;
   // Hände (mit Handschuhen in deren Farbe)
-  t += `<rect x="14" y="65" width="15" height="18" rx="6" fill="${o.handschuh || haut}" ${S}/><rect x="72" y="65" width="15" height="18" rx="6" fill="${o.handschuh || haut}" ${S}/>`;
-  if (o.handschuh) t += `<path d="M15,69 h14 M73,69 h14" stroke="${o.handschuhRand || U}" stroke-width="3" stroke-linecap="round"/>`;
+  t += `<rect x="${14 + hl}" y="65" width="15" height="18" rx="6" fill="${o.handschuh || haut}" ${S}/><rect x="${72 + hr}" y="65" width="15" height="18" rx="6" fill="${o.handschuh || haut}" ${S}/>`;
+  if (o.handschuh) t += `<path d="M${15 + hl},69 h14 M${73 + hr},69 h14" stroke="${o.handschuhRand || U}" stroke-width="3" stroke-linecap="round"/>`;
   // Kopf
   if (o.kopf === "kapuze") {
     t += `<path d="M20,44 Q18,4 50,4 Q82,4 80,44 Q80,54 50,56 Q20,54 20,44 Z" fill="${o.kapuze}" ${S}/><path d="M50,4 Q62,-4 70,8" fill="none" ${S}/>`;
@@ -90,8 +99,29 @@ function person(o) {
   // Schild vorne
   if (o.schild)
     t += `<path d="M4,56 h34 v16 q0,20 -17,27 q-17,-7 -17,-27 z" fill="${o.schild}" ${S}/><path d="M21,62 v30 M10,74 h22" stroke="${o.akzent}" stroke-width="5" stroke-linecap="round" fill="none"/>`;
-  return t;
+  return t + "</g>";
 }
+
+// Lauf-Bilder (Harry 16.11.2026: fließende Animationen): 0 = Stand, 1 = Schritt, 2 = Durchschwung, 3 = Gegenschritt.
+// Je Bein [dx, dy, Drehung]; koerper/sitz = Wippen des Oberkörpers; hand = Schwung der Hände.
+const SCHRITT = [
+  { hinten: [0, 0, 0], vorn: [0, 0, 0], koerper: 0, sitz: 0, hand: 0 },
+  { hinten: [-4, 0, 20], vorn: [5, -1, -20], koerper: 2, sitz: 1.5, hand: 3 },
+  { hinten: [1, -5, -4], vorn: [0, 0, 2], koerper: -1.5, sitz: 0, hand: 0 },
+  { hinten: [5, -1, -20], vorn: [-4, 0, 20], koerper: 2, sitz: -1.5, hand: -3 },
+];
+// Vier Lauf-Bilder nebeneinander in einem Bild; CSS zeigt immer eins davon (background-position in Schritten).
+const laufBogen = (o, gespiegelt) =>
+  svg(
+    400,
+    124,
+    [0, 1, 2, 3]
+      .map((i) => {
+        const fig = person({ ...o, schritt: i });
+        return `<svg x="${i * 100}" y="0" width="100" height="124" viewBox="0 0 100 124"><g transform="translate(0,12)">${gespiegelt ? spiegeln(fig) : fig}</g></svg>`;
+      })
+      .join("")
+  );
 
 const spiegeln = (t) => `<g transform="translate(100,0) scale(-1,1)">${t}</g>`;
 const figurSvg = (t) => svg(100, 124, `<g transform="translate(0,12)">${t}</g>`);
@@ -155,7 +185,8 @@ const BOSSE = {
 // Spieler: Gut = Beschützer mit Schild, Böse = Dieb mit Kapuze. farbe = gekaufter Umhang/Aussehen.
 // tragen: angelegte Rüstung je Platz { zeitalter, farbe (Seltenheit) } – Helm, Rüstung, Handschuhe und Stiefel
 // sind an der Figur zu sehen: Material in der Farbe ihres Zeitalters, Rand in der Farbe der Seltenheit.
-export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
+// lauf = true: vier Lauf-Bilder nebeneinander (für die Figur im Kampf), sonst ein einzelnes Bild.
+export function spielerBild(seite, zeitalter, farbe, tragen = {}, lauf = false) {
   const f = zeitalter.farben;
   // Set-Teile aus den Dungeons bringen eigene Farben mit (metall); sonst bestimmt das Zeitalter das Material.
   const teil = (p) =>
@@ -168,7 +199,7 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
   const schluessel =
     ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe + (tragen[p].metall || "") + (tragen[p].akzent || "") : "-")).join(",") +
     (tragen.schild ? "S" : "") + (tragen.sitzt ? "R" : "") + (tragen.aura || "");
-  return alsBild(["spieler", seite, farbe, zeitalter.id, schluessel].join("|"), () => {
+  return alsBild(["spieler", seite, farbe, zeitalter.id, schluessel, lauf ? "L" : ""].join("|"), () => {
     const o =
       seite === "boese"
         ? { ...dieb(zeitalter, "normal", farbe), kleid: "#4a3566", kleid2: "#2b1a3d", umhang: farbe, boese: false, waffe: null, schild: tragen.schild ? "#3a2d44" : null }
@@ -180,8 +211,7 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}) {
     if (ruestung) Object.assign(o, { platte: ruestung.frueh ? "#a8763a" : ruestung.m, platteRand: ruestung.rand, fell: false });
     if (handschuhe) Object.assign(o, { handschuh: handschuhe.frueh ? "#8a5a3a" : handschuhe.m, handschuhRand: handschuhe.rand });
     if (stiefel) Object.assign(o, { stiefel: stiefel.frueh ? "#8a5a3a" : stiefel.m, stiefelRand: stiefel.rand });
-    const bild = person(o);
-    return figurSvg(bild);
+    return lauf ? laufBogen(o, false) : figurSvg(person(o));
   });
 }
 
@@ -212,10 +242,10 @@ export function geschossBild(art) {
 }
 
 // art: "nah" (Keule/Speer) oder "fern" (Bogen, später Blaster) – nie beides.
-export function gegnerBild(seite, zeitalter, typ, boss, art) {
+export function gegnerBild(seite, zeitalter, typ, boss, art, lauf = false) {
   const f = zeitalter.farben;
   const fern = art === "fern";
-  return alsBild(["gegner", seite, zeitalter.id, typ, boss ? 1 : 0, fern ? 1 : 0].join("|"), () => {
+  return alsBild(["gegner", seite, zeitalter.id, typ, boss ? 1 : 0, fern ? 1 : 0, lauf ? "L" : ""].join("|"), () => {
     const fernWaffe = zeitalter.nummer >= 10 ? "blaster" : "bogen";
     let o;
     if (boss)
@@ -224,7 +254,7 @@ export function gegnerBild(seite, zeitalter, typ, boss, art) {
       o = { ...waechter(zeitalter, typ), boese: true, schild: fern ? null : f.zweit, waffe: fern ? fernWaffe : "speer" };
     else o = { ...dieb(zeitalter, typ), waffe: fern ? fernWaffe : "keule" };
     o.waffe = null; // die Waffe liegt als eigenes Bild über der Figur (gegnerWaffe), damit sie sich bewegen kann
-    return figurSvg(spiegeln(person(o)));
+    return lauf ? laufBogen(o, true) : figurSvg(spiegeln(person(o)));
   });
 }
 
@@ -246,30 +276,43 @@ export function gegnerWaffe(seite, zeitalter, boss, art) {
 
 // ---------- Ausrüstung ----------
 // Eine Form je Platz, zwei Varianten je Waffe; das Material kommt aus den Farben des Zeitalters.
+// Glanzlicht (heller Strich) und Schatten (dunkle Fläche) für die Gegenstands-Bilder.
+const GL = (d, w = 3, o = 0.6) => `<path d="${d}" fill="none" stroke="#fff" stroke-width="${w}" stroke-linecap="round" opacity="${o}"/>`;
+const SCH = (d, o = 0.18) => `<path d="${d}" fill="#000" opacity="${o}"/>`;
+// Harry 16.11.2026: schönere Icons – jedes Stück mit Glanz, Schatten und mehr Details.
 function stueck(art, variante, m) {
   const holz = "#9a6a3c";
+  const holz2 = "#7a4f2a";
   switch (art) {
     case "nah":
-      if (m.frueh && !variante) return `<g transform="rotate(40 32 32)"><rect x="24" y="6" width="17" height="50" rx="8.5" fill="${holz}" ${S3}/><circle cx="32" cy="16" r="2.4" fill="${U}"/><circle cx="29" cy="27" r="2" fill="${U}"/><rect x="26" y="44" width="13" height="4" fill="${m.akzent}"/></g>`;
-      if (variante) return `<g transform="rotate(35 32 32)"><rect x="29" y="8" width="7" height="50" rx="3.5" fill="${holz}" ${S3}/><path d="M36,10 Q54,12 52,30 Q44,26 36,30 Z" fill="${m.metall}" ${S3}/></g>`;
-      return `<g transform="rotate(40 32 32)"><path d="M27,4 L37,4 L37,40 L27,40 Z" fill="${m.metall}" ${S3}/><path d="M32,-4 L37,4 L27,4 Z" fill="${m.metall}" ${S3}/><rect x="20" y="40" width="24" height="6" rx="3" fill="${m.akzent}" ${S3}/><rect x="29" y="46" width="6" height="12" rx="3" fill="${holz}" ${S3}/></g>`;
+      // Keule (frühe Zeitalter)
+      if (m.frueh && !variante)
+        return `<g transform="rotate(40 32 32)"><path d="M26,56 L27,22 Q22,6 32,5 Q43,6 38,22 L39,56 Q32,60 26,56 Z" fill="${holz}" ${S3}/>${SCH("M33,8 Q41,10 37,22 L38,55 Q35,57 33,57 Z")}${GL("M28,12 Q27,20 29,34", 3, 0.45)}<circle cx="33" cy="14" r="2.2" fill="${U}"/><circle cx="29.5" cy="24" r="1.8" fill="${U}"/><path d="M27,42 h11 M27,47 h11" stroke="${m.akzent}" stroke-width="3.2"/><path d="M27,42 h11 M27,47 h11 M27,52 h11" stroke="${U}" stroke-width="1.2" opacity="0.6"/></g>`;
+      // Axt
+      if (variante)
+        return `<g transform="rotate(35 32 32)"><rect x="29" y="8" width="7" height="50" rx="3.5" fill="${holz}" ${S3}/>${SCH("M33,10 h2 v46 h-2 z")}<path d="M35,9 Q56,10 54,32 Q45,26 35,30 Z" fill="${m.metall}" ${S3}/><path d="M47,13 Q54,20 53,31 Q49,27 45,26 Q49,20 47,13 Z" fill="#fff" opacity="0.55"/>${SCH("M35,24 Q45,22 53,30 Q45,26 35,30 Z", 0.2)}<path d="M28,13 h9 M28,27 h9" stroke="${m.akzent}" stroke-width="3.5" stroke-linecap="round"/><path d="M29,50 h7 M29,54 h7" stroke="${holz2}" stroke-width="2"/></g>`;
+      // Schwert
+      return `<g transform="rotate(40 32 32)"><path d="M26.5,40 L26.5,6 L32,-5 L37.5,6 L37.5,40 Z" fill="${m.metall}" ${S3}/>${SCH("M32,-4 L37,6 L37,39.5 L32,39.5 Z", 0.16)}${GL("M29,7 V36", 2.4, 0.75)}<path d="M32,4 V38" stroke="${U}" stroke-width="1.4" opacity="0.45"/><path d="M17,38 Q32,44 47,38 L47,45 Q32,50 17,45 Z" fill="${m.akzent}" ${S3}/>${GL("M21,41.5 Q32,45.5 43,41.5", 1.8, 0.6)}<rect x="28.5" y="46" width="7" height="11" rx="2.5" fill="${holz}" ${S3}/><path d="M28.5,50 h7 M28.5,53.5 h7" stroke="${holz2}" stroke-width="1.6"/><circle cx="32" cy="59.5" r="4" fill="${m.gold}" ${S3}/></g>`;
     case "fern":
-      if (variante) return `<g transform="rotate(40 32 32)"><rect x="29.5" y="12" width="5" height="48" rx="2.5" fill="${holz}" ${S3}/><path d="M32,-2 L41,16 L23,16 Z" fill="${m.metall}" ${S3}/></g>`;
-      return `<path d="M18,8 Q52,32 18,56" fill="none" stroke="${U}" stroke-width="9" stroke-linecap="round"/><path d="M18,8 Q52,32 18,56" fill="none" stroke="${holz}" stroke-width="4" stroke-linecap="round"/><line x1="18" y1="8" x2="18" y2="56" stroke="${U}" stroke-width="2.5"/><line x1="14" y1="32" x2="54" y2="32" stroke="${U}" stroke-width="3.5" stroke-linecap="round"/><path d="M58,32 L48,26 L48,38 Z" fill="${m.metall}" ${S3}/>`;
+      // Speer
+      if (variante)
+        return `<g transform="rotate(40 32 32)"><rect x="29.5" y="12" width="5" height="50" rx="2.5" fill="${holz}" ${S3}/>${SCH("M32.5,14 h1.6 v46 h-1.6 z")}<path d="M32,-5 L42,15 L32,20 L22,15 Z" fill="${m.metall}" ${S3}/>${SCH("M32,-4 L41.5,15 L32,19.5 Z", 0.18)}${GL("M28.5,4 L25.5,13.5", 2, 0.75)}<path d="M28,21 h8 M28,25 h8" stroke="${m.akzent}" stroke-width="3.2" stroke-linecap="round"/><path d="M34,26 q7,3 4,11 q-4,-2 -4,-8" fill="${m.akzent}" ${S3}/></g>`;
+      // Bogen mit Pfeil
+      return `<path d="M18,6 Q54,32 18,58" fill="none" stroke="${U}" stroke-width="9.5" stroke-linecap="round"/><path d="M18,6 Q54,32 18,58" fill="none" stroke="${holz}" stroke-width="5" stroke-linecap="round"/><path d="M21,11 Q46,32 21,53" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.4"/><path d="M33.5,26 Q36.5,32 33.5,38" fill="none" stroke="${U}" stroke-width="9.5" stroke-linecap="round"/><path d="M33.5,26 Q36.5,32 33.5,38" fill="none" stroke="${m.akzent}" stroke-width="5.5" stroke-linecap="round"/><line x1="18" y1="6" x2="18" y2="58" stroke="${U}" stroke-width="2.2"/><line x1="10" y1="32" x2="52" y2="32" stroke="${U}" stroke-width="5" stroke-linecap="round"/><line x1="10" y1="32" x2="50" y2="32" stroke="#d9b98a" stroke-width="2" stroke-linecap="round"/><path d="M61,32 L49,25 L49,39 Z" fill="${m.metall}" ${S3}/><path d="M6,26 L14,32 L6,38 Z" fill="${m.akzent}" ${S3}/>`;
     case "helm":
-      return `<path d="M10,40 Q8,10 32,10 Q56,10 54,40 Z" fill="${m.metall}" ${S3}/><rect x="6" y="38" width="52" height="9" rx="4.5" fill="${m.akzent}" ${S3}/><path d="M32,10 v30" stroke="${U}" stroke-width="3" opacity="0.5"/>`;
+      return `<path d="M9,40 Q7,9 32,9 Q57,9 55,40 Z" fill="${m.metall}" ${S3}/>${SCH("M38,10 Q57,12 55,40 H40 Q46,24 38,10 Z", 0.16)}${GL("M16,30 Q16,17 27,14", 3.2, 0.7)}<path d="M32,9 V40" stroke="${U}" stroke-width="2" opacity="0.4"/><path d="M27,9 Q32,-3 37,9 Z" fill="${m.akzent}" ${S3}/><rect x="5" y="37" width="54" height="10" rx="5" fill="${m.akzent}" ${S3}/>${GL("M11,40.5 H44", 2, 0.5)}<path d="M28.5,47 h7 v9 q-3.5,4 -7,0 Z" fill="${m.metall}" ${S3}/><circle cx="14" cy="42" r="1.7" fill="${U}"/><circle cx="50" cy="42" r="1.7" fill="${U}"/>`;
     case "handschuhe":
-      return `<path d="M18,54 V30 Q18,24 23,24 V14 Q23,9 27.5,9 Q32,9 32,14 V12 Q32,7 36.5,7 Q41,7 41,12 V16 Q41,12 45,12 Q49,12 49,17 V36 Q49,54 34,54 Z" fill="${m.metall}" ${S3}/><rect x="16" y="46" width="24" height="10" rx="4" fill="${m.akzent}" ${S3}/>`;
+      return `<path d="M17,50 V30 Q17,24 22,24 V14 Q22,9 26.5,9 Q31,9 31,14 V12 Q31,7 35.5,7 Q40,7 40,12 V15 Q40,11 44,11 Q48.5,11 48.5,16 V34 Q48.5,46 44,50 Z" fill="${m.metall}" ${S3}/>${SCH("M40,14 Q44,11 48,16 V34 Q48,46 44,50 H38 Q43,40 40,14 Z", 0.16)}${GL("M21.5,30 V42", 2.6, 0.6)}${GL("M26.5,13 V22", 2.2, 0.6)}<path d="M31,15 V25 M40,16 V26" stroke="${U}" stroke-width="2.2" stroke-linecap="round" opacity="0.6"/><path d="M22,33 Q33,37 47,32" fill="none" stroke="${U}" stroke-width="2" opacity="0.45"/><path d="M14,47 H47 V55 Q30,60 14,55 Z" fill="${m.akzent}" ${S3}/>${GL("M18,50.5 H40", 1.8, 0.55)}<circle cx="30" cy="53" r="2" fill="${m.gold}" stroke="${U}" stroke-width="1.4"/>`;
     case "ruestung":
-      return `<path d="M14,12 L24,8 Q32,16 40,8 L50,12 L56,26 L47,30 V54 Q32,60 17,54 V30 L8,26 Z" fill="${m.metall}" ${S3}/><path d="M32,20 v32" stroke="${U}" stroke-width="3" opacity="0.5"/><rect x="18" y="40" width="28" height="6" fill="${m.akzent}" ${S3}/>`;
+      return `<path d="M15,13 L24,8 Q32,17 40,8 L49,13 L52,28 L46,31 V53 Q32,60 18,53 V31 L12,28 Z" fill="${m.metall}" ${S3}/>${SCH("M40,9 L49,13 L52,28 L46,31 V53 Q39,57 33,57 V16 Q37,14 40,9 Z", 0.15)}<path d="M5,24 Q5,11 17,11 Q22,17 20,29 Q12,31 5,24 Z" fill="${m.metall}" ${S3}/><path d="M59,24 Q59,11 47,11 Q42,17 44,29 Q52,31 59,24 Z" fill="${m.metall}" ${S3}/>${GL("M9,21 Q10,15 16,15", 2.4, 0.65)}${GL("M22,22 Q23,32 22,44", 2.8, 0.55)}<path d="M32,17 V40" stroke="${U}" stroke-width="2" opacity="0.4"/><path d="M21,31 Q32,36 43,31" fill="none" stroke="${U}" stroke-width="2" opacity="0.4"/><path d="M18,41 Q32,47 46,41 V48 Q32,54 18,48 Z" fill="${m.akzent}" ${S3}/><path d="M32,22 l4.5,4.5 l-4.5,4.5 l-4.5,-4.5 z" fill="${m.gold}" stroke="${U}" stroke-width="2" stroke-linejoin="round"/>`;
     case "stiefel":
-      return `<path d="M20,8 H38 V36 Q56,38 56,50 V56 H20 Z" fill="${m.metall}" ${S3}/><rect x="17" y="6" width="24" height="9" rx="4" fill="${m.akzent}" ${S3}/><path d="M20,50 H56" stroke="${U}" stroke-width="3.5"/>`;
+      return `<path d="M20,10 H39 V34 Q57,36 57,48 V52 H20 Z" fill="${m.metall}" ${S3}/>${SCH("M33,12 H39 V34 Q57,36 57,48 V52 H44 Q48,40 33,36 Z", 0.15)}${GL("M24.5,17 V40", 2.8, 0.6)}<path d="M39,34 Q33,35 30,40" fill="none" stroke="${U}" stroke-width="2" opacity="0.45"/><path d="M46,41 q4,1 6,5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.5"/><path d="M16,5 H42 V15 Q29,19 16,15 Z" fill="${m.akzent}" ${S3}/>${GL("M20,8.5 H37", 1.8, 0.55)}<path d="M17,51 H59 V57 Q38,60 17,57 Z" fill="${holz2}" ${S3}/>`;
     case "ring":
-      return `<circle cx="32" cy="38" r="16" fill="none" stroke="${U}" stroke-width="12"/><circle cx="32" cy="38" r="16" fill="none" stroke="${m.gold}" stroke-width="6"/><path d="M32,6 L42,16 L32,26 L22,16 Z" fill="${m.akzent}" ${S3}/>`;
+      return `<circle cx="32" cy="40" r="16" fill="none" stroke="${U}" stroke-width="12.5"/><circle cx="32" cy="40" r="16" fill="none" stroke="${m.gold}" stroke-width="7"/><path d="M19,47 A15,15 0 0 1 19,33" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity="0.7"/><path d="M45,33 A15,15 0 0 1 43,50" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" opacity="0.18"/><path d="M24,22 h16 l3,-6 l-5,-6 h-12 l-5,6 z" fill="${m.gold}" ${S3}/><path d="M32,3 L43,13 L32,25 L21,13 Z" fill="${m.akzent}" ${S3}/><path d="M32,3 L37,13 L32,25 L27,13 Z" fill="#fff" opacity="0.28"/><path d="M21,13 H43" stroke="${U}" stroke-width="1.4" opacity="0.5"/>${GL("M26.5,10.5 L30,7", 2, 0.85)}`;
     case "amulett":
-      return `<path d="M12,6 Q32,40 52,6" fill="none" stroke="${U}" stroke-width="7" stroke-linecap="round"/><path d="M12,6 Q32,40 52,6" fill="none" stroke="${m.gold}" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="42" r="14" fill="${m.gold}" ${S3}/><circle cx="32" cy="42" r="6.5" fill="${m.akzent}" ${S3}/>`;
+      return `<path d="M10,4 Q32,42 54,4" fill="none" stroke="${U}" stroke-width="7.5" stroke-linecap="round"/><path d="M10,4 Q32,42 54,4" fill="none" stroke="${m.gold}" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="4.5 3"/><path d="M32,24 L47,34 L43,53 Q32,61 21,53 L17,34 Z" fill="${m.gold}" ${S3}/>${SCH("M32,25 L46,34.5 L42.5,52.5 Q37,57 32,58 Z", 0.16)}${GL("M22,36 L24,49", 2.4, 0.65)}<path d="M32,32 L40,41 L32,52 L24,41 Z" fill="${m.akzent}" ${S3}/><path d="M32,32 L35.5,41 L32,52 L28.5,41 Z" fill="#fff" opacity="0.3"/>${GL("M28.5,38.5 L30.5,36", 1.8, 0.9)}`;
     case "guertel":
-      return `<rect x="4" y="24" width="56" height="16" rx="5" fill="${holz}" ${S3}/><rect x="23" y="18" width="18" height="28" rx="5" fill="${m.gold}" ${S3}/><rect x="28.5" y="25" width="7" height="14" rx="2" fill="${holz}" ${S3}/>`;
+      return `<path d="M3,25 Q32,20 61,25 V40 Q32,45 3,40 Z" fill="${holz}" ${S3}/>${SCH("M3,34 Q32,38 61,34 V40 Q32,45 3,40 Z", 0.2)}${GL("M8,27.5 Q20,25.5 24,25.5", 2, 0.45)}<path d="M5,30 Q32,26 59,30 M5,36.5 Q32,40.5 59,36.5" fill="none" stroke="${holz2}" stroke-width="1.4" stroke-dasharray="3 3"/><circle cx="48" cy="32.5" r="1.8" fill="${U}"/><circle cx="54.5" cy="32.5" r="1.8" fill="${U}"/><rect x="21" y="16" width="22" height="33" rx="6" fill="${m.gold}" ${S3}/>${SCH("M33,17 h5 q5,0 5,6 v20 q0,6 -5,6 h-5 z", 0.16)}${GL("M25,22 V42", 2.4, 0.65)}<rect x="27.5" y="23" width="9" height="19" rx="2.5" fill="${holz}" ${S3}/><rect x="30" y="29" width="13" height="5" rx="2.5" fill="${m.akzent}" ${S3}/>`;
   }
   return "";
 }
