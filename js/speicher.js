@@ -3,7 +3,7 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 19;
+export const VERSION = 20;
 
 export function neueSeite(startZeitalter) {
   return {
@@ -14,7 +14,7 @@ export function neueSeite(startZeitalter) {
     level: 1,
     xp: 0,
     kampf: { index: 0, rate: 0, raten: {}, stufe: 1, welle: 1 },
-    schmiede: { stufe: 0, geschmiedet: 0, ausbauBis: null },
+    schmiede: { stufe: 0, geschmiedet: 0, geschmiedetZA: 0, ausbauBis: null },
     waffen: { waffe: null, stil: null },
     ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
     schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
@@ -81,6 +81,7 @@ export function pruefen(stand) {
     seite.schmiede = {
       stufe: Math.max(0, Math.floor(Number(sch.stufe)) || 0),
       geschmiedet: Math.max(0, Math.floor(Number(sch.geschmiedet)) || 0),
+      geschmiedetZA: Math.max(0, Math.floor(Number(sch.geschmiedetZA)) || 0), // Schmieden im jetzigen Zeitalter (Preis steigt)
       ausbauBis: Number.isFinite(sch.ausbauBis) ? sch.ausbauBis : null,
     };
     const w = seite.waffen || {};
@@ -176,13 +177,19 @@ export function pruefen(stand) {
     const ganz = (x, min) => Math.max(min, Math.floor(Number(x)) || 0);
     const sammlung = (Array.isArray(fa.sammlung) ? fa.sammlung : [])
       .filter((x) => x && typeof x.id === "string")
-      .map((x) => ({ id: x.id, level: ganz(x.level, 1), sterne: ganz(x.sterne, 0), kopien: ganz(x.kopien, 0) }));
-    const ids = new Set(sammlung.map((x) => x.id));
+      .map((x) => {
+        const e = { id: x.id, level: ganz(x.level, 1), sterne: ganz(x.sterne, 0), kopien: ganz(x.kopien, 0) };
+        if (Number.isFinite(x.q)) e.q = ganz(x.q, 0); // Qualität (ab Version 38); alte Einträge bekommen sie beim ersten Laden
+        return e;
+      });
+    // Ab Version 38 heißt jeder Eintrag id@q; ältere Spielstände haben nur die id (das Fähigkeiten-System wandelt sie um).
+    const ids = new Set(sammlung.map((x) => (Number.isFinite(x.q) ? x.id + "@" + x.q : x.id)));
     seite.faehigkeiten = {
       punkte: ganz(fa.punkte, 0),
       sammlung,
       ausgeruestet: (Array.isArray(fa.ausgeruestet) ? fa.ausgeruestet : []).filter((id) => ids.has(id)),
     };
+    if (fa.v2) seite.faehigkeiten.v2 = true;
     // Dungeons (V30): Schlüssel statt Tages-Tickets, Stufe je Zeitalter. Alte Tickets werden zu Schlüsseln,
     // die alten Dungeons (Eier-Höhle, Waffenkammer, Schatzkammer) und ihre Stufen fallen weg.
     const du = seite.dungeons || {};

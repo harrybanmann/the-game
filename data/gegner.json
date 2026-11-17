@@ -1,5 +1,5 @@
 {
-  "_hinweis": "Zahlen sind Startwerte (Vorschlag). name.gut = Gegner der Beschützer-Seite, name.boese = Gegner der Dieb-Seite. Werte sind für beide Seiten gleich.",
+  "_hinweis": "Zahlen sind Startwerte (Vorschlag). name.gut = Gegner der Beschützer-Seite, name.boese = Gegner der Dieb-Seite. Werte sind für beide Seiten gleich. Version 38 (17.11.2026): Gegner-Stärke wächst jetzt ×10 je Zeitalter (vorher ×3), gleich wie die Upgrade-Wirkung des Helden.",
   "steinzeit": {
     "reihenfolge": [
       "schwach",
@@ -76,8 +76,8 @@
           "gut": "Hühnerdieb",
           "boese": "Feldwache"
         },
-        "leben": 20,
-        "schaden": 2,
+        "leben": 67,
+        "schaden": 7,
         "beute": 1,
         "xp": 3
       },
@@ -86,8 +86,8 @@
           "gut": "Muschel-Räuber",
           "boese": "Dorfwächter"
         },
-        "leben": 40,
-        "schaden": 3,
+        "leben": 133,
+        "schaden": 10,
         "beute": 2,
         "xp": 5
       },
@@ -96,8 +96,8 @@
           "gut": "Ochsen-Räuber",
           "boese": "Stier-Wächter"
         },
-        "leben": 70,
-        "schaden": 5,
+        "leben": 233,
+        "schaden": 17,
         "beute": 5,
         "xp": 10
       }
@@ -107,8 +107,8 @@
         "gut": "Hermes",
         "boese": "Hermes"
       },
-      "leben": 200,
-      "schaden": 8,
+      "leben": 667,
+      "schaden": 27,
       "beute": 40,
       "xp": 60,
       "naechstesZeitalter": "bronzezeit",
@@ -138,8 +138,8 @@
           "gut": "Kamel-Dieb",
           "boese": "Torwache"
         },
-        "leben": 60,
-        "schaden": 5,
+        "leben": 667,
+        "schaden": 56,
         "beute": 1,
         "xp": 8
       },
@@ -148,8 +148,8 @@
           "gut": "Karawanen-Räuber",
           "boese": "Tempelwächter"
         },
-        "leben": 110,
-        "schaden": 8,
+        "leben": 1222,
+        "schaden": 89,
         "beute": 2,
         "xp": 14
       },
@@ -158,8 +158,8 @@
           "gut": "Bronze-Räuber",
           "boese": "Speer-Hauptmann"
         },
-        "leben": 200,
-        "schaden": 12,
+        "leben": 2222,
+        "schaden": 133,
         "beute": 5,
         "xp": 25
       }
@@ -169,8 +169,8 @@
         "gut": "Hammurabi",
         "boese": "Hammurabi"
       },
-      "leben": 700,
-      "schaden": 22,
+      "leben": 7778,
+      "schaden": 244,
       "beute": 40,
       "xp": 150,
       "naechstesZeitalter": "muenzen",
@@ -200,8 +200,8 @@
           "gut": "Taschendieb",
           "boese": "Marktwache"
         },
-        "leben": 180,
-        "schaden": 14,
+        "leben": 6667,
+        "schaden": 519,
         "beute": 1,
         "xp": 20
       },
@@ -210,8 +210,8 @@
           "gut": "Münzfälscher",
           "boese": "Münzwächter"
         },
-        "leben": 330,
-        "schaden": 22,
+        "leben": 12222,
+        "schaden": 815,
         "beute": 2,
         "xp": 35
       },
@@ -220,8 +220,8 @@
           "gut": "Gold-Schwindler",
           "boese": "Schatz-Hüter"
         },
-        "leben": 600,
-        "schaden": 34,
+        "leben": 22222,
+        "schaden": 1259,
         "beute": 5,
         "xp": 60
       }
@@ -231,8 +231,8 @@
         "gut": "König Krösus",
         "boese": "König Krösus"
       },
-      "leben": 2100,
-      "schaden": 60,
+      "leben": 77778,
+      "schaden": 2222,
       "beute": 40,
       "xp": 400,
       "naechstesZeitalter": "rom",
@@ -262,8 +262,8 @@
           "gut": "Straßendieb",
           "boese": "Legionär"
         },
-        "leben": 540,
-        "schaden": 39,
+        "leben": 66667,
+        "schaden": 4815,
         "beute": 1,
         "xp": 50
       },
@@ -272,8 +272,8 @@
           "gut": "Straßenräuber",
           "boese": "Zenturio"
         },
-        "leben": 990,
-        "schaden": 62,
+        "leben": 122222,
+        "schaden": 7654,
         "beute": 2,
         "xp": 88
       },
@@ -282,8 +282,8 @@
           "gut": "Gladiator-Räuber",
           "boese": "Prätorianer"
         },
-        "leben": 1800,
-        "schaden": 95,
+        "leben": 222222,
+        "schaden": 11728,
         "beute": 5,
         "xp": 150
       }
@@ -293,8 +293,8 @@
         "gut": "Julius Caesar",
         "boese": "Julius Caesar"
       },
-      "leben": 6300,
-      "schaden": 168,
+      "leben": 777778,
+      "schaden": 20741,
       "beute": 40,
       "xp": 1000,
       "naechstesZeitalter": "mittelalter",
@@ -332,8 +332,8 @@
           "gut": "Beutelschneider",
           "boese": "Torwache"
         },
-        "leben": 1620,
-        "schaden": 109,
+        "leben": 666667,
+        "schaden": 44856,
         "beute": 1,
         "xp": 125
       },
@@ -342,8 +342,8 @@
           "gut": "Wegelagerer",
           "boese": "Burgwache"
         },
-        "leben": 2970,
-        "schaden": 174,
+        "leben": 1222222,
+        "schaden": 71605,
         "beute": 2,
         "xp": 220
       },
@@ -352,8 +352,8 @@
           "gut": "Ritter-Räuber",
           "boese": "Ritter"
         },
-        "leben": 5400,
-        "schaden": 266,
+        "leben": 2222222,
+        "schaden": 109465,
         "beute": 5,
         "xp": 375
       }
@@ -363,8 +363,8 @@
         "gut": "Dschingis Khan",
         "boese": "Dschingis Khan"
       },
-      "leben": 18900,
-      "schaden": 470,
+      "leben": 7777778,
+      "schaden": 193416,
       "beute": 40,
       "xp": 2500,
       "naechstesZeitalter": "banken",
@@ -402,8 +402,8 @@
           "gut": "Schein-Dieb",
           "boese": "Schalterwache"
         },
-        "leben": 4860,
-        "schaden": 305,
+        "leben": 6666667,
+        "schaden": 418381,
         "beute": 1,
         "xp": 312
       },
@@ -412,8 +412,8 @@
           "gut": "Wechsel-Fälscher",
           "boese": "Bankwächter"
         },
-        "leben": 8910,
-        "schaden": 487,
+        "leben": 12222222,
+        "schaden": 668038,
         "beute": 2,
         "xp": 550
       },
@@ -422,8 +422,8 @@
           "gut": "Tresor-Knacker",
           "boese": "Tresor-Vogt"
         },
-        "leben": 16200,
-        "schaden": 745,
+        "leben": 22222222,
+        "schaden": 1021948,
         "beute": 5,
         "xp": 938
       }
@@ -433,8 +433,8 @@
         "gut": "Cosimo de' Medici",
         "boese": "Cosimo de' Medici"
       },
-      "leben": 56700,
-      "schaden": 1316,
+      "leben": 77777778,
+      "schaden": 1805213,
       "beute": 40,
       "xp": 6250,
       "naechstesZeitalter": "entdeckungen",
@@ -472,8 +472,8 @@
           "gut": "Schiffsjunge-Dieb",
           "boese": "Hafenwache"
         },
-        "leben": 14580,
-        "schaden": 854,
+        "leben": 66666667,
+        "schaden": 3904893,
         "beute": 1,
         "xp": 780
       },
@@ -482,8 +482,8 @@
           "gut": "Pirat",
           "boese": "Marinesoldat"
         },
-        "leben": 26730,
-        "schaden": 1364,
+        "leben": 122222222,
+        "schaden": 6236854,
         "beute": 2,
         "xp": 1375
       },
@@ -492,8 +492,8 @@
           "gut": "Enterhaken-Pirat",
           "boese": "Kanonier"
         },
-        "leben": 48600,
-        "schaden": 2086,
+        "leben": 222222222,
+        "schaden": 9538180,
         "beute": 5,
         "xp": 2345
       }
@@ -503,8 +503,8 @@
         "gut": "Pirat Blackbeard",
         "boese": "Pirat Blackbeard"
       },
-      "leben": 170100,
-      "schaden": 3685,
+      "leben": 777777778,
+      "schaden": 16849566,
       "beute": 40,
       "xp": 15625,
       "naechstesZeitalter": "aktien",
@@ -542,8 +542,8 @@
           "gut": "Börsen-Dieb",
           "boese": "Börsendiener"
         },
-        "leben": 43740,
-        "schaden": 2391,
+        "leben": 666666667,
+        "schaden": 36442615,
         "beute": 1,
         "xp": 1950
       },
@@ -552,8 +552,8 @@
           "gut": "Börsenschwindler",
           "boese": "Aufseher"
         },
-        "leben": 80190,
-        "schaden": 3819,
+        "leben": 1222222222,
+        "schaden": 58207590,
         "beute": 2,
         "xp": 3438
       },
@@ -562,8 +562,8 @@
           "gut": "Bilanz-Fälscher",
           "boese": "Prüfer"
         },
-        "leben": 145800,
-        "schaden": 5841,
+        "leben": 2222222222,
+        "schaden": 89026063,
         "beute": 5,
         "xp": 5862
       }
@@ -573,8 +573,8 @@
         "gut": "John Law",
         "boese": "John Law"
       },
-      "leben": 510300,
-      "schaden": 10318,
+      "leben": 7777777778,
+      "schaden": 157262612,
       "beute": 40,
       "xp": 39062,
       "naechstesZeitalter": "industrie",
@@ -612,8 +612,8 @@
           "gut": "Kohle-Dieb",
           "boese": "Pförtner"
         },
-        "leben": 131220,
-        "schaden": 6695,
+        "leben": 6666666667,
+        "schaden": 340141239,
         "beute": 1,
         "xp": 4875
       },
@@ -622,8 +622,8 @@
           "gut": "Fabrik-Saboteur",
           "boese": "Werkschutz"
         },
-        "leben": 240570,
-        "schaden": 10693,
+        "leben": 12222222222,
+        "schaden": 543260682,
         "beute": 2,
         "xp": 8595
       },
@@ -632,8 +632,8 @@
           "gut": "Dampf-Gauner",
           "boese": "Vorarbeiter-Wächter"
         },
-        "leben": 437400,
-        "schaden": 16355,
+        "leben": 22222222222,
+        "schaden": 830920083,
         "beute": 5,
         "xp": 14655
       }
@@ -643,8 +643,8 @@
         "gut": "John D. Rockefeller",
         "boese": "John D. Rockefeller"
       },
-      "leben": 1530900,
-      "schaden": 28890,
+      "leben": 77777777778,
+      "schaden": 1467764060,
       "beute": 40,
       "xp": 97655,
       "naechstesZeitalter": "fiat",
@@ -682,8 +682,8 @@
           "gut": "Taschendieb",
           "boese": "Wachmann"
         },
-        "leben": 393660,
-        "schaden": 18746,
+        "leben": 66666666667,
+        "schaden": 3174651561,
         "beute": 1,
         "xp": 12188
       },
@@ -692,8 +692,8 @@
           "gut": "Bankräuber",
           "boese": "Sicherheitsdienst"
         },
-        "leben": 721710,
-        "schaden": 29940,
+        "leben": 122222222222,
+        "schaden": 5070365290,
         "beute": 2,
         "xp": 21488
       },
@@ -702,8 +702,8 @@
           "gut": "Panzerknacker",
           "boese": "Tresor-Wächter"
         },
-        "leben": 1312200,
-        "schaden": 45794,
+        "leben": 222222222222,
+        "schaden": 7755254111,
         "beute": 5,
         "xp": 36638
       }
@@ -713,8 +713,8 @@
         "gut": "Richard Nixon",
         "boese": "Richard Nixon"
       },
-      "leben": 4592700,
-      "schaden": 80892,
+      "leben": 777777777778,
+      "schaden": 13699131230,
       "beute": 40,
       "xp": 244138,
       "naechstesZeitalter": "digital",
@@ -752,8 +752,8 @@
           "gut": "Skript-Kiddie",
           "boese": "Firewall-Wächter"
         },
-        "leben": 1180980,
-        "schaden": 52489,
+        "leben": 666666666667,
+        "schaden": 29630194133,
         "beute": 1,
         "xp": 30470
       },
@@ -762,8 +762,8 @@
           "gut": "Hacker",
           "boese": "Security-Profi"
         },
-        "leben": 2165130,
-        "schaden": 83832,
+        "leben": 1222222222222,
+        "schaden": 47323409372,
         "beute": 2,
         "xp": 53720
       },
@@ -772,8 +772,8 @@
           "gut": "Elite-Hacker",
           "boese": "Cyber-Security-Chef"
         },
-        "leben": 3936600,
-        "schaden": 128223,
+        "leben": 2222222222222,
+        "schaden": 72382258802,
         "beute": 5,
         "xp": 91595
       }
@@ -783,8 +783,8 @@
         "gut": "der Satoshi-Schatten",
         "boese": "der Satoshi-Schatten"
       },
-      "leben": 13778100,
-      "schaden": 226498,
+      "leben": 7777777777778,
+      "schaden": 127858783948,
       "beute": 40,
       "xp": 610345,
       "naechstesZeitalter": null,

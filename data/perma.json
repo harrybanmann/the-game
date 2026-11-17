@@ -203,6 +203,30 @@
           "text": "Seltene Set-Teile 2 % häufiger"
         }
       ]
+    },
+    {
+      "id": "aufstieg",
+      "name": "Aufstieg",
+      "bild": "uhr",
+      "knoten": [
+        {
+          "id": "p-tempo",
+          "name": "Rückenwind",
+          "wirkung": "zeitalterTempo",
+          "wert": 0.1,
+          "max": 50,
+          "text": "+10 % Geld und Erfahrung (im ersten Zeitalter voll, bis zum letzten immer weniger)"
+        },
+        {
+          "id": "p-frueh",
+          "name": "Frühstarter",
+          "wirkung": "fruehStaerke",
+          "wert": 0.05,
+          "max": 30,
+          "text": "+5 % Schaden und Leben (im ersten Zeitalter voll, bis zum letzten immer weniger)"
+        }
+      ]
     }
-  ]
+  ],
+  "_hinweisV38": "Version 38 (Harry 17.11.2026): Wer nach einem Neustart permanente Upgrades kauft, kommt schneller durch die Zeitalter: Ast „Aufstieg“. Der Bonus wirkt im ersten Zeitalter voll und nimmt bis zum letzten auf 1/12 ab. Zahlen sind Vorschläge."
 }

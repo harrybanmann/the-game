@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=52";
-import * as speicher from "./speicher.js?v=52";
-import { kampfSystem } from "./kampf.js?v=52";
-import { waffenSystem } from "./waffen.js?v=52";
-import { tierSystem } from "./tiere.js?v=52";
-import { dungeonSystem } from "./dungeons.js?v=52";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=52";
-import { bitcoinSystem } from "./bitcoin.js?v=52";
-import { techSystem } from "./tech.js?v=52";
-import * as grafik from "./grafik.js?v=52";
-import { haushaltSystem } from "./haushalt.js?v=52";
-import { farmSystem } from "./farm.js?v=52";
-import { reittierSystem } from "./reittiere.js?v=52";
-import { setSystem } from "./sets.js?v=52";
-import { permaSystem } from "./perma.js?v=52";
+import { zahl, btc, dauer } from "./format.js?v=56";
+import * as speicher from "./speicher.js?v=56";
+import { kampfSystem } from "./kampf.js?v=56";
+import { waffenSystem } from "./waffen.js?v=56";
+import { tierSystem } from "./tiere.js?v=56";
+import { dungeonSystem } from "./dungeons.js?v=56";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=56";
+import { bitcoinSystem } from "./bitcoin.js?v=56";
+import { techSystem } from "./tech.js?v=56";
+import * as grafik from "./grafik.js?v=56";
+import { haushaltSystem } from "./haushalt.js?v=56";
+import { farmSystem } from "./farm.js?v=56";
+import { reittierSystem } from "./reittiere.js?v=56";
+import { setSystem } from "./sets.js?v=56";
+import { permaSystem } from "./perma.js?v=56";
 
 const $ = (id) => document.getElementById(id);
 
@@ -149,11 +149,15 @@ function upgradeFortschritt() {
 
 const klickWert = () => (zeitalter().klickGrundwert + summe("klick")) * (1 + tech.wert("produktion"));
 const proSekunde = () => summe("proSekunde") * (1 + tech.wert("produktion"));
+// Harry 17.11.2026: Dauerhafte Aufstiegs-Boni (Perma-Baum) wirken im ersten Zeitalter voll und nehmen bis zum letzten ab.
+const fruehAnteil = () => (13 - Math.min(12, Math.max(1, zeitalter().nummer))) / 12;
+const tempoFaktor = () => 1 + (perma ? perma.wert("zeitalterTempo") * fruehAnteil() : 0);
+const fruehFaktor = () => 1 + (perma ? perma.wert("fruehStaerke") * fruehAnteil() : 0);
 function schaden() {
   const b = waffen.bonus();
   const tb = tiere.bonus();
   const grund = daten.einstellungen.kampf.grundSchaden + summe("schaden") + b.schaden + tb.schaden;
-  return grund * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden")) * (1 + setBonus().schaden);
+  return grund * (1 + tb.schadenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("schaden")) * (1 + setBonus().schaden) * fruehFaktor();
 }
 function setBonus() {
   if (!sets || !frei("dungeons")) return { schaden: 0, leben: 0, setTeile: 0, setBonus: 0 };
@@ -198,7 +202,7 @@ function maxLeben() {
   const tb = tiere.bonus();
   const b = waffen.bonus();
   const grund = daten.einstellungen.kampf.grundLeben + summe("leben") + b.leben + tb.leben;
-  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("leben")) * (1 + setBonus().leben);
+  return grund * (1 + tb.lebenProzent) * (1 + b.lebenProzent) * (1 + b.schmuckSet) * (1 + tech.wert("leben")) * (1 + setBonus().leben) * fruehFaktor();
 }
 const gegnerDaten = () => daten.gegner[zeitalter().id];
 const xpBedarf = (level) =>
@@ -219,7 +223,7 @@ function bezahlen(preis) {
 }
 
 function xpGeben(menge) {
-  menge *= 1 + (perma ? perma.wert("xp") : 0);
+  menge *= (1 + (perma ? perma.wert("xp") : 0)) * tempoFaktor();
   const s = seite();
   s.xp += menge;
   while (s.xp >= xpBedarf(s.level)) {
@@ -395,6 +399,8 @@ function infoZeigen(bauen) {
 function infoZu() {
   infoBauen = null;
   $("info").hidden = true;
+  // Nach einer Änderung im Info-Fenster die Listen im Upgrade-Bereich auffrischen.
+  if (!$("upgrades-fenster").hidden) upgradeKategorienZeichnen();
 }
 
 function infoZeichnen() {
@@ -779,7 +785,7 @@ function stueckInfo(art) {
     if (bitcoin.haendler().some((h) => h.offen && h.plaetze.includes(art))) {
       const voll = bitcoin.voll(art);
       const preis = frei("bitcoin") ? btc(bitcoin.preis(art)) + " ₿" : zahl(bitcoin.preisGeld(art)) + " " + waehrung().name;
-      zeilen.push(el("div", "hinweis", "Händler Lv. " + bitcoin.stufe(art) + "/100 · +" + Math.round((bitcoin.faktor(art) - 1) * 100) + " % Werte, bleibt für immer"));
+      zeilen.push(el("div", "hinweis", "Händler Lv. " + bitcoin.stufe(art) + "/" + bitcoin.maxStufe() + " · +" + Math.round((bitcoin.faktor(art) - 1) * 100) + " % Werte, bleibt für immer"));
       knoepfe.push({
         text: voll ? "Händler: Maximum" : "Verbessern · " + preis,
         aus: voll,
@@ -850,6 +856,66 @@ function ambossZeichnen() {
   $("schmiede-zeit").textContent = rest !== null ? dauer(Math.ceil(rest)) : waffen.stufeVoll() ? "Max" : "▲ " + zahl(waffen.stufeKosten());
 }
 
+// Harry 17.11.2026: Im Upgrade-Bereich stehen alle Dinge, die man aufwerten kann, nach Kategorien getrennt und
+// jeweils nach Qualität sortiert (Göttlich oben, dann Zeitalter, dann Sterne). Fähigkeiten gibt es nur hier.
+function upgradeKategorienZeichnen() {
+  const nummer = (id) => zeitalterVon(id).nummer;
+  const sortieren = (a, b) => b.rang - a.rang || b.zNr - a.zNr || b.sterne - a.sterne || b.staerke - a.staerke;
+  const rangVon = (selten) => daten.waffen.seltenheiten.indexOf(selten);
+  // Ausrüstung: alle getragenen Stücke
+  const stuecke = PLAETZE.map(([p, name]) => ({ p, name, w: waffen.werte(waffen.hole(p), p) }))
+    .filter((x) => x.w)
+    .map((x) => ({ ...x, rang: rangVon(x.w.seltenheit), zNr: nummer(x.w.zeitalter), sterne: x.w.sterne, staerke: x.w.staerke }))
+    .sort(sortieren);
+  const aus = $("up-ausruestung");
+  aus.replaceChildren();
+  if (!stuecke.length) aus.append(el("p", "hinweis", "Noch nichts angelegt. In der Schmiede gibt es Ausrüstung."));
+  for (const x of stuecke) aus.append(platzKachel(x.p, x.name, () => stueckInfo(x.p)));
+  // Haustiere: Kämpfer und Helfer
+  const tbox = $("up-tiere-box");
+  tbox.hidden = !frei("tiere");
+  if (!tbox.hidden) {
+    const t = seite().tiere;
+    const team = [t.kaempfer, ...t.supporter]
+      .filter((nr) => nr !== null && nr !== undefined)
+      .map((nr) => tiere.werte(tiere.finde(nr)))
+      .filter(Boolean)
+      .map((w) => ({ w, rang: w.rang, zNr: nummer(w.zeitalter), sterne: w.sterne, staerke: w.staerke }))
+      .sort(sortieren);
+    const box = $("up-tiere");
+    box.replaceChildren();
+    if (!team.length) box.append(el("p", "hinweis", "Noch kein Haustier im Team."));
+    for (const x of team) box.append(tierKachel(x.w, ""));
+  }
+  // Reittiere: alle, nach Qualität
+  const rbox = $("up-reittiere-box");
+  rbox.hidden = !frei("reittiere");
+  if (!rbox.hidden) {
+    const a = reittiere.aktiv();
+    const box = $("up-reittiere");
+    box.replaceChildren();
+    const liste = reittiere.liste();
+    if (!liste.length) box.append(el("p", "hinweis", "Noch kein Reittier."));
+    for (const w of liste)
+      box.append(
+        bildKachel({
+          titel: w.name,
+          farbe: w.seltenheit.farbe,
+          glanz: w.seltenheit.glanz,
+          bild: grafik.reittierBild(w.id),
+          sterne: w.sterne,
+          lv: a && a.nr === w.nr ? "an" : "",
+          punkt: reittiere.mergbar(w.nr),
+          klick: () => reittierInfo(w.nr),
+        })
+      );
+  }
+  // Fähigkeiten gibt es nur im Upgrade-Bereich
+  const fbox = $("faehigkeiten-box");
+  fbox.hidden = !frei("faehigkeiten");
+  if (!fbox.hidden) faehigkeitenZeichnen();
+}
+
 function upgradesZeichnen() {
   const liste = $("upgrades");
   liste.replaceChildren();
@@ -866,6 +932,7 @@ function upgradesZeichnen() {
     k.dataset.upgrade = u.id;
     liste.append(k);
   }
+  upgradeKategorienZeichnen();
   anzeigeAktualisieren();
 }
 
@@ -902,7 +969,7 @@ const GRUPPEN = [
     reiter: [
       ["arena", "Kampf", () => {}],
       ["waffen-fenster", "Schmiede", () => waffenZeichnen()],
-      ["upgrades-fenster", "Upgrades", () => upgradesZeichnen()],
+      ["upgrades-fenster", "Upgrades", () => (($("faehigkeit-ergebnis").textContent = ""), upgradesZeichnen())],
     ],
   },
   { id: "dungeons", name: "Dungeons", reiter: [["dungeon-fenster", "Dungeons", () => (($("dungeon-ergebnis").textContent = ""), dungeonsZeichnen()), "dungeons"]] },
@@ -910,7 +977,6 @@ const GRUPPEN = [
     id: "held",
     name: "Held",
     reiter: [
-      ["faehigkeiten-fenster", "Fähigkeiten", () => (($("faehigkeit-ergebnis").textContent = ""), faehigkeitenZeichnen()), "faehigkeiten"],
       ["tiere-fenster", "Haustiere", () => tiereZeichnen(), "tiere"],
       ["reittiere-fenster", "Reittiere", () => reittiereZeichnen(), "reittiere"],
     ],
@@ -944,8 +1010,9 @@ const reiterOffen = (r) => !r[3] || (r[3] === "farm" ? frei("trading") || frei("
 const reiterVon = (g) => (g.reiter || []).filter(reiterOffen);
 const gruppeVon = (fensterId) => GRUPPEN.find((g) => g.reiter && g.reiter.some((r) => r[0] === fensterId));
 
+// "arena" ist der Kampf selbst, kein Fenster: der darf nie versteckt oder zur Seite gemacht werden.
 const fensterVerstecken = () => {
-  for (const g of GRUPPEN) for (const r of g.reiter || []) if ($(r[0])) $(r[0]).hidden = true;
+  for (const g of GRUPPEN) for (const r of g.reiter || []) if (r[0] !== "arena" && $(r[0])) $(r[0]).hidden = true;
 };
 
 function seiteSchliessen() {
@@ -975,7 +1042,7 @@ function seiteOeffnen(gruppeId, fensterId) {
     leiste.append(k);
   }
   r[2]();
-  const f = $(r[0]);
+  const f = r[0] === "arena" ? null : $(r[0]);
   if (!f) {
     // Reiter „Kampf“: kein Fenster, nur die Reiter-Leiste über dem Kampf
     leisteZeichnen();
@@ -1547,7 +1614,7 @@ function setTeilInfo(e) {
 const HAENDLER_NAMEN = { tier: "Kämpfer-Tier", reittier: "Reittier", "set-helm": "Set-Helm", "set-ruestung": "Set-Rüstung", "set-handschuhe": "Set-Handschuhe", "set-waffe": "Set-Waffe" };
 
 function haendlerZeile(platz) {
-  return el("div", "hinweis", "Händler Lv. " + bitcoin.stufe(platz) + "/100 · +" + Math.round((bitcoin.faktor(platz) - 1) * 100) + " % Werte, bleibt für immer");
+  return el("div", "hinweis", "Händler Lv. " + bitcoin.stufe(platz) + "/" + bitcoin.maxStufe() + " · +" + Math.round((bitcoin.faktor(platz) - 1) * 100) + " % Werte, bleibt für immer");
 }
 
 function haendlerKnopf(platz) {
@@ -1598,9 +1665,11 @@ function dungeonInfo(s) {
         "Dungeon aus Zeitalter " + zeitalterVon(s.zeitalter).nummer + ". Jeder Sieg bringt ein Teil des Sets " + s.name + " und einen Heiltrank.",
         marken([["Stufe " + st], ["🗝 " + k]]),
       ],
+      // Harry 17.11.2026: Das Fenster bleibt nach einem Kampf offen. Es schließt nur, wenn keine Schlüssel mehr da sind
+      // oder du es selbst schließt.
       knoepfe: [
-        { text: "Stufe " + st + " kämpfen · 🗝 1", aus: k <= 0, zu: true, aktion: () => dungeonErgebnis(dungeons.kaempfen(s.zeitalter)) },
-        st > 1 ? { text: "Auto: Stufe " + (st - 1) + " · 🗝 1", aus: k <= 0, zu: true, aktion: () => dungeonErgebnis(dungeons.autoClear(s.zeitalter)) } : null,
+        { text: "Stufe " + st + " kämpfen · 🗝 1", aus: k <= 0, aktion: () => { dungeonErgebnis(dungeons.kaempfen(s.zeitalter)); if (dungeons.schluessel() <= 0) infoZu(); } },
+        st > 1 ? { text: "Auto: Stufe " + (st - 1) + " · 🗝 1", aus: k <= 0, aktion: () => { dungeonErgebnis(dungeons.autoClear(s.zeitalter)); if (dungeons.schluessel() <= 0) infoZu(); } } : null,
       ],
     };
   });
@@ -1630,8 +1699,8 @@ function faehigkeitenZeichnen() {
       sterne: w.sterne,
       lv: "Lv. " + w.level,
       marke,
-      punkt: faehigkeiten.mergbar(w.id),
-      klick: () => faehigkeitInfo(w.id),
+      punkt: faehigkeiten.mergbar(w.key),
+      klick: () => faehigkeitInfo(w.key),
     });
 
   const plaetze = $("faehigkeit-plaetze");
@@ -1639,7 +1708,7 @@ function faehigkeitenZeichnen() {
   const ab = faehigkeiten.plaetzeAbLevel();
   for (let i = 0; i < ab.length; i++) {
     const offen = i < faehigkeiten.plaetze();
-    const w = offen ? faehigkeiten.werte(f.sammlung.find((x) => x.id === f.ausgeruestet[i])) : null;
+    const w = offen ? faehigkeiten.werte(faehigkeiten.eintrag(f.ausgeruestet[i])) : null;
     plaetze.append(w ? kachel(w) : bildKachel({ rund: true, leer: true, marke: offen ? "frei" : "Lv. " + ab[i] }));
   }
 
@@ -1647,16 +1716,16 @@ function faehigkeitenZeichnen() {
   liste.replaceChildren();
   const alle = faehigkeiten.liste();
   if (!alle.length) liste.append(el("p", "hinweis", "Noch keine Fähigkeit. Punkte (★) lassen Gegner manchmal fallen."));
-  for (const w of alle) liste.append(kachel(w, w.ausgeruestet ? "an" : mitSternen ? w.kopien + "/2" : ""));
+  for (const w of alle) liste.append(kachel(w, w.ausgeruestet ? "an" : w.kopien + "/2"));
   faehigkeitLeisteZeichnen();
 }
 
-function faehigkeitInfo(id) {
+function faehigkeitInfo(key) {
   infoZeigen(() => {
     const f = seite().faehigkeiten;
-    const w = faehigkeiten.liste().find((x) => x.id === id);
+    const w = faehigkeiten.liste().find((x) => x.key === key);
     if (!w) return null;
-    const e = f.sammlung.find((x) => x.id === w.id);
+    const e = faehigkeiten.eintrag(w.key);
     const tun = (aktion) => () => {
       aktion();
       faehigkeitGeaendert();
@@ -1669,9 +1738,9 @@ function faehigkeitInfo(id) {
       rund: true,
       zeilen: [w.text, marken([[w.seltenheit.name, w.seltenheit.farbe], ["Lv. " + w.level], ["Stärke ×" + zahl(w.faktor)]])],
       knoepfe: [
-        w.ausgeruestet ? { text: "Ablegen", rot: true, aktion: tun(() => faehigkeiten.ablegen(w.id)) } : { text: "Ausrüsten", aktion: tun(() => faehigkeiten.ausruesten(w.id)) },
-        { text: "Level +1 · ★ " + faehigkeiten.levelKosten(e), aus: f.punkte < faehigkeiten.levelKosten(e), aktion: tun(() => faehigkeiten.levelKaufen(w.id)) },
-        frei("sterne") ? { text: "Mergen (+1 Stern)", aus: !faehigkeiten.mergbar(w.id), aktion: tun(() => faehigkeiten.mergen(w.id)) } : null,
+        w.ausgeruestet ? { text: "Ablegen", rot: true, aktion: tun(() => faehigkeiten.ablegen(w.key)) } : { text: "Ausrüsten", aktion: tun(() => faehigkeiten.ausruesten(w.key)) },
+        { text: "Level +1 · ★ " + faehigkeiten.levelKosten(e), aus: f.punkte < faehigkeiten.levelKosten(e), aktion: tun(() => faehigkeiten.levelKaufen(w.key)) },
+        { text: "Mergen (3 gleiche → " + (w.rang >= daten.waffen.seltenheiten.length - 1 ? "+1 Stern" : "nächste Qualität") + ") · " + w.kopien + "/2", aus: !faehigkeiten.mergbar(w.key), aktion: tun(() => faehigkeiten.mergen(w.key)) },
       ],
     };
   });
@@ -1687,7 +1756,7 @@ function faehigkeitLeisteZeichnen() {
   leiste.dataset.k = k;
   leiste.replaceChildren();
   for (const id of aktiv) {
-    const w = faehigkeiten.werte(f.sammlung.find((x) => x.id === id));
+    const w = faehigkeiten.werte(faehigkeiten.eintrag(id));
     if (!w) continue;
     const b = el("span", "faehigkeit-punkt");
     b.style.backgroundImage = grafik.faehigkeitBild(w.art);
@@ -2128,7 +2197,9 @@ function seiteWechseln() {
 function weltBeute(gegner) {
   const b = daten.einstellungen.beute;
   const typ = gegner.boss || gegner.zwischen ? "boss" : gegner.typ; // Zwischen-Boss gibt Boss-Beute
-  const wurf = (art, plus) => Math.random() < (b[art].chance[typ] || 0) * (1 + plus);
+  // Je weiter man in den Kampfstufen ist, desto öfter fällt etwas (Harry 17.11.2026).
+  const stufenBonus = 1 + ((b.stufenBonus && b.stufenBonus.jeStufe) || 0) * (seite().kampf.stufe - 1);
+  const wurf = (art, plus) => Math.random() < (b[art].chance[typ] || 0) * (1 + plus) * stufenBonus;
   const menge = (art) => (b[art].menge && b[art].menge[typ]) || 1;
   if (frei("faehigkeiten") && wurf("fpunkte", tech.wert("fpunkte") + reittierBonus("fpunkte"))) {
     seite().faehigkeiten.punkte += menge("fpunkte");
@@ -2213,6 +2284,7 @@ function aufsteigen(boss) {
   s.zeitalter = neu.id;
   s.kampf = { index: 0, rate: 0, stufe: 1, welle: 1 };
   s.upgrades = {}; // Harry 16.11.2026: im neuen Zeitalter beginnen die Upgrades wieder bei 0 (bringen aber mehr)
+  s.schmiede.geschmiedetZA = 0; // der Schmiede-Preis beginnt im neuen Zeitalter wieder bei 20
   const dazu = freiListe().filter((n) => !vorher.includes(n));
   freiBelohnen(dazu);
   const f = daten.einstellungen.freischalten;
@@ -2532,7 +2604,7 @@ function neustartMachen() {
 }
 
 const PERMA_BILD = {
-  schaden: "schwert", leben: "herz", xp: "stern", bossSchaden: "krone", beute: "muenze", tickets: "schluessel", eier: "ei",
+  schaden: "schwert", leben: "herz", xp: "stern", zeitalterTempo: "uhr", fruehStaerke: "herz", bossSchaden: "krone", beute: "muenze", tickets: "schluessel", eier: "ei",
   reittierChance: "tiere", fpunkte: "stern", techpunkte: "tech", schmiedeSelten: "amboss", autoSchmiede: "uhr", rabatt: "upgrades",
   energieZeit: "blitz", offline: "uhr", offlineBeute: "beutel", schluepfen: "nest", supporter: "tiere", setStaerke: "schild", setSelten: "schatz",
 };
@@ -2716,7 +2788,7 @@ function knoepfeVerbinden() {
     const r = faehigkeiten.ziehen();
     if (r) {
       const e = $("faehigkeit-ergebnis");
-      e.textContent = r.seltenheit.name + ": " + r.name + (r.neu ? " – neu!" : frei("sterne") ? " – Kopie für Sterne." : " – schon da (Kopie für später).");
+      e.textContent = r.seltenheit.name + ": " + r.name + (r.neu ? " – neu!" : " – schon da (Kopie zum Mergen).");
       e.style.color = r.seltenheit.farbe;
     }
     faehigkeitGeaendert();
@@ -2785,8 +2857,9 @@ async function start() {
     tempo: angriffsTempo,
     kampfWerte,
     wellen: () => daten.einstellungen.kampf.wellen,
-    gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute") + summe("beute"))),
+    gutschreiben: (m) => gutschreiben(m * (1 + tech.wert("beute") + summe("beute")) * tempoFaktor()),
     bossRegeln: () => daten.einstellungen.kampf.boss,
+    ueberspringen: () => daten.einstellungen.kampf.ueberspringen,
     bossSchaden: () => (perma ? perma.wert("bossSchaden") : 0),
     zeitalterNummer: () => zeitalter().nummer,
     xpGeben,
@@ -2875,7 +2948,7 @@ async function start() {
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     level: () => seite().level,
     schluepfFaktor: () => 1 - Math.min(0.75, tech.wert("schluepfen")),
-    eiChanceFaktor: () => 1 + tech.wert("eier") + reittierBonus("eier"),
+    eiChanceFaktor: () => (1 + tech.wert("eier") + reittierBonus("eier")) * (1 + (((daten.einstellungen.beute.stufenBonus || {}).jeStufe) || 0) * (seite().kampf.stufe - 1)),
     lagerPlus: () => 0,
     brutPlaetze: () => 1 + Math.floor(tech.wert("brutplatz") + 1e-9),
     offen: () => frei("tiere"),
@@ -2889,6 +2962,7 @@ async function start() {
     seltenheiten: () => daten.waffen.seltenheiten,
     seite,
     zeitalterNummerVon: (id) => (daten.zeitalter.find((z) => z.id === id) || { nummer: 1 }).nummer,
+    zeitalterNummer: () => zeitalter().nummer,
     sterneOffen: () => frei("sterne"),
     haendlerFaktor: () => (bitcoin ? bitcoin.faktor("reittier") : 1),
   });
@@ -2899,6 +2973,7 @@ async function start() {
     seitenName: () => stand.aktiveSeite,
     level: () => seite().level,
     grundSchaden: schaden,
+    zeitalterNummer: () => zeitalter().nummer,
     sterneOffen: () => frei("sterne"),
   });
   sets = setSystem({
@@ -2924,7 +2999,7 @@ async function start() {
   knoepfeVerbinden();
   allesZeichnen();
   tick();
-  setInterval(tick, 250);
+  setInterval(tick, 150);
 }
 
 start();

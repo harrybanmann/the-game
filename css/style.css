@@ -543,7 +543,7 @@ body.boese #ausruestung-bereich { background: #d9d0e4; }
 .arena { position: relative; display: block; height: 150px; flex: 0 0 150px; }
 #spieler-box { position: absolute; left: 0; bottom: 0; width: 96px; display: flex; flex-direction: column; align-items: center; gap: 3px; z-index: 4; }
 #gegner-gruppe { position: absolute; inset: 0; display: block; }
-.gegner { position: absolute; bottom: 0; width: 62px; transform: translateX(-50%); transition: left 0.26s linear, opacity 0.2s;
+.gegner { position: absolute; bottom: 0; width: 62px; transform: translateX(-50%); transition: left 0.16s linear, opacity 0.2s;
   display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 30px; }
 .gegner.boss { width: 120px; }
 .gegner .balken.klein { width: 44px; }
@@ -653,7 +653,7 @@ details summary { cursor: pointer; padding: 6px 0; }
 }
 
 /* ---------- V27: eine Waffe, Held läuft, Bogen, Fähigkeiten-Effekte ---------- */
-#spieler-box { transition: left 0.26s linear; }
+#spieler-box { transition: left 0.16s linear; }
 #spieler-box.laeuft .figur.spieler { animation: laufen 0.36s ease-in-out infinite; }
 #spieler-box.laeuft .reittier-bild { animation: laufen 0.36s ease-in-out infinite; }
 .held-waffe.bogen { right: -22px; top: 30px; width: 50px; height: 50px; transform-origin: 30% 50%; }
@@ -967,3 +967,7 @@ h3 { font-size: 15px; margin-top: 2px; }
 .rund.an .rund-symbol { transform: translateY(-3px); }
 .knopf { letter-spacing: 0.2px; }
 @media (prefers-reduced-motion: reduce) { .gegner.laeuft .figur, #spieler-box.laeuft .figur.spieler, .kachel.glanz { animation: none; } }
+
+/* ---------- Version 38: flüssiger Lauf (Waffen und Reittier wippen mit) ---------- */
+.gegner.laeuft .gegner-waffe:not(.los), #spieler-box.laeuft .held-waffe:not(.schwung):not(.spannen):not(.loslassen):not(.wurf) { animation: huepf 0.23s ease-in-out infinite; }
+#spieler-box.laeuft .reittier-bild { animation: huepf 0.23s ease-in-out infinite; }

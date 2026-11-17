@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=52">
+  <link rel="stylesheet" href="css/style.css?v=56">
 </head>
 <body>
   <div id="spiel">
@@ -183,21 +183,30 @@
     </div>
   </div>
 
-  <div id="faehigkeiten-fenster" class="fenster" hidden>
-    <div class="karte">
-      <div class="titel-zeile"><h2>Fähigkeiten</h2><span id="punkte-text" class="zahl-chip"></span></div>
-      <div id="faehigkeit-plaetze" class="kachel-raster"></div>
-      <button id="ziehen-knopf" class="knopf" type="button"></button>
-      <p id="faehigkeit-ergebnis" class="ergebnis"></p>
-      <div id="faehigkeit-liste" class="kachel-raster"></div>
-      <button class="knopf rot" type="button" data-schliessen="faehigkeiten-fenster">Zurück</button>
-    </div>
-  </div>
-
   <div id="upgrades-fenster" class="fenster" hidden>
     <div class="karte">
       <h2>Upgrades</h2>
+      <h3>Werte</h3>
       <section id="upgrades" class="kachel-raster vier" aria-label="Verbesserungen"></section>
+      <div id="up-ausruestung-box">
+        <h3>Ausrüstung</h3>
+        <div id="up-ausruestung" class="kachel-raster"></div>
+      </div>
+      <div id="up-tiere-box" hidden>
+        <h3>Haustiere</h3>
+        <div id="up-tiere" class="kachel-raster"></div>
+      </div>
+      <div id="up-reittiere-box" hidden>
+        <h3>Reittiere</h3>
+        <div id="up-reittiere" class="kachel-raster"></div>
+      </div>
+      <div id="faehigkeiten-box" hidden>
+        <div class="titel-zeile"><h3>Fähigkeiten</h3><span id="punkte-text" class="zahl-chip"></span></div>
+        <div id="faehigkeit-plaetze" class="kachel-raster"></div>
+        <button id="ziehen-knopf" class="knopf" type="button"></button>
+        <p id="faehigkeit-ergebnis" class="ergebnis"></p>
+        <div id="faehigkeit-liste" class="kachel-raster"></div>
+      </div>
       <button class="knopf rot" type="button" data-schliessen="upgrades-fenster">Zurück</button>
     </div>
   </div>
@@ -297,7 +306,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=52"></script>
+  <script type="module" src="js/main.js?v=56"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

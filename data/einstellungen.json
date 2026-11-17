@@ -50,7 +50,7 @@
     },
     "boss": {
       "_hinweis": "Harry 16.11.2026: Der Zeitalter-Boss auf Stufe 100 ist sehr stark: so stark wie die Gegner auf Stufe 100, Leben × 5, Schaden × 1,5. Unter 2/3 und 1/3 Leben wechselt er die Phase (mehr Schaden, schnellere Fähigkeiten, kurz ein Schild). Zahlen sind Vorschläge.",
-      "lebenFaktor": 5,
+      "lebenFaktor": 10,
       "schadenFaktor": 1.5,
       "schildSekunden": 2,
       "phasen": [
@@ -65,7 +65,14 @@
           "tempo": 1.5
         }
       ],
-      "stufe": 100
+      "stufe": 100,
+      "_hinweisV38": "Version 38: Boss-Leben ×10 (vorher ×5), damit der Held mit voll ausgebauten Upgrades etwa 20 bis 25 Schläge braucht und mit der Hälfte der Upgrades verliert (Wand am Zeitalter-Boss)."
+    },
+    "ueberspringen": {
+      "_hinweis": "Version 38 (Harry 17.11.2026): Ist der Held viel stärker als die Gegner, werden Stufen übersprungen. Nie auf die Stufe 100 (die erreicht man nur Schritt für Schritt), nie über den nächsten Anführer (alle 10 Stufen) hinweg. Zahlen sind Vorschläge.",
+      "abFaktor": 3,
+      "maxSprung": 4,
+      "hoechsteStufe": 99
     }
   },
   "level": {
@@ -73,11 +80,12 @@
     "faktor": 1.15
   },
   "aufstieg": {
-    "levelJeZeitalter": 10,
-    "schmiedeJeZeitalter": 3,
+    "levelJeZeitalter": 8,
+    "schmiedeJeZeitalter": 2,
     "_hinweis": "Harry 16.11.2026: Aufsteigen erst, wenn alle Upgrades des Zeitalters auf Lv 100 sind. Beim Aufstieg beginnen die Upgrades wieder bei 0 (neue Währung, 10× mehr wert); Schaden und Leben bringen je Zeitalter 10× mehr.",
     "alleUpgradesMax": true,
-    "stufe": 100
+    "stufe": 100,
+    "_hinweis2": "Version 38 (17.11.2026, Bau-Chat-Vorschlag aus Balancing-Zahlenpruefung-V37): Level 8 × Zeitalter, Schmiede 2 × Zeitalter, sonst ab Zeitalter 5 bis 8 nicht mehr erreichbar."
   },
   "freischalten": {
     "_hinweis": "Harry 16.11.2026: Inhalte kommen nach und nach, historisch passend. Zeitalter und Level sind Vorschläge des Bau-Chats.",
@@ -183,6 +191,10 @@
         "elite": 0.01,
         "boss": 0.25
       }
+    },
+    "stufenBonus": {
+      "_hinweis": "Version 38 (Harry 17.11.2026): Je weiter man in den Kampfstufen kommt, desto größer die Belohnungen. Geld und Erfahrung wachsen schon mit der Stufe (kampf.wellen.beuteFaktor, Stufe 100 = ×10); dazu steigen hier die Drop-Chancen (Punkte, Schlüssel, Eier, Reittiere) um diesen Anteil je Stufe. In jedem neuen Zeitalter beginnt das von vorn.",
+      "jeStufe": 0.01
     }
   },
   "energie": {

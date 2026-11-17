@@ -60,11 +60,13 @@
     "ratioStart": 5,
     "ratioEnde": 2,
     "dauerGrund": 60,
-    "dauerFaktor": 1.8,
+    "dauerFaktor": 1.25,
     "autoSekunden": 2,
     "autoSchnellerJeStufe": 0.05,
     "autoMinSekunden": 0.5,
-    "verkaufAnteil": 0.1
+    "verkaufAnteil": 0.1,
+    "_hinweisV38": "Version 38: Ausbau-Dauer wächst ×1,25 statt ×1,8 je Stufe (sonst ab Zeitalter 5 unerreichbar); Schmieden wird mit jedem Mal teurer (preisFaktor), je Zeitalter zurückgesetzt.",
+    "preisFaktor": 1.05
   },
   "setBonusSchaden": 0.1,
   "ruestungSet": {

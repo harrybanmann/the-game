@@ -165,7 +165,8 @@ export function waffenSystem(api) {
     anzahlGleich(stueck) >= 3 &&
     // Mergen geht nur bis zur Qualität, die das Zeitalter schon freigeschaltet hat; Sterne erst ganz oben.
     (stueck.seltenheit < maxSelten() || (stueck.seltenheit === hoechste() && sterneOffen() && (stueck.sterne || 0) < d().maxSterne));
-  const schmiedeKosten = () => d().schmiede.kosten;
+  // Harry 17.11.2026: Jedes Schmieden wird teurer (sonst hat das Geld keinen Wert). Beim Aufstieg beginnt der Preis wieder bei 20.
+  const schmiedeKosten = () => Math.ceil(d().schmiede.kosten * Math.pow(d().schmiede.preisFaktor || 1, s().schmiede.geschmiedetZA || 0));
   const stufeVoll = () => s().schmiede.stufe >= d().schmiede.maxStufe;
   const stufeKosten = () => Math.ceil(d().schmiede.stufenKosten * Math.pow(d().schmiede.stufenFaktor, s().schmiede.stufe));
   // Auto-Schmieden: alle paar Sekunden, mit jeder Schmiede-Stufe etwas schneller.
@@ -235,6 +236,7 @@ export function waffenSystem(api) {
       verkauft = 0;
       const besser = einsortieren(neu);
       s().schmiede.geschmiedet += 1;
+      s().schmiede.geschmiedetZA = (s().schmiede.geschmiedetZA || 0) + 1;
       return { neu: werte(neu), besser, verkauft };
     },
     // Für Dungeon-Belohnungen: wie Schmieden, aber ohne Kosten.

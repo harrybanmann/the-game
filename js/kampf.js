@@ -25,6 +25,7 @@ export function kampfSystem(api) {
   let kampfZeit = 0;
   let tierUhr = 0;
   let spielerUhr = 0;
+  let welleMaxLeben = 0; // höchstes Leben eines Gegners der aktuellen Ebene (für das Überspringen von Stufen)
   let heldX = 0;
   let heldLaeuft = false;
   let effekte = []; // nur für die Anzeige: Schüsse und Schläge seit dem letzten Zeichnen
@@ -75,6 +76,7 @@ export function kampfSystem(api) {
     const faktor = Math.pow(c.staerkeFaktor, s - 1);
     const beuteFaktor = Math.pow(c.beuteFaktor, s - 1);
     gegner = [];
+    welleMaxLeben = 0;
     const l = api.lauf();
     let nahe = 0;
     let ferne = 0;
@@ -97,6 +99,7 @@ export function kampfSystem(api) {
         g.xp *= z.beute;
       }
       gegner.push(g);
+      welleMaxLeben = Math.max(welleMaxLeben, g.maxLeben);
     }
     spielerUhr = 0;
     heldX = 0; // jede Welle beginnt am Startplatz: Held und Gegner laufen neu aufeinander zu
@@ -122,6 +125,24 @@ export function kampfSystem(api) {
     api.ereignis("sieg", g);
   }
 
+  // Harry 17.11.2026: Ist der Held viel stärker als die Gegner, überspringt er Stufen. Er springt aber nie direkt auf
+  // Stufe 100 (nur Schritt für Schritt) und nie über den nächsten Anführer (alle 10 Stufen) hinweg.
+  function sprung(stufe) {
+    const u = api.ueberspringen ? api.ueberspringen() : null;
+    if (!u || !(welleMaxLeben > 0)) return 0;
+    const schlag = api.schaden() * api.faehigkeiten().schadenFaktor();
+    const verhaeltnis = schlag / welleMaxLeben;
+    if (verhaeltnis < u.abFaktor) return 0;
+    let n = Math.min(u.maxSprung, Math.floor(verhaeltnis / u.abFaktor));
+    const c = w();
+    const naechsterAnfuehrer = c.zwischenBossAlle ? (Math.floor(stufe / c.zwischenBossAlle) + 1) * c.zwischenBossAlle : 1e9;
+    const grenze = Math.min(u.hoechsteStufe, naechsterAnfuehrer);
+    // Nächste Stufe ist ohnehin schon der Anführer oder die 100: dann kein Sprung.
+    if (stufe + 1 >= grenze) return 0;
+    n = Math.min(n, grenze - (stufe + 1));
+    return Math.max(0, n);
+  }
+
   function welleGeschafft() {
     if (bossKampf) {
       const boss = gegner[0];
@@ -144,7 +165,11 @@ export function kampfSystem(api) {
     if (k().welle > w().proStufe) {
       k().welle = 1;
       // Auf Stufe 100 bleibt man stehen; weiter geht es nur über den Zeitalter-Boss.
-      if (!w().maxStufe || k().stufe < w().maxStufe) k().stufe += 1;
+      if (!w().maxStufe || k().stufe < w().maxStufe) {
+        const vorher = k().stufe;
+        k().stufe += 1 + sprung(vorher);
+        if (k().stufe > vorher + 1) api.hinweis("Stufen übersprungen: " + vorher + " → " + k().stufe);
+      }
       welleStellen("voll");
     } else {
       welleStellen("teil");

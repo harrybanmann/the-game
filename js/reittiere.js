@@ -40,8 +40,11 @@ export function reittierSystem(api) {
   const gleiche = (tier) =>
     r().sammlung.filter((x) => x !== tier && x.id === tier.id && x.seltenheit === tier.seltenheit && (x.sterne || 0) === (tier.sterne || 0));
 
+  // Harry 17.11.2026: jedes Zeitalter schaltet eine neue Qualität frei (wie bei Ausrüstung und Haustieren).
+  const maxSelten = () => Math.min(api.seltenheiten().length - 1, (api.zeitalterNummer ? api.zeitalterNummer() : 99) - 1);
   function wuerfeln(ratio) {
-    const gewichte = api.seltenheiten().map((_, i) => Math.pow(ratio, -i));
+    const grenze = maxSelten();
+    const gewichte = api.seltenheiten().map((_, i) => (i <= grenze ? Math.pow(ratio, -i) : 0));
     let z = Math.random() * gewichte.reduce((a, b) => a + b, 0);
     for (let i = 0; i < gewichte.length; i++) {
       z -= gewichte[i];
@@ -101,7 +104,7 @@ export function reittierSystem(api) {
     mergbar(nr) {
       const tier = finde(nr);
       if (!tier || gleiche(tier).length < 2) return false;
-      if (tier.seltenheit < api.seltenheiten().length - 1) return true;
+      if (tier.seltenheit < api.seltenheiten().length - 1) return tier.seltenheit < maxSelten(); // nur bis zur freigeschalteten Qualität
       return (!api.sterneOffen || api.sterneOffen()) && (tier.sterne || 0) < d().maxSterne;
     },
     mergen(nr) {

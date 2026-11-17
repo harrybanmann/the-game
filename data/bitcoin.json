@@ -4,8 +4,9 @@
   "upgrade": {
     "maxStufe": 100,
     "grundPreis": 5e-07,
-    "faktor": 1.2,
-    "bonusProStufe": 0.05
+    "faktor": 1.1,
+    "bonusProStufe": 0.05,
+    "_hinweisV38": "Version 38 (Harry 17.11.2026): Items, Haustiere, Reittiere und Set-Teile sind bis Stufe 100 aufwertbar, mit jedem neuen Zeitalter bis 200, 300 usw. (maxStufe × Zeitalter-Nummer). Kosten steigen mit jeder Stufe (×1,1; vorher ×1,2, dann wäre schon Stufe 100 in Zeitalter 2 unerreichbar)."
   },
   "rueckfluss": {
     "anteilProStunde": 0.05
