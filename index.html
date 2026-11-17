@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=70">
+  <link rel="stylesheet" href="css/style.css?v=71">
 </head>
 <body>
   <div id="spiel">
@@ -102,6 +102,17 @@
       <p class="hinweis">Beide Seiten spielen sich gleich, nur Gegner, Namen und Look sind anders. Jede Seite hat ihren eigenen Spielstand.</p>
       <button id="sicherung-knopf" class="knopf" type="button">Sicherung zurückholen ↩</button>
       <button id="neu-anfangen" class="knopf rot" type="button">Alles löschen und neu anfangen</button>
+      <h3>Test-Modus (nur für Harry)</h3>
+      <p class="hinweis">Zum Testen des Endgames: Alles kostet nichts, es gibt Schnellknöpfe. Der Schalter gilt nur auf diesem Gerät. Nicht exportieren, solange er an ist. Beim Ausschalten kommen deine echten Vorräte zurück.</p>
+      <button id="test-schalter" class="knopf" type="button"></button>
+      <div id="test-knoepfe" hidden>
+        <button class="knopf klein" type="button" data-test="upgrades">Alle Upgrades auf Max</button>
+        <button class="knopf klein" type="button" data-test="zeit">Alle Wartezeiten fertig</button>
+        <button class="knopf klein" type="button" data-test="zeitalter">Nächstes Zeitalter</button>
+        <button class="knopf klein" type="button" data-test="stufe99">Kampfstufe 99</button>
+        <button class="knopf klein" type="button" data-test="level">Level +10</button>
+        <button class="knopf klein" type="button" data-test="boss">Boss freischalten (Level, Schmiede, Stufe 100)</button>
+      </div>
       <button class="knopf rot" type="button" data-schliessen="menue">Zurück</button>
     </div>
   </div>
@@ -312,7 +323,7 @@
   <div id="kurzmeldung" hidden></div>
   <div id="lade-fehler" hidden></div>
 
-  <script type="module" src="js/main.js?v=70"></script>
+  <script type="module" src="js/main.js?v=71"></script>
   <script>
     // Falls eine Code-Datei nicht lädt (z. B. schlechtes Netz), nicht stumm hängen bleiben.
     setTimeout(function () {

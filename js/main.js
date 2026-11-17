@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=70";
-import * as speicher from "./speicher.js?v=70";
-import { kampfSystem } from "./kampf.js?v=70";
-import { waffenSystem } from "./waffen.js?v=70";
-import { tierSystem } from "./tiere.js?v=70";
-import { dungeonSystem } from "./dungeons.js?v=70";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=70";
-import { bitcoinSystem } from "./bitcoin.js?v=70";
-import { techSystem } from "./tech.js?v=70";
-import * as grafik from "./grafik.js?v=70";
-import { haushaltSystem } from "./haushalt.js?v=70";
-import { farmSystem } from "./farm.js?v=70";
-import { reittierSystem } from "./reittiere.js?v=70";
-import { setSystem } from "./sets.js?v=70";
-import { permaSystem } from "./perma.js?v=70";
+import { zahl, btc, dauer } from "./format.js?v=71";
+import * as speicher from "./speicher.js?v=71";
+import { kampfSystem } from "./kampf.js?v=71";
+import { waffenSystem } from "./waffen.js?v=71";
+import { tierSystem } from "./tiere.js?v=71";
+import { dungeonSystem } from "./dungeons.js?v=71";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=71";
+import { bitcoinSystem } from "./bitcoin.js?v=71";
+import { techSystem } from "./tech.js?v=71";
+import * as grafik from "./grafik.js?v=71";
+import { haushaltSystem } from "./haushalt.js?v=71";
+import { farmSystem } from "./farm.js?v=71";
+import { reittierSystem } from "./reittiere.js?v=71";
+import { setSystem } from "./sets.js?v=71";
+import { permaSystem } from "./perma.js?v=71";
 
 const $ = (id) => document.getElementById(id);
 
@@ -256,6 +256,7 @@ function xpGeben(menge) {
 // ---------- Zeit: aktiv und offline ----------
 
 function tick() {
+  if (testModus) testAuffuellen();
   const jetzt = Date.now();
   const sekunden = Math.max(0, (jetzt - letzterTick) / 1000);
   letzterTick = jetzt;
@@ -2819,6 +2820,114 @@ function sammelbuchZeichnen() {
   abschnitt("Set-Teile", teile);
 }
 
+// ---------- Test-Modus (Harry 17.11.2026) ----------
+// Nur lokal auf diesem Gerät (eigener localStorage-Schlüssel, nicht im Spielstand und nicht im Export). Solange er an ist, werden
+// Währungen, Punkte und Schlüssel immer wieder aufgefüllt, also kostet alles nichts. Beim Ausschalten kommen die echten Vorräte zurück.
+const TEST_AN = "the-game-testmodus";
+const TEST_SICHERUNG = "the-game-testmodus-sicherung";
+let testModus = false;
+try {
+  testModus = localStorage.getItem(TEST_AN) === "an";
+} catch {}
+const GROSS = 1e21;
+function testSicherung() {
+  const sicher = {};
+  for (const [name, s] of Object.entries(stand.seiten)) {
+    if (!s) continue;
+    sicher[name] = { w: { ...s.waehrungen }, fp: s.faehigkeiten.punkte, btc: s.btc.menge, schluessel: s.dungeons.schluessel, traenke: s.traenke };
+  }
+  sicher.tech = stand.gemeinsam.tech.punkte;
+  try {
+    localStorage.setItem(TEST_SICHERUNG, JSON.stringify(sicher));
+  } catch {}
+}
+function testAuffuellen() {
+  for (const s of Object.values(stand.seiten)) {
+    if (!s) continue;
+    for (const id of Object.keys(s.waehrungen)) if (s.waehrungen[id] < GROSS) s.waehrungen[id] = GROSS;
+    s.waehrungen[(daten.zeitalter.find((z) => z.id === s.zeitalter) || daten.zeitalter[0]).waehrung.id] = Math.max(GROSS, s.waehrungen[(daten.zeitalter.find((z) => z.id === s.zeitalter) || daten.zeitalter[0]).waehrung.id] || 0);
+    if (s.faehigkeiten.punkte < 1e6) s.faehigkeiten.punkte = 1e6;
+    if (s.btc.menge < 1) s.btc.menge = Math.min(daten.bitcoin.maxBtc * 0.5, 1e6);
+    if (s.dungeons.schluessel < 30) s.dungeons.schluessel = 30;
+  }
+  if (stand.gemeinsam.tech.punkte < 1e6) stand.gemeinsam.tech.punkte = 1e6;
+  stand.gemeinsam.energie.wert = Math.max(stand.gemeinsam.energie.wert, 100);
+}
+function testSchalten(an) {
+  if (an === testModus) return;
+  if (an) {
+    testSicherung();
+    testModus = true;
+    try {
+      localStorage.setItem(TEST_AN, "an");
+    } catch {}
+    testAuffuellen();
+  } else {
+    testModus = false;
+    try {
+      const sicher = JSON.parse(localStorage.getItem(TEST_SICHERUNG) || "null");
+      if (sicher) {
+        for (const [name, s] of Object.entries(stand.seiten)) {
+          const alt = s && sicher[name];
+          if (!alt) continue;
+          s.waehrungen = { ...alt.w };
+          s.faehigkeiten.punkte = alt.fp;
+          s.btc.menge = alt.btc;
+          s.dungeons.schluessel = alt.schluessel;
+          s.traenke = alt.traenke;
+        }
+        stand.gemeinsam.tech.punkte = sicher.tech;
+      }
+      localStorage.removeItem(TEST_AN);
+      localStorage.removeItem(TEST_SICHERUNG);
+    } catch {}
+  }
+  testAnzeige();
+  allesZeichnen();
+  sichern();
+}
+function testAnzeige() {
+  $("test-schalter").textContent = testModus ? "Test-Modus: AN (antippen zum Ausschalten)" : "Test-Modus einschalten";
+  $("test-schalter").classList.toggle("rot", testModus);
+  $("test-knoepfe").hidden = !testModus;
+}
+function testAktion(was) {
+  const s = seite();
+  if (was === "upgrades") {
+    for (const u of upgradesHier()) s.upgrades[u.id] = capOf(u);
+    kurzMeldung("Alle Upgrades auf der Höchststufe.");
+  } else if (was === "zeit") {
+    if (s.schmiede.ausbauBis) s.schmiede.ausbauBis = Date.now();
+    for (const l of Object.values(stand.gemeinsam.tech.laeuft || {})) if (l) l.bis = Date.now();
+    for (const b of s.tiere.brueten) b.fertigUm = Date.now();
+    kurzMeldung("Alle Wartezeiten sind gleich fertig.");
+  } else if (was === "zeitalter") {
+    const naechstes = daten.zeitalter.find((z) => z.nummer === zeitalter().nummer + 1);
+    if (!naechstes) return kurzMeldung("Das ist schon das letzte Zeitalter.");
+    aufsteigen({ naechstesZeitalter: naechstes.id, name: "Test" });
+  } else if (was === "stufe99") {
+    s.kampf.stufe = 99;
+    s.kampf.welle = 1;
+    kampf.neuStarten();
+    kurzMeldung("Kampfstufe 99.");
+  } else if (was === "level") {
+    s.level += 10;
+    s.xp = 0;
+    kurzMeldung("Level " + s.level);
+  } else if (was === "boss") {
+    const a = daten.einstellungen.aufstieg;
+    const nr = zeitalter().nummer;
+    s.level = Math.max(s.level, a.levelJeZeitalter * nr);
+    s.schmiede.stufe = Math.max(s.schmiede.stufe, a.schmiedeJeZeitalter * nr);
+    s.kampf.stufe = Math.max(s.kampf.stufe, a.stufe || 100);
+    for (const u of upgradesHier()) s.upgrades[u.id] = capOf(u);
+    kampf.neuStarten();
+    kurzMeldung("Boss ist freigeschaltet.");
+  }
+  allesZeichnen();
+  sichern();
+}
+
 // ---------- Start ----------
 
 function knoepfeVerbinden() {
@@ -2946,6 +3055,9 @@ function knoepfeVerbinden() {
   });
   $("neu-anfangen").addEventListener("click", neuAnfangen);
   $("neustart-knopf").addEventListener("click", neustartInfo);
+  $("test-schalter").addEventListener("click", () => testSchalten(!testModus));
+  for (const k of document.querySelectorAll("[data-test]")) k.addEventListener("click", () => testAktion(k.dataset.test));
+  testAnzeige();
   $("sicherung-knopf").addEventListener("click", sicherungInfo);
   $("energie-chip").addEventListener("click", energieInfo);
   $("aufstieg-balken").addEventListener("click", bossTippen);
