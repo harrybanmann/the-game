@@ -55,9 +55,9 @@
       },
       "art": "flaeche",
       "kampfArt": "nah",
-      "wert": 0.3,
+      "wert": 0.6,
       "abklingen": 0,
-      "text": "Passiv, nur Nahkampf: Jeder Nahkampf-Angriff trifft auch alle anderen Gegner mit 30 % Schaden."
+      "text": "Passiv, nur Nahkampf: Jeder Nahkampf-Angriff trifft auch alle anderen Gegner mit 60 % Schaden."
     },
     {
       "id": "flaeche-fern",
@@ -68,9 +68,9 @@
       },
       "art": "flaeche",
       "kampfArt": "fern",
-      "wert": 0.3,
+      "wert": 0.6,
       "abklingen": 0,
-      "text": "Passiv, nur Fernkampf: Jeder Fernkampf-Angriff trifft auch alle anderen Gegner mit 30 % Schaden."
+      "text": "Passiv, nur Fernkampf: Jeder Fernkampf-Angriff trifft auch alle anderen Gegner mit 60 % Schaden."
     },
     {
       "id": "kriegsschrei",

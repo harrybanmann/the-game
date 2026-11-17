@@ -26,6 +26,8 @@ export function kampfSystem(api) {
   let tierUhr = 0;
   let spielerUhr = 0;
   let welleMaxLeben = 0; // höchstes Leben eines Gegners der aktuellen Ebene (für das Überspringen von Stufen)
+  let stufeBeute = 0; // Geld und Erfahrung der laufenden Stufe: übersprungene Stufen zahlen das aus
+  let stufeXp = 0;
   let heldX = 0;
   let heldLaeuft = false;
   let effekte = []; // nur für die Anzeige: Schüsse und Schläge seit dem letzten Zeichnen
@@ -120,6 +122,8 @@ export function kampfSystem(api) {
     api.gutschreiben(g.beute);
     api.xpGeben(g.xp);
     beuteWelle += g.beute;
+    stufeBeute += g.beute;
+    stufeXp += g.xp;
     if (!g.boss && siegeWelle[g.typ] !== undefined) siegeWelle[g.typ] += 1;
     if (!g.boss) siegeWelle.xp += g.xp;
     api.ereignis("sieg", g);
@@ -167,9 +171,18 @@ export function kampfSystem(api) {
       // Auf Stufe 100 bleibt man stehen; weiter geht es nur über den Zeitalter-Boss.
       if (!w().maxStufe || k().stufe < w().maxStufe) {
         const vorher = k().stufe;
-        k().stufe += 1 + sprung(vorher);
-        if (k().stufe > vorher + 1) api.hinweis("Stufen übersprungen: " + vorher + " → " + k().stufe);
+        const n = sprung(vorher);
+        k().stufe += 1 + n;
+        if (n > 0) {
+          // Belohnung fürs Überspringen (Harry 17.11.2026): jede übersprungene Stufe zahlt Geld, Erfahrung und Beute wie die eben gespielte.
+          api.gutschreiben(stufeBeute * n);
+          api.xpGeben(stufeXp * n);
+          api.ereignis("sprung", { n, stufe: vorher });
+          api.hinweis("Stufen übersprungen: " + vorher + " → " + k().stufe + " (Belohnung ×" + (n + 1) + ")");
+        }
       }
+      stufeBeute = 0;
+      stufeXp = 0;
       welleStellen("voll");
     } else {
       welleStellen("teil");

@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=62";
-import * as speicher from "./speicher.js?v=62";
-import { kampfSystem } from "./kampf.js?v=62";
-import { waffenSystem } from "./waffen.js?v=62";
-import { tierSystem } from "./tiere.js?v=62";
-import { dungeonSystem } from "./dungeons.js?v=62";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=62";
-import { bitcoinSystem } from "./bitcoin.js?v=62";
-import { techSystem } from "./tech.js?v=62";
-import * as grafik from "./grafik.js?v=62";
-import { haushaltSystem } from "./haushalt.js?v=62";
-import { farmSystem } from "./farm.js?v=62";
-import { reittierSystem } from "./reittiere.js?v=62";
-import { setSystem } from "./sets.js?v=62";
-import { permaSystem } from "./perma.js?v=62";
+import { zahl, btc, dauer } from "./format.js?v=66";
+import * as speicher from "./speicher.js?v=66";
+import { kampfSystem } from "./kampf.js?v=66";
+import { waffenSystem } from "./waffen.js?v=66";
+import { tierSystem } from "./tiere.js?v=66";
+import { dungeonSystem } from "./dungeons.js?v=66";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=66";
+import { bitcoinSystem } from "./bitcoin.js?v=66";
+import { techSystem } from "./tech.js?v=66";
+import * as grafik from "./grafik.js?v=66";
+import { haushaltSystem } from "./haushalt.js?v=66";
+import { farmSystem } from "./farm.js?v=66";
+import { reittierSystem } from "./reittiere.js?v=66";
+import { setSystem } from "./sets.js?v=66";
+import { permaSystem } from "./perma.js?v=66";
 
 const $ = (id) => document.getElementById(id);
 
@@ -2228,7 +2228,48 @@ function weltBeute(gegner) {
   }
 }
 
+// Überspringen gibt Beute (Harry 17.11.2026): für jede übersprungene Stufe werden die Drops der Gegner (Ebene 1–10) gewürfelt.
+function sprungBeute(n, stufe) {
+  const b = daten.einstellungen.beute;
+  const pro = daten.einstellungen.kampf.wellen.proStufe;
+  const anzahl = Math.round(n * ((pro * (pro + 1)) / 2));
+  const stufenBonus = 1 + ((b.stufenBonus && b.stufenBonus.jeStufe) || 0) * (stufe - 1);
+  const wurf = (art, plus) => Math.random() < (b[art].chance.normal || 0) * (1 + plus) * stufenBonus;
+  const menge = (art) => (b[art].menge && b[art].menge.normal) || 1;
+  const sum = { fpunkte: 0, tech: 0, schluessel: 0, reittiere: 0, eier: 0 };
+  for (let i = 0; i < anzahl; i++) {
+    if (frei("faehigkeiten") && wurf("fpunkte", tech.wert("fpunkte") + reittierBonus("fpunkte"))) {
+      seite().faehigkeiten.punkte += menge("fpunkte");
+      sum.fpunkte += menge("fpunkte");
+    }
+    if (frei("tech") && wurf("techpunkte", tech.wert("techpunkte"))) {
+      stand.gemeinsam.tech.punkte += menge("techpunkte");
+      sum.tech += menge("techpunkte");
+    }
+    if (frei("dungeons") && wurf("schluessel", tech.wert("tickets") + reittierBonus("schluessel"))) {
+      dungeons.schluesselGeben(menge("schluessel"));
+      sum.schluessel += menge("schluessel");
+    }
+    if (frei("reittiere") && b.reittier && wurf("reittier", perma.wert("reittierChance"))) {
+      reittiere.geben(zeitalter().id);
+      sum.reittiere += 1;
+    }
+    if (frei("tiere") && tiere.eiWurf("normal")) sum.eier += 1;
+  }
+  const teile = [];
+  if (sum.fpunkte) teile.push("+" + sum.fpunkte + " ★");
+  if (sum.tech) teile.push("+" + sum.tech + " Tech");
+  if (sum.schluessel) teile.push("+" + sum.schluessel + " Schlüssel");
+  if (sum.eier) teile.push("+" + sum.eier + " Eier");
+  if (sum.reittiere) teile.push("+" + sum.reittiere + " Reittiere");
+  if (teile.length) kurzMeldung("Sprung-Beute: " + teile.join(" · "));
+  reittierAnzeigen();
+  if (!$("tiere-fenster").hidden) tiereZeichnen();
+  if (!$("reittiere-fenster").hidden) reittiereZeichnen();
+}
+
 function kampfEreignis(name, gegner) {
+  if (name === "sprung") return sprungBeute(gegner.n, gegner.stufe);
   if (name === "sieg") {
     weltBeute(gegner);
     if (gegner.boss && frei("tiere") && Math.random() < tech.wert("bossEi")) {
