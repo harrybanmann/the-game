@@ -6,8 +6,11 @@ export function tierSystem(api) {
   const t = () => api.seite().tiere;
   const finde = (nr) => t().sammlung.find((x) => x.nr === nr);
 
+  // Harry 17.11.2026: jedes Zeitalter schaltet eine neue Qualität frei (Zeitalter 1 = nur Gewöhnlich … Göttlich ab 7).
+  const maxSelten = () => Math.min(api.seltenheiten().length - 1, (api.zeitalterNummer ? api.zeitalterNummer() : 99) - 1);
   function wuerfeln(ratio) {
-    const gewichte = api.seltenheiten().map((_, i) => Math.pow(ratio, -i));
+    const grenze = maxSelten();
+    const gewichte = api.seltenheiten().map((_, i) => (i <= grenze ? Math.pow(ratio, -i) : 0));
     let z = Math.random() * gewichte.reduce((a, b) => a + b, 0);
     for (let i = 0; i < gewichte.length; i++) {
       z -= gewichte[i];
@@ -103,7 +106,7 @@ export function tierSystem(api) {
     // Für Dungeon-Belohnungen: ein sicheres Ei. plus hebt die Seltenheit an.
     eiGeben(ratio, plus) {
       const hoechste = api.seltenheiten().length - 1;
-      const ei = { zeitalter: api.zeitalterId(), seltenheit: Math.min(hoechste, wuerfeln(ratio) + plus) };
+      const ei = { zeitalter: api.zeitalterId(), seltenheit: Math.min(hoechste, maxSelten(), wuerfeln(ratio) + plus) };
       t().eier.push(ei);
       return api.seltenheiten()[ei.seltenheit];
     },
@@ -171,7 +174,7 @@ export function tierSystem(api) {
     mergbar(nr) {
       const tier = finde(nr);
       if (!tier || gleiche(nr).length < 2) return false;
-      if (tier.seltenheit < api.seltenheiten().length - 1) return true;
+      if (tier.seltenheit < api.seltenheiten().length - 1) return tier.seltenheit < maxSelten(); // nur bis zur freigeschalteten Qualität
       return (!api.sterneOffen || api.sterneOffen()) && (tier.sterne || 0) < d().maxSterne;
     },
     // 3 gleiche Tiere (Art, Seltenheit, Sternzahl) werden zu 1 Tier der nächsten Seltenheit (ganz oben: +1 Stern).

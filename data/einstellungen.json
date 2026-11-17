@@ -92,9 +92,10 @@
       "text": "Sie lösen im Kampf von selbst aus. Punkte dafür gibt es in den Dungeons."
     },
     "tiere": {
-      "zeitalter": 2,
+      "zeitalter": 1,
       "name": "Haustiere",
-      "text": "Gegner lassen jetzt Eier fallen. Aus Eiern schlüpfen Tiere, die dir helfen."
+      "text": "Gegner lassen jetzt Eier fallen. Aus Eiern schlüpfen Tiere, die dir helfen.",
+      "_hinweis": "Harry 17.11.2026: Haustiere von Anfang an; jedes Zeitalter schaltet eine neue Qualität frei (wie bei der Ausrüstung)."
     },
     "tech": {
       "zeitalter": 1,

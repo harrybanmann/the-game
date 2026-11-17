@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=51";
-import * as speicher from "./speicher.js?v=51";
-import { kampfSystem } from "./kampf.js?v=51";
-import { waffenSystem } from "./waffen.js?v=51";
-import { tierSystem } from "./tiere.js?v=51";
-import { dungeonSystem } from "./dungeons.js?v=51";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=51";
-import { bitcoinSystem } from "./bitcoin.js?v=51";
-import { techSystem } from "./tech.js?v=51";
-import * as grafik from "./grafik.js?v=51";
-import { haushaltSystem } from "./haushalt.js?v=51";
-import { farmSystem } from "./farm.js?v=51";
-import { reittierSystem } from "./reittiere.js?v=51";
-import { setSystem } from "./sets.js?v=51";
-import { permaSystem } from "./perma.js?v=51";
+import { zahl, btc, dauer } from "./format.js?v=52";
+import * as speicher from "./speicher.js?v=52";
+import { kampfSystem } from "./kampf.js?v=52";
+import { waffenSystem } from "./waffen.js?v=52";
+import { tierSystem } from "./tiere.js?v=52";
+import { dungeonSystem } from "./dungeons.js?v=52";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=52";
+import { bitcoinSystem } from "./bitcoin.js?v=52";
+import { techSystem } from "./tech.js?v=52";
+import * as grafik from "./grafik.js?v=52";
+import { haushaltSystem } from "./haushalt.js?v=52";
+import { farmSystem } from "./farm.js?v=52";
+import { reittierSystem } from "./reittiere.js?v=52";
+import { setSystem } from "./sets.js?v=52";
+import { permaSystem } from "./perma.js?v=52";
 
 const $ = (id) => document.getElementById(id);
 
@@ -2871,6 +2871,7 @@ async function start() {
     seltenheiten: () => daten.waffen.seltenheiten,
     seite,
     zeitalterId: () => zeitalter().id,
+    zeitalterNummer: () => zeitalter().nummer,
     zeitalterStaerke: (id) => (daten.zeitalter.find((z) => z.id === id) || {}).staerke || 1,
     level: () => seite().level,
     schluepfFaktor: () => 1 - Math.min(0.75, tech.wert("schluepfen")),
