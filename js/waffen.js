@@ -22,11 +22,15 @@ export function waffenSystem(api) {
     !!a && !!b && a.id === b.id && a.seltenheit === b.seltenheit && (a.sterne || 0) === (b.sterne || 0);
 
   // Je höher die Schmiede, desto kleiner der Abstand zwischen den Seltenheiten.
+  // Harry 17.11.2026: jedes Zeitalter schaltet eine neue Qualität frei (Zeitalter 1 = nur Gewöhnlich,
+  // Zeitalter 2 = bis Ungewöhnlich … Göttlich ab Zeitalter 7). Die Schmiede-Stufe verbessert die Chancen nur darunter.
+  const maxSelten = () => Math.min(d().seltenheiten.length - 1, api.zeitalterNummerVon(api.zeitalterId()) - 1);
   function chancen() {
     const sch = d().schmiede;
     const anteil = Math.min(1, s().schmiede.stufe / sch.maxStufe);
-    const ratio = sch.ratioStart + (sch.ratioEnde - sch.ratioStart) * anteil;
-    const gewichte = d().seltenheiten.map((_, i) => Math.pow(ratio, -i));
+    const ratio = Math.max(1.3, (sch.ratioStart + (sch.ratioEnde - sch.ratioStart) * anteil) * (1 - Math.min(0.5, api.seltenBonus ? api.seltenBonus() : 0)));
+    const grenze = maxSelten();
+    const gewichte = d().seltenheiten.map((_, i) => (i <= grenze ? Math.pow(ratio, -i) : 0));
     const summe = gewichte.reduce((a, b) => a + b, 0);
     return gewichte.map((g) => g / summe);
   }
@@ -158,7 +162,9 @@ export function waffenSystem(api) {
   // Erst geht es die Seltenheiten hinauf; ganz oben kommen (im Endgame) die Sterne.
   const hoechste = () => d().seltenheiten.length - 1;
   const mergbar = (stueck) =>
-    anzahlGleich(stueck) >= 3 && (stueck.seltenheit < hoechste() || (sterneOffen() && (stueck.sterne || 0) < d().maxSterne));
+    anzahlGleich(stueck) >= 3 &&
+    // Mergen geht nur bis zur Qualität, die das Zeitalter schon freigeschaltet hat; Sterne erst ganz oben.
+    (stueck.seltenheit < maxSelten() || (stueck.seltenheit === hoechste() && sterneOffen() && (stueck.sterne || 0) < d().maxSterne));
   const schmiedeKosten = () => d().schmiede.kosten;
   const stufeVoll = () => s().schmiede.stufe >= d().schmiede.maxStufe;
   const stufeKosten = () => Math.ceil(d().schmiede.stufenKosten * Math.pow(d().schmiede.stufenFaktor, s().schmiede.stufe));
@@ -169,6 +175,7 @@ export function waffenSystem(api) {
 
   return {
     chancen,
+    maxSelten,
     werte,
     hole,
     stil,

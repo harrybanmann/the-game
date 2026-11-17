@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=49";
-import * as speicher from "./speicher.js?v=49";
-import { kampfSystem } from "./kampf.js?v=49";
-import { waffenSystem } from "./waffen.js?v=49";
-import { tierSystem } from "./tiere.js?v=49";
-import { dungeonSystem } from "./dungeons.js?v=49";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=49";
-import { bitcoinSystem } from "./bitcoin.js?v=49";
-import { techSystem } from "./tech.js?v=49";
-import * as grafik from "./grafik.js?v=49";
-import { haushaltSystem } from "./haushalt.js?v=49";
-import { farmSystem } from "./farm.js?v=49";
-import { reittierSystem } from "./reittiere.js?v=49";
-import { setSystem } from "./sets.js?v=49";
-import { permaSystem } from "./perma.js?v=49";
+import { zahl, btc, dauer } from "./format.js?v=50";
+import * as speicher from "./speicher.js?v=50";
+import { kampfSystem } from "./kampf.js?v=50";
+import { waffenSystem } from "./waffen.js?v=50";
+import { tierSystem } from "./tiere.js?v=50";
+import { dungeonSystem } from "./dungeons.js?v=50";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=50";
+import { bitcoinSystem } from "./bitcoin.js?v=50";
+import { techSystem } from "./tech.js?v=50";
+import * as grafik from "./grafik.js?v=50";
+import { haushaltSystem } from "./haushalt.js?v=50";
+import { farmSystem } from "./farm.js?v=50";
+import { reittierSystem } from "./reittiere.js?v=50";
+import { setSystem } from "./sets.js?v=50";
+import { permaSystem } from "./perma.js?v=50";
 
 const $ = (id) => document.getElementById(id);
 
@@ -819,12 +819,13 @@ function schmiedeInfo() {
   infoZeigen(() => {
     const rest = waffen.ausbauRest(Date.now());
     const voll = waffen.stufeVoll();
-    const chancen = waffen.chancen().map((c, i) => [daten.waffen.seltenheiten[i].name + " " + prozent(c), daten.waffen.seltenheiten[i].farbe]);
+    // Noch gesperrte Qualitäten (kommen mit späteren Zeitaltern) zeigen ein Schloss und ihr Zeitalter.
+    const chancen = waffen.chancen().map((c, i) => [daten.waffen.seltenheiten[i].name + (i <= waffen.maxSelten() ? " " + prozent(c) : " 🔒 ZA " + (i + 1)), daten.waffen.seltenheiten[i].farbe]);
     return {
       titel: "Schmiede Stufe " + seite().schmiede.stufe,
       bild: grafik.symbolBild("amboss"),
       zeilen: [
-        "Höhere Stufe = bessere Chancen auf seltene Stücke.",
+        "Höhere Stufe = bessere Chancen auf seltene Stücke. Jedes Zeitalter schaltet eine neue Qualität frei.",
         marken(chancen),
         rest !== null ? "Ausbau läuft: noch " + dauer(Math.ceil(rest)) + "." : voll ? "" : "Ausbau dauert " + dauer(waffen.stufeDauer()) + ".",
       ],
@@ -2854,6 +2855,7 @@ async function start() {
   });
   waffen = waffenSystem({
     platzFaktor: (art) => bitcoin.faktor(art),
+    seltenBonus: () => (perma ? perma.wert("schmiedeSelten") : 0),
     daten: () => daten.waffen,
     seite,
     seitenName: () => stand.aktiveSeite,
