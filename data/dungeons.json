@@ -26,15 +26,14 @@
       "handschuhe",
       "waffe",
       "stiefel",
-      "amulett"
+      "amulett",
+      "ring",
+      "guertel",
+      "schulter",
+      "umhang"
     ],
     "grundProzent": 0.02,
     "jeZeitalter": 0.15,
-    "bonus": {
-      "2": 0.05,
-      "4": 0.15,
-      "6": 0.3
-    },
     "meilensteinTeile": 1,
     "teilAbZeitalter": {
       "helm": 1,
@@ -42,9 +41,199 @@
       "ruestung": 3,
       "waffe": 4,
       "stiefel": 5,
-      "amulett": 6
+      "amulett": 6,
+      "ring": 7,
+      "guertel": 8,
+      "schulter": 9,
+      "umhang": 10
     },
-    "_hinweisTeile": "Harry 16.11.2026: Jedes Zeitalter bringt am Anfang ein neues Set-Teil: Helm, dann Handschuhe, Rüstung, Waffe. Die Dungeons geben nur Teile, die schon offen sind (nach dem aktuellen Zeitalter)."
+    "_hinweisTeile": "Harry 16.11.2026: Jedes Zeitalter bringt am Anfang ein neues Set-Teil: Helm, dann Handschuhe, Rüstung, Waffe. Die Dungeons geben nur Teile, die schon offen sind (nach dem aktuellen Zeitalter).",
+    "_hinweisV41": "Harry 17.11.2026: 10 Set-Teile, 4 Sets (Themen) mit eigenen Boni bei 2/4/6/8/10 Teilen des gleichen Sets (Teile aus allen Zeitaltern zählen). Hell für Gut, dunkel für Böse. Boni zählen zusammen (2 bis zur erreichten Stufe). Alle Zahlen sind Vorschläge.",
+    "themen": [
+      {
+        "id": "berserker",
+        "name": "Berserker",
+        "thema": "Schaden",
+        "gut": [
+          "#d9d4c6",
+          "#c0392b"
+        ],
+        "boese": [
+          "#2a1a24",
+          "#ff3b1f"
+        ],
+        "boni": {
+          "2": {
+            "w": {
+              "schaden": 0.1
+            },
+            "text": "+10 % Schaden"
+          },
+          "4": {
+            "w": {
+              "krit": 0.1
+            },
+            "text": "+10 % Krit-Chance"
+          },
+          "6": {
+            "w": {
+              "schaden": 0.3
+            },
+            "text": "+30 % Schaden"
+          },
+          "8": {
+            "w": {
+              "kritSchaden": 0.5
+            },
+            "text": "+50 % Krit-Schaden"
+          },
+          "10": {
+            "w": {
+              "schaden": 1.0
+            },
+            "text": "+100 % Schaden, Flammen-Aura"
+          }
+        }
+      },
+      {
+        "id": "bollwerk",
+        "name": "Bollwerk",
+        "thema": "Leben und Schutz",
+        "gut": [
+          "#9fb4c9",
+          "#e8c24a"
+        ],
+        "boese": [
+          "#1f2a35",
+          "#39d6c4"
+        ],
+        "boni": {
+          "2": {
+            "w": {
+              "leben": 0.1
+            },
+            "text": "+10 % Leben"
+          },
+          "4": {
+            "w": {
+              "block": 0.05
+            },
+            "text": "+5 % Block"
+          },
+          "6": {
+            "w": {
+              "leben": 0.3
+            },
+            "text": "+30 % Leben"
+          },
+          "8": {
+            "w": {
+              "regeneration": 0.01
+            },
+            "text": "1 % Heilung je Sekunde"
+          },
+          "10": {
+            "w": {
+              "leben": 1.0,
+              "schutz": 0.2
+            },
+            "text": "+100 % Leben, 20 % weniger Schaden"
+          }
+        }
+      },
+      {
+        "id": "sturm",
+        "name": "Sturmläufer",
+        "thema": "Tempo und Ausweichen",
+        "gut": [
+          "#e9f4ff",
+          "#3ec6ff"
+        ],
+        "boese": [
+          "#241a3d",
+          "#b04cff"
+        ],
+        "boni": {
+          "2": {
+            "w": {
+              "tempo": 0.1
+            },
+            "text": "+10 % Angriffstempo"
+          },
+          "4": {
+            "w": {
+              "ausweichen": 0.05
+            },
+            "text": "+5 % Ausweichen"
+          },
+          "6": {
+            "w": {
+              "tempo": 0.3
+            },
+            "text": "+30 % Tempo"
+          },
+          "8": {
+            "w": {
+              "ausweichen": 0.1
+            },
+            "text": "+10 % Ausweichen"
+          },
+          "10": {
+            "w": {
+              "tempo": 0.6
+            },
+            "text": "+60 % Tempo, Sturm-Aura"
+          }
+        }
+      },
+      {
+        "id": "pluenderer",
+        "name": "Plünderer",
+        "thema": "Geld und Beute",
+        "gut": [
+          "#f2c230",
+          "#2e7d4f"
+        ],
+        "boese": [
+          "#3a2a12",
+          "#ffd54a"
+        ],
+        "boni": {
+          "2": {
+            "w": {
+              "geld": 0.1
+            },
+            "text": "+10 % Geld"
+          },
+          "4": {
+            "w": {
+              "drop": 0.2
+            },
+            "text": "+20 % Drop-Chancen"
+          },
+          "6": {
+            "w": {
+              "geld": 0.3,
+              "xp": 0.3
+            },
+            "text": "+30 % Geld und Erfahrung"
+          },
+          "8": {
+            "w": {
+              "drop": 0.5
+            },
+            "text": "+50 % Drop-Chancen"
+          },
+          "10": {
+            "w": {
+              "geld": 1.0,
+              "bossDrop": 1.0
+            },
+            "text": "+100 % Geld, doppelte Boss-Drops"
+          }
+        }
+      }
+    ]
   },
   "sets": [
     {

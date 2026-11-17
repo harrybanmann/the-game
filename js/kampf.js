@@ -332,7 +332,7 @@ export function kampfSystem(api) {
       // Block und Ausweichen wehren den Treffer ganz ab.
       if (Math.random() < w.block) merken({ art: "block" });
       else if (Math.random() < w.ausweichen) merken({ art: "ausweichen" });
-      else spielerLeben -= g.schaden * fae.schutzFaktor() * (g.boss ? wut * phaseRegel().schaden : 1);
+      else spielerLeben -= g.schaden * fae.schutzFaktor() * (api.schutz ? api.schutz() : 1) * (g.boss ? wut * phaseRegel().schaden : 1);
     }
     // Erholung (Upgrade): ein kleiner Teil des Lebens kommt jede Sekunde zurück.
     if (w.regeneration > 0 && spielerLeben > 0) spielerLeben = Math.min(api.maxLeben(), spielerLeben + api.maxLeben() * w.regeneration * dt);

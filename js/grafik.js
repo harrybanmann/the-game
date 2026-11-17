@@ -21,6 +21,7 @@ function person(o) {
   const haut = o.haut || HAUT[0];
   let t = o.sitzt ? "" : `<ellipse cx="50" cy="114" rx="30" ry="5" fill="#000" opacity="0.22"/>`;
   if (o.aura) t += `<circle cx="50" cy="60" r="52" fill="${o.akzent}" opacity="0.28"/>`;
+  if (o.hinten) t += o.hinten; // Set-Aussehen hinter der Figur (Flügel, Flammen, Umhang)
   // Umhang hinten
   if (o.umhang) t += `<path d="M24,58 Q8,96 20,108 L44,100 Z" fill="${o.umhang}" ${S}/>`;
   // Waffe hinter der Hand
@@ -99,7 +100,7 @@ function person(o) {
   // Schild vorne
   if (o.schild)
     t += `<path d="M4,56 h34 v16 q0,20 -17,27 q-17,-7 -17,-27 z" fill="${o.schild}" ${S}/><path d="M21,62 v30 M10,74 h22" stroke="${o.akzent}" stroke-width="5" stroke-linecap="round" fill="none"/>`;
-  return t + "</g>";
+  return t + "</g>" + (o.vorn || "");
 }
 
 // Lauf-Bilder (Harry 16.11.2026: fließende Animationen): 0 = Stand, 1 = Schritt, 2 = Durchschwung, 3 = Gegenschritt.
@@ -186,6 +187,40 @@ const BOSSE = {
 // tragen: angelegte Rüstung je Platz { zeitalter, farbe (Seltenheit) } – Helm, Rüstung, Handschuhe und Stiefel
 // sind an der Figur zu sehen: Material in der Farbe ihres Zeitalters, Rand in der Farbe der Seltenheit.
 // lauf = true: vier Lauf-Bilder nebeneinander (für die Figur im Kampf), sonst ein einzelnes Bild.
+
+// ---------- Set-Aussehen des Helden (Harry 17.11.2026) ----------
+// Je mehr Teile eines Sets getragen werden (4, 6, 8, 10), desto heftiger sieht der Held aus. Vier Sets mit eigenem Look.
+const SU = "#2e1c12";
+const SST = `stroke="${SU}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"`;
+const flamme = (x, y, h, c) => `<path d="M${x},${y} Q${x - 9},${y - h * 0.5} ${x - 3},${y - h} Q${x},${y - h * 0.55} ${x + 4},${y - h * 0.75} Q${x + 10},${y - h * 0.3} ${x},${y} Z" fill="${c}" ${SST}/>`;
+const SET_LOOK = {
+  berserker: (c, f, r) => ({
+    hinten: (c >= 8 ? `<circle cx="50" cy="58" r="52" fill="${r}" opacity="0.25"/>` : "") + (c >= 10 ? flamme(12, 112, 46, r) + flamme(88, 112, 46, r) + flamme(50, 118, 40, "#ffd54a") : ""),
+    vorn:
+      (c >= 4 ? `<path d="M10,50 L0,40 L16,42 L6,28 L24,40 Z M90,50 L100,40 L84,42 L94,28 L76,40 Z" fill="${f}" ${SST}/><ellipse cx="18" cy="58" rx="15" ry="11" fill="${f}" ${SST}/><ellipse cx="82" cy="58" rx="15" ry="11" fill="${f}" ${SST}/>` : "") +
+      (c >= 6 ? `<path d="M32,24 Q4,22 6,-10 Q22,0 38,14 Z M68,24 Q96,22 94,-10 Q78,0 62,14 Z" fill="${r}" ${SST}/>` : ""),
+  }),
+  bollwerk: (c, f, r) => ({
+    hinten: (c >= 8 ? `<rect x="16" y="40" width="68" height="78" rx="12" fill="${r}" opacity="0.3"/>` : "") + (c >= 10 ? `<circle cx="50" cy="58" r="54" fill="${r}" opacity="0.22"/>` : ""),
+    vorn:
+      (c >= 4 ? `<rect x="0" y="40" width="28" height="24" rx="6" fill="${f}" ${SST}/><rect x="72" y="40" width="28" height="24" rx="6" fill="${f}" ${SST}/><path d="M3,46 h22 M75,46 h22 M3,56 h22 M75,56 h22" stroke="${r}" stroke-width="3"/>` : "") +
+      (c >= 6 ? `<rect x="38" y="-6" width="24" height="22" rx="4" fill="${r}" ${SST}/>` : "") +
+      (c >= 8 ? `<path d="M30,92 h40 v20 Q50,124 30,112 Z" fill="${f}" ${SST}/><path d="M50,92 v28" stroke="${r}" stroke-width="3"/>` : ""),
+  }),
+  sturm: (c, f, r) => ({
+    hinten: (c >= 6 ? `<path d="M30,60 Q-2,14 6,-8 Q14,22 26,36 Q0,30 8,54 Q18,52 28,70 Z" fill="${f}" ${SST}/><path d="M70,60 Q102,14 94,-8 Q86,22 74,36 Q100,30 92,54 Q82,52 72,70 Z" fill="${f}" ${SST}/>` : "") + (c >= 10 ? `<circle cx="50" cy="58" r="52" fill="${r}" opacity="0.25"/>` : ""),
+    vorn:
+      (c >= 4 ? `<path d="M84,14 L74,34 L82,34 L72,56 L92,30 L84,30 Z" fill="${r}" ${SST}/>` : "") +
+      (c >= 8 ? `<path d="M18,72 L8,92 L16,92 L6,112 L26,88 L18,88 Z" fill="${r}" ${SST}/><path d="M34,18 L24,6 L40,10 Z M66,18 L76,6 L60,10 Z" fill="${r}" ${SST}/>` : ""),
+  }),
+  pluenderer: (c, f, r) => ({
+    hinten: (c >= 8 ? `<path d="M26,58 Q-4,100 10,120 L46,110 Z" fill="${r}" ${SST}/><circle cx="14" cy="96" r="7" fill="#ffd54a" ${SST}/><circle cx="28" cy="108" r="6" fill="#ffd54a" ${SST}/>` : "") + (c >= 10 ? `<circle cx="50" cy="58" r="52" fill="#ffd54a" opacity="0.25"/>` : ""),
+    vorn:
+      (c >= 4 ? `<circle cx="22" cy="62" r="12" fill="#ffd54a" ${SST}/><circle cx="78" cy="62" r="12" fill="#ffd54a" ${SST}/><path d="M16,62 h12 M72,62 h12" stroke="${SU}" stroke-width="3"/>` : "") +
+      (c >= 6 ? `<path d="M28,16 L30,-8 L40,8 L50,-14 L60,8 L70,-8 L72,16 Z" fill="#ffd54a" ${SST}/><circle cx="50" cy="2" r="4" fill="${r}" stroke="${SU}" stroke-width="2.5"/>` : ""),
+  }),
+};
+
 export function spielerBild(seite, zeitalter, farbe, tragen = {}, lauf = false) {
   const f = zeitalter.farben;
   // Set-Teile aus den Dungeons bringen eigene Farben mit (metall); sonst bestimmt das Zeitalter das Material.
@@ -198,7 +233,8 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}, lauf = false) 
   const helm = teil("helm"), ruestung = teil("ruestung"), handschuhe = teil("handschuhe"), stiefel = teil("stiefel");
   const schluessel =
     ["helm", "ruestung", "handschuhe", "stiefel"].map((p) => (tragen[p] ? tragen[p].zeitalter.id + tragen[p].farbe + (tragen[p].metall || "") + (tragen[p].akzent || "") : "-")).join(",") +
-    (tragen.schild ? "S" : "") + (tragen.sitzt ? "R" : "") + (tragen.aura || "");
+    (tragen.schild ? "S" : "") + (tragen.sitzt ? "R" : "") + (tragen.aura || "") +
+    (tragen.setLook ? "|" + tragen.setLook.thema + tragen.setLook.c + tragen.setLook.f + tragen.setLook.r : "");
   return alsBild(["spieler", seite, farbe, zeitalter.id, schluessel, lauf ? "L" : ""].join("|"), () => {
     const o =
       seite === "boese"
@@ -211,6 +247,8 @@ export function spielerBild(seite, zeitalter, farbe, tragen = {}, lauf = false) 
     if (ruestung) Object.assign(o, { platte: ruestung.frueh ? "#a8763a" : ruestung.m, platteRand: ruestung.rand, fell: false });
     if (handschuhe) Object.assign(o, { handschuh: handschuhe.frueh ? "#8a5a3a" : handschuhe.m, handschuhRand: handschuhe.rand });
     if (stiefel) Object.assign(o, { stiefel: stiefel.frueh ? "#8a5a3a" : stiefel.m, stiefelRand: stiefel.rand });
+    const sl = tragen.setLook;
+    if (sl && SET_LOOK[sl.thema] && sl.c >= 4) Object.assign(o, SET_LOOK[sl.thema](sl.c, sl.f, sl.r));
     return lauf ? laufBogen(o, false) : figurSvg(person(o));
   });
 }
@@ -284,6 +322,10 @@ function stueck(art, variante, m) {
   const holz = "#9a6a3c";
   const holz2 = "#7a4f2a";
   switch (art) {
+    case "schulter":
+      return `<ellipse cx="16" cy="34" rx="13" ry="11" fill="${m.metall}" ${S3}/><ellipse cx="48" cy="34" rx="13" ry="11" fill="${m.metall}" ${S3}/><path d="M9,30 h13 M42,30 h13" stroke="${m.akzent}" stroke-width="3" stroke-linecap="round"/><path d="M16,23 l-3,-9 l7,5 M48,23 l3,-9 l-7,5" fill="${m.akzent}" ${S3}/>`;
+    case "umhang":
+      return `<path d="M16,8 H48 L57,58 Q32,50 7,58 Z" fill="${m.metall}" ${S3}/><path d="M16,8 Q32,19 48,8" fill="none" stroke="${m.akzent}" stroke-width="4"/><circle cx="32" cy="16" r="4.5" fill="${m.akzent}" ${S3}/>`;
     case "nah":
       // Keule (frühe Zeitalter)
       if (m.frueh && !variante)

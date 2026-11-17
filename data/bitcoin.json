@@ -27,7 +27,11 @@
         "set-handschuhe",
         "set-waffe",
         "set-stiefel",
-        "set-amulett"
+        "set-amulett",
+        "set-ring",
+        "set-guertel",
+        "set-schulter",
+        "set-umhang"
       ]
     },
     {
