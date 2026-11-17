@@ -97,9 +97,10 @@
       "text": "Gegner lassen jetzt Eier fallen. Aus Eiern schlüpfen Tiere, die dir helfen."
     },
     "tech": {
-      "zeitalter": 3,
+      "zeitalter": 1,
       "name": "Tech-Baum",
-      "text": "Forsche mit Tech-Punkten aus den Dungeons."
+      "text": "Forsche mit Tech-Punkten. Gegner lassen manchmal welche fallen.",
+      "_hinweis": "Harry 17.11.2026: der Tech-Baum ist von Anfang an da."
     },
     "reittiere": {
       "zeitalter": 3,
