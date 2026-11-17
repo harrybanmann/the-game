@@ -47,6 +47,32 @@
       "text": "Heilt alle 6 Sek. 12 % Leben."
     },
     {
+      "id": "flaeche-nah",
+      "seltenheit": 0,
+      "name": {
+        "gut": "Wirbelschlag",
+        "boese": "Klingenwirbel"
+      },
+      "art": "flaeche",
+      "kampfArt": "nah",
+      "wert": 0.3,
+      "abklingen": 0,
+      "text": "Passiv, nur Nahkampf: Jeder Nahkampf-Angriff trifft auch alle anderen Gegner mit 30 % Schaden."
+    },
+    {
+      "id": "flaeche-fern",
+      "seltenheit": 0,
+      "name": {
+        "gut": "Pfeilhagel",
+        "boese": "Streuschuss"
+      },
+      "art": "flaeche",
+      "kampfArt": "fern",
+      "wert": 0.3,
+      "abklingen": 0,
+      "text": "Passiv, nur Fernkampf: Jeder Fernkampf-Angriff trifft auch alle anderen Gegner mit 30 % Schaden."
+    },
+    {
       "id": "kriegsschrei",
       "seltenheit": 2,
       "name": {

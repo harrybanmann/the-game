@@ -32,7 +32,7 @@
     },
     {
       "id": "gerber",
-      "ab": 2,
+      "ab": 1,
       "name": {
         "gut": "Gerber",
         "boese": "Lederdieb"
@@ -47,7 +47,7 @@
     },
     {
       "id": "goldschmied",
-      "ab": 3,
+      "ab": 1,
       "name": {
         "gut": "Goldschmied",
         "boese": "Juwelendieb"

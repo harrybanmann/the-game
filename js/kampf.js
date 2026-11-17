@@ -210,6 +210,11 @@ export function kampfSystem(api) {
       const anteil = n === 0 ? 1 : w.zweihandNebenschaden;
       gemacht += treffen(api.schaden() * faktor * anteil * (krit ? 2 + (w.kritSchaden || 0) : 1), n === 0 ? (art === "nah" ? "schlag" : "schuss") : "mitSchlag", ziel, krit ? "krit" : "");
     });
+    // Passiver Flächenschaden: alle anderen Gegner bekommen einen Teil des Schadens, egal ob nah oder fern.
+    const flaeche = api.faehigkeiten().flaeche(art);
+    if (flaeche > 0)
+      for (const g of lebende().slice())
+        if (!ziele.includes(g)) gemacht += treffen(api.schaden() * faktor * flaeche * (krit ? 2 + (w.kritSchaden || 0) : 1), "mitSchlag", g);
     if (w.raub > 0 && gemacht > 0) spielerLeben = Math.min(api.maxLeben(), spielerLeben + gemacht * w.raub);
   }
 
@@ -240,6 +245,7 @@ export function kampfSystem(api) {
   }
 
   // Ein kleiner Zeitschritt. Gibt true zurück, wenn die Welle gewechselt hat.
+  let heldArtJetzt = null;
   function zeitschritt(dt) {
     const schlag = api.schlagZeit();
     const l = api.lauf();
@@ -248,8 +254,10 @@ export function kampfSystem(api) {
     // Held: Nahkämpfer läuft dem nächsten sichtbaren Gegner entgegen, sonst geht er zum Startplatz zurück.
     const vorn = naechster();
     const sichtbar = vorn && vorn.x <= 1.02;
+    // Nah und fern zugleich (Stil "Egal"): erst aus der Ferne schießen, kommt der nächste Gegner nah, läuft der Held ihm entgegen.
+    heldArtJetzt = w.kombi ? (vorn && vorn.x <= (l.nahWechsel || 0.5) ? "nah" : "fern") : w.art;
     let zielX = 0;
-    if (w.art === "nah" && sichtbar) zielX = Math.min(l.heldMax, Math.max(0, vorn.x - l.nahReichweite));
+    if (heldArtJetzt === "nah" && sichtbar) zielX = Math.min(l.heldMax, Math.max(0, vorn.x - l.nahReichweite));
     const altX = heldX;
     if (heldX < zielX) heldX = Math.min(zielX, heldX + l.heldTempo * dt);
     else if (heldX > zielX && !sichtbar) heldX = Math.max(zielX, heldX - l.heldZurueck * dt);
@@ -292,12 +300,12 @@ export function kampfSystem(api) {
     // Held: Reittier und Ausrüstung machen ihn schneller. Die Uhr läuft immer, zugeschlagen wird nur in Reichweite.
     const abstand = schlag / (1 + api.tempo());
     const ziel = naechster();
-    const inReichweite = w.art === "nah" ? ziel.x - heldX <= l.nahReichweite + 0.005 : ziel.x <= 1.02;
+    const inReichweite = heldArtJetzt === "nah" ? ziel.x - heldX <= l.nahReichweite + 0.005 : ziel.x <= 1.02;
     spielerUhr = Math.min(abstand, spielerUhr + dt);
     if (spielerUhr >= abstand && inReichweite) {
       spielerUhr = 0;
       if (aussetzen > 0) aussetzen -= 1;
-      else heldAngriff(w.art, fae.schadenFaktor() * schild());
+      else heldAngriff(heldArtJetzt, fae.schadenFaktor() * schild());
     }
     if (!lebende().length) return welleGeschafft(), true;
     const wut = kampfZeit < bossWutBis ? 1 + (gegner[0].faehigkeiten.find((f) => f.art === "wut") || { wert: 0 }).wert : 1;
@@ -391,7 +399,7 @@ export function kampfSystem(api) {
         wellenProStufe: w().proStufe,
         heldX,
         heldLaeuft,
-        heldArt: api.kampfWerte().art,
+        heldArt: heldArtJetzt || api.kampfWerte().art,
         ladung: Math.min(1, spielerUhr / (api.schlagZeit() / (1 + api.tempo()))),
         spielerLeben: Math.min(max, Math.max(0, spielerLeben)),
         maxLeben: max,

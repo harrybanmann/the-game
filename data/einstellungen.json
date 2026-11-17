@@ -46,7 +46,8 @@
       "heldTempo": 0.3,
       "heldZurueck": 0.7,
       "heldMax": 0.5,
-      "nahReichweite": 0.08
+      "nahReichweite": 0.08,
+      "nahWechsel": 0.5
     },
     "boss": {
       "_hinweis": "Harry 16.11.2026: Der Zeitalter-Boss auf Stufe 100 ist sehr stark: so stark wie die Gegner auf Stufe 100, Leben × 5, Schaden × 1,5. Unter 2/3 und 1/3 Leben wechselt er die Phase (mehr Schaden, schnellere Fähigkeiten, kurz ein Schild). Zahlen sind Vorschläge.",
@@ -70,8 +71,8 @@
     },
     "ueberspringen": {
       "_hinweis": "Version 38 (Harry 17.11.2026): Ist der Held viel stärker als die Gegner, werden Stufen übersprungen. Nie auf die Stufe 100 (die erreicht man nur Schritt für Schritt), nie über den nächsten Anführer (alle 10 Stufen) hinweg. Zahlen sind Vorschläge.",
-      "abFaktor": 3,
-      "maxSprung": 4,
+      "abFaktor": 1,
+      "maxSprung": 5,
       "hoechsteStufe": 99
     }
   },

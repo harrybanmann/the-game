@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=56";
-import * as speicher from "./speicher.js?v=56";
-import { kampfSystem } from "./kampf.js?v=56";
-import { waffenSystem } from "./waffen.js?v=56";
-import { tierSystem } from "./tiere.js?v=56";
-import { dungeonSystem } from "./dungeons.js?v=56";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=56";
-import { bitcoinSystem } from "./bitcoin.js?v=56";
-import { techSystem } from "./tech.js?v=56";
-import * as grafik from "./grafik.js?v=56";
-import { haushaltSystem } from "./haushalt.js?v=56";
-import { farmSystem } from "./farm.js?v=56";
-import { reittierSystem } from "./reittiere.js?v=56";
-import { setSystem } from "./sets.js?v=56";
-import { permaSystem } from "./perma.js?v=56";
+import { zahl, btc, dauer } from "./format.js?v=62";
+import * as speicher from "./speicher.js?v=62";
+import { kampfSystem } from "./kampf.js?v=62";
+import { waffenSystem } from "./waffen.js?v=62";
+import { tierSystem } from "./tiere.js?v=62";
+import { dungeonSystem } from "./dungeons.js?v=62";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=62";
+import { bitcoinSystem } from "./bitcoin.js?v=62";
+import { techSystem } from "./tech.js?v=62";
+import * as grafik from "./grafik.js?v=62";
+import { haushaltSystem } from "./haushalt.js?v=62";
+import { farmSystem } from "./farm.js?v=62";
+import { reittierSystem } from "./reittiere.js?v=62";
+import { setSystem } from "./sets.js?v=62";
+import { permaSystem } from "./perma.js?v=62";
 
 const $ = (id) => document.getElementById(id);
 
@@ -183,6 +183,7 @@ function kampfWerte() {
   const wert = (id) => Math.min(deckel(id), (z[id] || 0) + summe(id));
   return {
     art: b.kampfArt,
+    kombi: !waffen.stil(),
     hand: b.hand,
     block: wert("block"),
     krit: wert("krit"),
@@ -1096,7 +1097,7 @@ function heldInfo() {
       bild: document.querySelector(".figur.spieler").style.backgroundImage,
       zeilen: [
         marken([["Level " + s.level + " · " + Math.floor((100 * s.xp) / xpBedarf(s.level)) + " %"], ["Stärke " + zahl(staerke())]]),
-        marken([["⚔ " + zahl(schaden())], ["♥ " + zahl(maxLeben())], ["Tempo +" + prozent(angriffsTempo())], [w.art === "fern" ? "Fernkämpfer" : "Nahkämpfer"]]),
+        marken([["⚔ " + zahl(schaden())], ["♥ " + zahl(maxLeben())], ["Tempo +" + prozent(angriffsTempo())], [w.kombi ? "Nah + Fern" : w.art === "fern" ? "Fernkämpfer" : "Nahkämpfer"]]),
         zusatz.length ? marken(zusatz) : "",
       ],
     };
@@ -1408,8 +1409,10 @@ function tierInfo(nr) {
         marken([["⚔ +" + zahl(w.schaden)], ["♥ +" + zahl(w.leben)]]),
         el("div", "hinweis", "Als Helfer:"),
         marken([[art + " +" + prozent(w.supporterProzent)]]),
+        t.kaempfer === w.nr ? haendlerZeile("tier") : "",
       ],
       knoepfe: [
+        t.kaempfer === w.nr ? haendlerKnopf("tier") : null,
         { text: "Als Kämpfer", aus: t.kaempfer === w.nr, aktion: tun(tiere.alsKaempfer) },
         { text: "Als Helfer", aus: tiere.plaetze() === 0 || t.supporter.includes(w.nr), aktion: tun(tiere.alsSupporter) },
         imTeam ? { text: "Aus dem Team", rot: true, aktion: tun(tiere.herausnehmen) } : null,
@@ -1820,8 +1823,10 @@ function reittierInfo(nr) {
         marken([[w.seltenheit.name, w.seltenheit.farbe], ["Zeitalter " + zeitalterVon(w.zeitalter).nummer], ["Tempo +" + prozent(w.tempo)]]),
         w.bonusArt && REITTIER_BONUS[w.bonusArt] ? marken([[REITTIER_BONUS[w.bonusArt](w.bonusWert)]]) : "",
         "Mit Reittier greifst du schneller an. Der zweite Bonus wirkt, solange es gesattelt ist.",
+        a && a.nr === w.nr ? haendlerZeile("reittier") : "",
       ],
       knoepfe: [
+        a && a.nr === w.nr ? haendlerKnopf("reittier") : null,
         { text: a && a.nr === w.nr ? "Gesattelt" : "Satteln", aus: !!a && a.nr === w.nr, aktion: tun(() => reittiere.satteln(w.nr)) },
         { text: "Mergen (3 gleiche → nächste Stufe)", aus: !reittiere.mergbar(w.nr), aktion: tun(() => reittiere.mergen(w.nr)) },
       ],

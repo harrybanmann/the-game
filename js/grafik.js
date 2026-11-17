@@ -790,6 +790,7 @@ const FAEHIGKEIT = {
   schaden: `<path d="M34,4 L46,28 L60,30 L44,42 L50,60 L32,48 L14,60 L20,42 L4,30 L22,28 Z" fill="#ffd54a" ${S}/><circle cx="32" cy="34" r="7" fill="#f2761e" ${S3}/>`,
   heilung: `<path d="M32,56 Q4,36 10,18 Q18,4 32,18 Q46,4 54,18 Q60,36 32,56 Z" fill="#e8475a" ${S}/><path d="M32,24 v18 M23,33 h18" stroke="#fff" stroke-width="6" stroke-linecap="round"/>`,
   staerke: `<path d="M10,40 Q8,22 22,20 Q24,8 36,10 Q42,12 40,22 Q56,22 56,38 Q56,54 34,54 Q14,54 10,40 Z" fill="#f3c9a0" ${S}/><path d="M24,36 q8,-10 18,-2" fill="none" ${S3}/>`,
+  flaeche: `<circle cx="32" cy="32" r="8" fill="#ffd54a" ${S3}/><path d="M32,24 V6 M32,40 V58 M24,32 H6 M40,32 H58 M26,26 L12,12 M38,38 L52,52 M38,26 L52,12 M26,38 L12,52" fill="none" stroke="#e8672a" stroke-width="5" stroke-linecap="round"/>`,
   schutz: `<path d="M12,8 H52 V30 Q52,50 32,58 Q12,50 12,30 Z" fill="#6f9ad0" ${S}/><path d="M32,16 V48 M20,30 H44" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`,
 };
 export function faehigkeitBild(art) {

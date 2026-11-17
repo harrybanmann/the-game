@@ -174,7 +174,7 @@ export function faehigkeitenSystem(api) {
       for (const key of aktiv) {
         const e = finde(key);
         const v = e ? vorlage(e.id) : null;
-        if (!e || !v) continue;
+        if (!e || !v || v.art === "flaeche") continue; // Passive lösen nicht aus
         uhren[key] = (uhren[key] || 0) + sekunden;
         if (uhren[key] < v.abklingen) continue;
         uhren[key] = 0;
@@ -194,6 +194,16 @@ export function faehigkeitenSystem(api) {
     },
     // Für die Anzeige: läuft gerade eine Verstärkung oder ein Schutz?
     aktiv: () => ({ staerke: zeit < staerkeBis, schutz: zeit < schutzBis }),
+    // Passiv (je eine für Nahkampf und Fernkampf): Anteil des Angriffsschadens, den alle anderen Gegner zusätzlich abbekommen (höchstens 100 %).
+    flaeche(kampfArt) {
+      let summe = 0;
+      for (const key of f().ausgeruestet.slice(0, plaetze())) {
+        const e = finde(key);
+        const v = e ? vorlage(e.id) : null;
+        if (e && v && v.art === "flaeche" && v.kampfArt === kampfArt) summe += v.wert * staerke(e);
+      }
+      return Math.min(1, summe);
+    },
     schadenFaktor: () => (zeit < staerkeBis ? 1 + staerkeWert : 1),
     schutzFaktor: () => (zeit < schutzBis ? 1 - schutzWert : 1),
   };
