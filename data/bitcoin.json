@@ -2,11 +2,12 @@
   "_hinweis": "Harry: BTC ist Hauptwährung; Upgrades mit BTC dauerhaft, 100 Stufen, Waffe UND Ausrüstung; bei verschiedenen Händlern je Zeitalter; Händler geben BTC langsam zurück, indem sie Güter abkaufen; 21 Mio. feste Grenze; 1 Feuerstein = 1 Satoshi, jede Währung ×10. Händler-Namen, Preise und Bonus sind Vorschläge.",
   "maxBtc": 21000000,
   "upgrade": {
-    "maxStufe": 100,
+    "maxStufe": 10,
     "grundPreis": 5e-07,
-    "faktor": 1.1,
-    "bonusProStufe": 0.05,
-    "_hinweisV38": "Version 38 (Harry 17.11.2026): Items, Haustiere, Reittiere und Set-Teile sind bis Stufe 100 aufwertbar, mit jedem neuen Zeitalter bis 200, 300 usw. (maxStufe × Zeitalter-Nummer). Kosten steigen mit jeder Stufe (×1,1; vorher ×1,2, dann wäre schon Stufe 100 in Zeitalter 2 unerreichbar)."
+    "faktor": 2.6,
+    "bonusProStufe": 0.5,
+    "_hinweisV38": "Version 38 (Harry 17.11.2026): Items, Haustiere, Reittiere und Set-Teile sind bis Stufe 100 aufwertbar, mit jedem neuen Zeitalter bis 200, 300 usw. (maxStufe × Zeitalter-Nummer). Kosten steigen mit jeder Stufe (×1,1; vorher ×1,2, dann wäre schon Stufe 100 in Zeitalter 2 unerreichbar).",
+    "_hinweisV44": "Harry 17.11.2026: wie die Werte-Upgrades nur 10 Stufen je Zeitalter (10, 20, 30 …). Wirkung je Stufe ×10, Preis je Stufe ×2,6 (10 Stufen = vorher 100 Stufen ×1,1), Preis beginnt mit jedem Zeitalter wieder von vorn (in ₿ ×10 je Zeitalter, weil die Währung 10× mehr wert ist)."
   },
   "rueckfluss": {
     "anteilProStunde": 0.05

@@ -1,18 +1,18 @@
-import { zahl, btc, dauer } from "./format.js?v=71";
-import * as speicher from "./speicher.js?v=71";
-import { kampfSystem } from "./kampf.js?v=71";
-import { waffenSystem } from "./waffen.js?v=71";
-import { tierSystem } from "./tiere.js?v=71";
-import { dungeonSystem } from "./dungeons.js?v=71";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=71";
-import { bitcoinSystem } from "./bitcoin.js?v=71";
-import { techSystem } from "./tech.js?v=71";
-import * as grafik from "./grafik.js?v=71";
-import { haushaltSystem } from "./haushalt.js?v=71";
-import { farmSystem } from "./farm.js?v=71";
-import { reittierSystem } from "./reittiere.js?v=71";
-import { setSystem } from "./sets.js?v=71";
-import { permaSystem } from "./perma.js?v=71";
+import { zahl, btc, dauer } from "./format.js?v=75";
+import * as speicher from "./speicher.js?v=75";
+import { kampfSystem } from "./kampf.js?v=75";
+import { waffenSystem } from "./waffen.js?v=75";
+import { tierSystem } from "./tiere.js?v=75";
+import { dungeonSystem } from "./dungeons.js?v=75";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=75";
+import { bitcoinSystem } from "./bitcoin.js?v=75";
+import { techSystem } from "./tech.js?v=75";
+import * as grafik from "./grafik.js?v=75";
+import { haushaltSystem } from "./haushalt.js?v=75";
+import { farmSystem } from "./farm.js?v=75";
+import { reittierSystem } from "./reittiere.js?v=75";
+import { setSystem } from "./sets.js?v=75";
+import { permaSystem } from "./perma.js?v=75";
 
 const $ = (id) => document.getElementById(id);
 
@@ -403,7 +403,7 @@ function anzeigeAktualisieren() {
   $("energie-chip").textContent = "⚡ " + stand.gemeinsam.energie.wert;
   const f = upgradeFortschritt();
   $("aufstieg-fuellung").style.width = (f.max ? (100 * f.hat) / f.max : 0) + "%";
-  $("aufstieg-balken").title = "Aufstieg: Upgrades " + f.voll + "/" + f.anzahl + " auf Lv 100";
+  $("aufstieg-balken").title = "Aufstieg: Upgrades " + f.voll + "/" + f.anzahl + " auf Höchststufe";
   $("chip-xp").style.width = Math.min(100, (100 * s.xp) / xpBedarf(s.level)) + "%";
   if (!$("btc-fenster").hidden) btcKnoepfe();
   for (const u of upgradesHier()) {
@@ -3078,21 +3078,32 @@ function knoepfeVerbinden() {
 // Die Marke "_baender" steht im Upgrade-Eintrag der Seite.
 function upgradeBaenderUebernehmen() {
   for (const seiteStand of Object.values(stand.seiten)) {
-    if (!seiteStand || !seiteStand.upgrades || seiteStand.upgrades._baender) continue;
+    if (!seiteStand || !seiteStand.upgrades) continue;
+    // Händler-Stufen: ebenfalls nur noch 10 je Zeitalter, alte Stufen zählen durch 10.
+    const hb = seiteStand.btc && seiteStand.btc.upgrades;
+    if (hb && !hb._v10) {
+      for (const k of Object.keys(hb)) hb[k] = Math.round(hb[k] / 10);
+      hb._v10 = 1;
+    }
+    if (seiteStand.upgrades._baender === 2) continue;
+    const alt = seiteStand.upgrades._baender === 1; // schon auf „100 Stufen je Zeitalter“ umgestellt
     const nr = (daten.zeitalter.find((z) => z.id === seiteStand.zeitalter) || daten.zeitalter[0]).nummer;
     for (const u of daten.upgrades) {
       if (u.zeitalter) continue;
       const ab = u.abZeitalter || 1;
-      if (nr <= ab) continue;
-      seiteStand.upgrades[u.id] = (seiteStand.upgrades[u.id] || 0) + u.maxStufe * (nr - ab);
+      // Version 44 (Harry 17.11.2026): nur noch 10 Stufen je Zeitalter (10, 20, 30 …) statt 100. Alte Stufen zählen durch 10.
+      const vorher = Math.round((seiteStand.upgrades[u.id] || 0) / 10);
+      seiteStand.upgrades[u.id] = alt ? vorher : vorher + (nr > ab ? u.maxStufe * (nr - ab) : 0);
     }
-    seiteStand.upgrades._baender = 1;
-    // Händler-Stufen des Kämpfer-Tiers und des gesattelten Reittiers gelten jetzt je Tier.
-    const bu = (seiteStand.btc && seiteStand.btc.upgrades) || {};
-    if (bu.tier && seiteStand.tiere && seiteStand.tiere.kaempfer != null) bu["tier-" + seiteStand.tiere.kaempfer] = bu.tier;
-    if (bu.reittier && seiteStand.reittiere && seiteStand.reittiere.aktiv != null) bu["reittier-" + seiteStand.reittiere.aktiv] = bu.reittier;
-    delete bu.tier;
-    delete bu.reittier;
+    seiteStand.upgrades._baender = 2;
+    // Händler-Stufen der Tiere/Reittiere nur bei alten Ständen ohne Marke (vor V41) auf je Tier umstellen
+    if (!alt) {
+      const bu = (seiteStand.btc && seiteStand.btc.upgrades) || {};
+      if (bu.tier && seiteStand.tiere && seiteStand.tiere.kaempfer != null) bu["tier-" + seiteStand.tiere.kaempfer] = bu.tier;
+      if (bu.reittier && seiteStand.reittiere && seiteStand.reittiere.aktiv != null) bu["reittier-" + seiteStand.reittiere.aktiv] = bu.reittier;
+      delete bu.tier;
+      delete bu.reittier;
+    }
   }
 }
 

@@ -9,7 +9,11 @@ export function bitcoinSystem(api) {
   const stufe = (platz) => b().upgrades[platz] || 0;
   // Harry 17.11.2026: bis Stufe 100, mit jedem neuen Zeitalter bis 200, 300 usw.
   const maxStufe = () => d().upgrade.maxStufe * Math.max(1, api.zeitalterNummer ? api.zeitalterNummer() : 1);
-  const preis = (platz) => d().upgrade.grundPreis * Math.pow(d().upgrade.faktor, stufe(platz));
+  // Je Zeitalter-Band (10 Stufen) beginnt der Preis wieder von vorn; in ₿ ×10 je Band, weil die Währung des Zeitalters 10× mehr wert ist.
+  const preis = (platz) => {
+    const band = Math.floor(stufe(platz) / d().upgrade.maxStufe);
+    return d().upgrade.grundPreis * Math.pow(d().upgrade.faktor, stufe(platz) - band * d().upgrade.maxStufe) * Math.pow(10, band);
+  };
   const verteilt = () => b().menge + b().kasse;
   // Bitcoin kommt erst im letzten Zeitalter (Harry 16.11.2026). Bis dahin zahlt man mit der Währung des Zeitalters.
   const btcOffen = () => !api.btcOffen || api.btcOffen();
