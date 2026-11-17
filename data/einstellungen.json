@@ -103,9 +103,10 @@
       "_hinweis": "Harry 17.11.2026: der Tech-Baum ist von Anfang an da."
     },
     "reittiere": {
-      "zeitalter": 3,
+      "zeitalter": 1,
       "name": "Reittiere",
-      "text": "Aus Eiern schlüpft jetzt manchmal ein Reittier. Es macht dich schneller."
+      "text": "Gegner lassen manchmal ein Reittier fallen. Es macht dich schneller und gibt einen zweiten Bonus.",
+      "_hinweis": "Harry 17.11.2026: Reittiere von Anfang an."
     },
     "haushalt": {
       "zeitalter": 5,
