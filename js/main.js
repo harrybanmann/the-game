@@ -1,19 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=79";
-import * as speicher from "./speicher.js?v=79";
-import { kampfSystem } from "./kampf.js?v=79";
-import { waffenSystem } from "./waffen.js?v=79";
-import { tierSystem } from "./tiere.js?v=79";
-import { dungeonSystem } from "./dungeons.js?v=79";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=79";
-import { bitcoinSystem } from "./bitcoin.js?v=79";
-import { techSystem } from "./tech.js?v=79";
-import * as grafik from "./grafik.js?v=79";
-import { haushaltSystem } from "./haushalt.js?v=79";
-import { farmSystem } from "./farm.js?v=79";
-import { reittierSystem } from "./reittiere.js?v=79";
-import { setSystem } from "./sets.js?v=79";
-import { permaSystem } from "./perma.js?v=79";
-import { puppeSystem } from "./puppe.js?v=79";
+import { zahl, btc, dauer } from "./format.js?v=80";
+import * as speicher from "./speicher.js?v=80";
+import { kampfSystem } from "./kampf.js?v=80";
+import { waffenSystem } from "./waffen.js?v=80";
+import { tierSystem } from "./tiere.js?v=80";
+import { dungeonSystem } from "./dungeons.js?v=80";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=80";
+import { bitcoinSystem } from "./bitcoin.js?v=80";
+import { techSystem } from "./tech.js?v=80";
+import * as grafik from "./grafik.js?v=80";
+import { haushaltSystem } from "./haushalt.js?v=80";
+import { farmSystem } from "./farm.js?v=80";
+import { reittierSystem } from "./reittiere.js?v=80";
+import { setSystem } from "./sets.js?v=80";
+import { permaSystem } from "./perma.js?v=80";
+import { puppeSystem } from "./puppe.js?v=80";
 
 const $ = (id) => document.getElementById(id);
 
@@ -30,6 +30,8 @@ let haushalt; // Haushalt und Firma
 let farm; // Trading, Mining Farm, BTC-Markt
 let reittiere; // Reittiere (Angriffstempo)
 let sets; // Set-Teile aus den Dungeons
+// Harry 18.11.2026: Reittiere sind im Kampf nicht zu sehen (Held als Puppe); ihre Boni gelten weiter.
+const REITTIER_SICHTBAR = false;
 const puppe = puppeSystem(); // Held als Puppe aus Bildteilen (Zeitalter 1 bis 6)
 let perma; // Perma-Baum (Punkte nur durch Neustart)
 let sammelTakt = 0;
@@ -382,7 +384,7 @@ function spielerBildSetzen() {
   }
   const waffe = waffen.werte(waffen.hole("waffe"), "waffe");
   tragen.schild = !!waffe && waffe.hand === "schild";
-  tragen.sitzt = frei("reittiere") && !!reittiere.aktiv();
+  tragen.sitzt = REITTIER_SICHTBAR && frei("reittiere") && !!reittiere.aktiv();
   // Wer rundum mindestens episch trägt, leuchtet in der Farbe seines schwächsten Stücks.
   const alle = PLAETZE.map(([p]) => waffen.werte(waffen.hole(p), p));
   if (alle.every(Boolean)) {
@@ -1842,7 +1844,7 @@ function faehigkeitLeisteZeichnen() {
 // ---------- Reittiere ----------
 
 function reittierAnzeigen() {
-  const a = frei("reittiere") ? reittiere.aktiv() : null;
+  const a = REITTIER_SICHTBAR && frei("reittiere") ? reittiere.aktiv() : null;
   const bild = $("reittier-bild");
   bild.hidden = !a;
   $("spieler-box").classList.toggle("reitet", !!a);
