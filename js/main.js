@@ -1,19 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=80";
-import * as speicher from "./speicher.js?v=80";
-import { kampfSystem } from "./kampf.js?v=80";
-import { waffenSystem } from "./waffen.js?v=80";
-import { tierSystem } from "./tiere.js?v=80";
-import { dungeonSystem } from "./dungeons.js?v=80";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=80";
-import { bitcoinSystem } from "./bitcoin.js?v=80";
-import { techSystem } from "./tech.js?v=80";
-import * as grafik from "./grafik.js?v=80";
-import { haushaltSystem } from "./haushalt.js?v=80";
-import { farmSystem } from "./farm.js?v=80";
-import { reittierSystem } from "./reittiere.js?v=80";
-import { setSystem } from "./sets.js?v=80";
-import { permaSystem } from "./perma.js?v=80";
-import { puppeSystem } from "./puppe.js?v=80";
+import { zahl, btc, dauer } from "./format.js?v=83";
+import * as speicher from "./speicher.js?v=83";
+import { kampfSystem } from "./kampf.js?v=83";
+import { waffenSystem } from "./waffen.js?v=83";
+import { tierSystem } from "./tiere.js?v=83";
+import { dungeonSystem } from "./dungeons.js?v=83";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=83";
+import { bitcoinSystem } from "./bitcoin.js?v=83";
+import { techSystem } from "./tech.js?v=83";
+import * as grafik from "./grafik.js?v=83";
+import { haushaltSystem } from "./haushalt.js?v=83";
+import { farmSystem } from "./farm.js?v=83";
+import { reittierSystem } from "./reittiere.js?v=83";
+import { setSystem } from "./sets.js?v=83";
+import { permaSystem } from "./perma.js?v=83";
+import { puppeSystem } from "./puppe.js?v=83";
 
 const $ = (id) => document.getElementById(id);
 

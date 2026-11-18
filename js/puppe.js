@@ -32,9 +32,10 @@ const ZEITALTER = {
 };
 const S = 0.830078125; // Maßstab aller Teile
 const HUEFTE = [90, 410];
+const ANGRIFF_S = 0.5; // Dauer eines Schlags in Sekunden
 const PUPPEN_MASSSTAB = 0.64;
 // Innere Zeichenfläche (Pixel) und wie hoch der stehende Körper darin ist; oben bleibt Platz für das erhobene Schwert.
-const BW = 300, BH = 300, KOERPER_H = 200, FUSS_Y = 292;
+const BW = 320, BH = 380, KOERPER_H = 250, FUSS_Y = 376;
 
 export function puppeSystem() {
   const bilder = {}; // bilder[za][teil] = Image, dunkel[za].(thigh|shin|larm) = Canvas
@@ -91,8 +92,11 @@ export function puppeSystem() {
       const d = g.getImageData(0, 0, 420, 520).data;
       let x0 = 420, x1 = 0, y0 = 520, y1 = 0;
       for (let yy = 0; yy < 520; yy++) for (let xx = 0; xx < 420; xx++) if (d[(yy * 420 + xx) * 4 + 3] > 20) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
-      const sk = KOERPER_H / Math.max(1, y1 - y0);
-      mass[nr] = { sk, ox: BW / 2 - ((x0 + x1) / 2) * sk, oy: FUSS_Y - y1 * sk };
+      // Der Körper wurde mit Maßstab 0.64 und Verschiebung (120|10) gemessen. Jetzt wird er auf KOERPER_H Pixel gebracht.
+      const sk = (PUPPEN_MASSSTAB * KOERPER_H) / Math.max(1, y1 - y0);
+      const mitteU = ((x0 + x1) / 2 - 120) / PUPPEN_MASSSTAB; // Mitte in Teile-Einheiten
+      const bodenU = (y1 - 10) / PUPPEN_MASSSTAB;             // Unterkante in Teile-Einheiten
+      mass[nr] = { sk, ox: BW / 2 - mitteU * sk, oy: FUSS_Y - bodenU * sk };
     }
     fertig = true;
     for (const f of warten.splice(0)) f();
@@ -142,10 +146,10 @@ export function puppeSystem() {
     g.translate(0, bob);
     let lean = 0.03 * Math.sin(tt) * a, sh = 0.38 * Math.sin(tt) * a, el = -0.35 * a - 0.08 * (1 - a);
     if (atk >= 0) {
-      // Der Arm geht hinter dem Körper nach oben (Ausholen) und schlägt dann von oben nach unten nach vorn.
-      const u = atk / 0.62;
-      if (u < 0.4) { const e = weich(u / 0.4); sh = 3.58 * e; el = -0.5 * e; lean = -0.1 * e; }
-      else { const q = Math.pow((u - 0.4) / 0.6, 0.6); sh = 3.58 + 1.4 * Math.min(1, q * 1.2); el = -0.5 * (1 - Math.min(1, q * 2)); lean = -0.1 + 0.28 * Math.sin(Math.min(1, q) * Math.PI * 0.9); }
+      // Kurzes Ausholen: der Arm geht nur bis über den Kopf, dann schlägt er von oben nach unten nach vorn.
+      const u = atk / ANGRIFF_S;
+      if (u < 0.38) { const e = weich(u / 0.38); sh = 2.5 * e; el = -0.6 * e; lean = -0.05 * e; }
+      else { const q = Math.pow((u - 0.38) / 0.62, 0.7); sh = 2.5 + 1.9 * Math.min(1, q * 1.15); el = -0.6 * (1 - Math.min(1, q * 2)); lean = -0.05 + 0.16 * Math.sin(Math.min(1, q) * Math.PI * 0.9); }
     }
     const [hx, hy] = HUEFTE;
     const aa = Math.max(a, 0.001);
@@ -166,7 +170,7 @@ export function puppeSystem() {
     if (!canvas || !fertig || !mass[za]) return;
     amp += (ziel - amp) * Math.min(1, dt * 7);
     t += dt * 1.0 * (5 + 2.5 * amp) * (0.15 + 0.85 * amp);
-    if (atkT >= 0) { atkT += dt; if (atkT > 0.62) atkT = -1; }
+    if (atkT >= 0) { atkT += dt; if (atkT > ANGRIFF_S) atkT = -1; }
     let blk = 0;
     if (blockT >= 0) { blockT += dt; if (blockT > 0.7) blockT = -1; else blk = blockT < 0.15 ? blockT / 0.15 : blockT < 0.45 ? 1 : 1 - (blockT - 0.45) / 0.25; }
     if (blkHalten) blk = 1;
@@ -222,13 +226,11 @@ export function puppeSystem() {
     standbild(nr) {
       if (!fertig || !mass[nr]) return null;
       const c = document.createElement("canvas");
-      c.width = 160; c.height = 200;
+      c.width = 200; c.height = 260;
       const g = c.getContext("2d");
       const m = mass[nr];
-      const f = 1.0;
-      g.translate(0, 0);
-      // Körper (200 hoch) in 160x200 einpassen: bei Höhe 200 sind es sk-skalierte Maße.
-      zeichne(g, nr, 0, 0, -1, 0, 0, m.sk, m.ox - (BW / 2 - 80), m.oy - (FUSS_Y - 196));
+      // Körper (KOERPER_H hoch) in 200x260 einpassen.
+      zeichne(g, nr, 0, 0, -1, 0, 0, m.sk, m.ox - (BW / 2 - 100), m.oy - (FUSS_Y - 252));
       return `url("${c.toDataURL("image/png")}")`;
     },
     bereit(f) { if (fertig) f(); else warten.push(f); },
