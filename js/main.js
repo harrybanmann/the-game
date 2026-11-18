@@ -1,18 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=75";
-import * as speicher from "./speicher.js?v=75";
-import { kampfSystem } from "./kampf.js?v=75";
-import { waffenSystem } from "./waffen.js?v=75";
-import { tierSystem } from "./tiere.js?v=75";
-import { dungeonSystem } from "./dungeons.js?v=75";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=75";
-import { bitcoinSystem } from "./bitcoin.js?v=75";
-import { techSystem } from "./tech.js?v=75";
-import * as grafik from "./grafik.js?v=75";
-import { haushaltSystem } from "./haushalt.js?v=75";
-import { farmSystem } from "./farm.js?v=75";
-import { reittierSystem } from "./reittiere.js?v=75";
-import { setSystem } from "./sets.js?v=75";
-import { permaSystem } from "./perma.js?v=75";
+import { zahl, btc, dauer } from "./format.js?v=77";
+import * as speicher from "./speicher.js?v=77";
+import { kampfSystem } from "./kampf.js?v=77";
+import { waffenSystem } from "./waffen.js?v=77";
+import { tierSystem } from "./tiere.js?v=77";
+import { dungeonSystem } from "./dungeons.js?v=77";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=77";
+import { bitcoinSystem } from "./bitcoin.js?v=77";
+import { techSystem } from "./tech.js?v=77";
+import * as grafik from "./grafik.js?v=77";
+import { haushaltSystem } from "./haushalt.js?v=77";
+import { farmSystem } from "./farm.js?v=77";
+import { reittierSystem } from "./reittiere.js?v=77";
+import { setSystem } from "./sets.js?v=77";
+import { permaSystem } from "./perma.js?v=77";
+import { puppeSystem } from "./puppe.js?v=77";
 
 const $ = (id) => document.getElementById(id);
 
@@ -29,6 +30,7 @@ let haushalt; // Haushalt und Firma
 let farm; // Trading, Mining Farm, BTC-Markt
 let reittiere; // Reittiere (Angriffstempo)
 let sets; // Set-Teile aus den Dungeons
+const puppe = puppeSystem(); // Held als Puppe aus Bildteilen (Zeitalter 1 bis 6)
 let perma; // Perma-Baum (Punkte nur durch Neustart)
 let sammelTakt = 0;
 let farmReiter = "trading";
@@ -388,8 +390,20 @@ function spielerBildSetzen() {
     if (daten.waffen.seltenheiten.indexOf(schwach.seltenheit) >= 3) tragen.aura = schwach.seltenheit.farbe;
   }
   const farbe = getComputedStyle(document.documentElement).getPropertyValue("--spieler").trim() || "#3c8fe0";
-  document.querySelector(".figur.spieler").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, tragen, true);
-  $("chip-held-bild").style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, { ...tragen, sitzt: false });
+  const figurEl = document.querySelector(".figur.spieler");
+  // Zeitalter 1 bis 6: der Held ist eine Puppe aus Bildteilen. Im Sattel und ab Zeitalter 7 bleibt das alte Bild.
+  const nr = zeitalter().nummer;
+  const alsPuppe = puppe.verfuegbar(nr) && !tragen.sitzt;
+  const stehend = alsPuppe ? puppe.standbild(nr) : null;
+  $("spieler-box").classList.toggle("puppe-aktiv", alsPuppe);
+  if (alsPuppe) {
+    figurEl.style.backgroundImage = "none";
+    puppe.zeigen(figurEl, nr);
+  } else {
+    puppe.weg();
+    figurEl.style.backgroundImage = grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, tragen, true);
+  }
+  $("chip-held-bild").style.backgroundImage = stehend || grafik.spielerBild(stand.aktiveSeite, zeitalter(), farbe, { ...tragen, sitzt: false });
 }
 
 function anzeigeAktualisieren() {
@@ -636,9 +650,11 @@ function kampfZeichnen() {
   const spielerFigur = spielerBox.querySelector(".figur");
   spielerBox.style.left = heldOrt + "%";
   spielerBox.classList.toggle("laeuft", z.heldLaeuft);
+  puppe.laufen(z.heldLaeuft);
   const fae = faehigkeiten.aktiv();
   spielerBox.classList.toggle("staerke", fae.staerke);
   spielerBox.classList.toggle("schutz", fae.schutz);
+  puppe.blockHalten(!!fae.schutz);
   // Bogen: je voller die Angriffs-Uhr, desto weiter ist er gespannt (nur wenn ein Gegner zu sehen ist).
   const sichtbar = z.gegner.some((g) => g.leben > 0 && g.x <= 1.02);
   const schoss = z.effekte.some((e) => e.art === "schuss");
@@ -654,6 +670,7 @@ function kampfZeichnen() {
         geschoss(heldOrt + 20, ort(ziel), false, pfeilArt);
       } else if (e.art === "schlag" && ziel) {
         wackeln(spielerFigur, "schlag");
+        puppe.schlag();
         wackeln($("held-waffe"), "schwung");
         hiebSpur(zielBox);
       } else if (e.art === "mitSchlag" && ziel) hiebSpur(zielBox);
@@ -666,7 +683,10 @@ function kampfZeichnen() {
         if (gw) wackeln(gw, "los");
         wackeln(zielBox.querySelector(".figur"), "hieb");
       }
-      else if (e.art === "block") wortZeigen(spielerBox, "Block!", "#9fd0ff");
+      else if (e.art === "block") {
+        wortZeigen(spielerBox, "Block!", "#9fd0ff");
+        puppe.block();
+      }
       else if (e.art === "ausweichen") wortZeigen(spielerBox, "Daneben!", "#d8f0c0");
       else if (e.art === "zauber" && ziel) {
         // Fähigkeit mit Schaden: Stein und Feuerball fliegen, der Doppelschlag ist ein zweiter, gelber Hieb.
@@ -1130,7 +1150,7 @@ function heldInfo() {
     const zusatz = daten.waffen.zusatzWerte.filter((z) => w[z.id] > 0).map((z) => [z.name + " " + prozent(w[z.id])]);
     return {
       titel: stand.aktiveSeite === "boese" ? "Dieb" : "Beschützer",
-      bild: document.querySelector(".figur.spieler").style.backgroundImage,
+      bild: puppe.aktiv() && puppe.standbild(zeitalter().nummer) || document.querySelector(".figur.spieler").style.backgroundImage,
       zeilen: [
         marken([["Level " + s.level + " · " + Math.floor((100 * s.xp) / xpBedarf(s.level)) + " %"], ["Stärke " + zahl(staerke())]]),
         marken([["⚔ " + zahl(schaden())], ["♥ " + zahl(maxLeben())], ["Tempo +" + prozent(angriffsTempo())], [w.kombi ? "Nah + Fern" : w.art === "fern" ? "Fernkämpfer" : "Nahkämpfer"]]),
@@ -3115,6 +3135,8 @@ async function start() {
     $("lade-fehler").hidden = false;
     return;
   }
+  puppe.start();
+  puppe.bereit(() => spielerBildSetzen());
   stand = speicher.laden() || speicher.neuerStand(daten.einstellungen.startZeitalter);
   upgradeBaenderUebernehmen();
   letzterTick = stand.zuletztGespeichert; // so rechnet der erste Tick die Offline-Zeit aus
