@@ -32,7 +32,7 @@ const ZEITALTER = {
 };
 const S = 0.830078125; // Maßstab aller Teile
 const HUEFTE = [90, 410];
-const ANGRIFF_S = 0.5; // Dauer eines Schlags in Sekunden
+const ANGRIFF_S = 0.45; // Dauer eines Schlags in Sekunden
 const PUPPEN_MASSSTAB = 0.64;
 // Innere Zeichenfläche (Pixel) und wie hoch der stehende Körper darin ist; oben bleibt Platz für das erhobene Schwert.
 const BW = 320, BH = 380, KOERPER_H = 250, FUSS_Y = 376;
@@ -146,10 +146,12 @@ export function puppeSystem() {
     g.translate(0, bob);
     let lean = 0.03 * Math.sin(tt) * a, sh = 0.38 * Math.sin(tt) * a, el = -0.35 * a - 0.08 * (1 - a);
     if (atk >= 0) {
-      // Kurzes Ausholen: der Arm geht nur bis über den Kopf, dann schlägt er von oben nach unten nach vorn.
+      // Kurzes Ausholen vorn über dem Kopf (nicht hinter den Körper), kurz halten, dann schnell von oben nach unten schlagen.
       const u = atk / ANGRIFF_S;
-      if (u < 0.38) { const e = weich(u / 0.38); sh = 2.5 * e; el = -0.6 * e; lean = -0.05 * e; }
-      else { const q = Math.pow((u - 0.38) / 0.62, 0.7); sh = 2.5 + 1.9 * Math.min(1, q * 1.15); el = -0.6 * (1 - Math.min(1, q * 2)); lean = -0.05 + 0.16 * Math.sin(Math.min(1, q) * Math.PI * 0.9); }
+      const HOCH = -1.4, UNTEN = -0.55;
+      if (u < 0.3) { const e = weich(u / 0.3); sh = HOCH * e; el = -0.9 * e; lean = -0.04 * e; }
+      else if (u < 0.42) { sh = HOCH; el = -0.9; lean = -0.04; }
+      else { const q = Math.pow((u - 0.42) / 0.58, 0.6); const e = Math.min(1, q * 1.1); sh = HOCH + (UNTEN - HOCH) * e; el = -0.9 + 0.8 * e; lean = -0.04 + 0.14 * Math.sin(e * Math.PI * 0.9); }
     }
     const [hx, hy] = HUEFTE;
     const aa = Math.max(a, 0.001);
