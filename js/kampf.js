@@ -268,7 +268,8 @@ export function kampfSystem(api) {
     const vorn = naechster();
     const sichtbar = vorn && vorn.x <= 1.02;
     // Nah und fern zugleich (Stil "Egal"): erst aus der Ferne schießen, kommt der nächste Gegner nah, läuft der Held ihm entgegen.
-    heldArtJetzt = w.kombi ? (vorn && vorn.x <= (l.nahWechsel || 0.5) ? "nah" : "fern") : w.art;
+    // Harry 18.11.2026: der Held kämpft immer im Nahkampf, er läuft zum Gegner vor (kein Fernkampf mehr).
+    heldArtJetzt = "nah";
     let zielX = 0;
     if (heldArtJetzt === "nah" && sichtbar) zielX = Math.min(l.heldMax, Math.max(0, vorn.x - l.nahReichweite));
     const altX = heldX;

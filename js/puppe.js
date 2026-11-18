@@ -142,9 +142,10 @@ export function puppeSystem() {
     g.translate(0, bob);
     let lean = 0.03 * Math.sin(tt) * a, sh = 0.38 * Math.sin(tt) * a, el = -0.35 * a - 0.08 * (1 - a);
     if (atk >= 0) {
+      // Der Arm geht hinter dem Körper nach oben (Ausholen) und schlägt dann von oben nach unten nach vorn.
       const u = atk / 0.62;
-      if (u < 0.4) { const e = weich(u / 0.4); sh = -2.7 * e; el = -0.5 * e; lean = -0.1 * e; }
-      else { const q = Math.pow((u - 0.4) / 0.6, 0.6); sh = -2.7 + 1.4 * Math.min(1, q * 1.2); el = -0.5 * (1 - Math.min(1, q * 2)); lean = -0.1 + 0.28 * Math.sin(Math.min(1, q) * Math.PI * 0.9); }
+      if (u < 0.4) { const e = weich(u / 0.4); sh = 3.58 * e; el = -0.5 * e; lean = -0.1 * e; }
+      else { const q = Math.pow((u - 0.4) / 0.6, 0.6); sh = 3.58 + 1.4 * Math.min(1, q * 1.2); el = -0.5 * (1 - Math.min(1, q * 2)); lean = -0.1 + 0.28 * Math.sin(Math.min(1, q) * Math.PI * 0.9); }
     }
     const [hx, hy] = HUEFTE;
     const aa = Math.max(a, 0.001);
