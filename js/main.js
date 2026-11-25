@@ -1,19 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=86";
-import * as speicher from "./speicher.js?v=86";
-import { kampfSystem } from "./kampf.js?v=86";
-import { waffenSystem } from "./waffen.js?v=86";
-import { tierSystem } from "./tiere.js?v=86";
-import { dungeonSystem } from "./dungeons.js?v=86";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=86";
-import { bitcoinSystem } from "./bitcoin.js?v=86";
-import { techSystem } from "./tech.js?v=86";
-import * as grafik from "./grafik.js?v=86";
-import { haushaltSystem } from "./haushalt.js?v=86";
-import { farmSystem } from "./farm.js?v=86";
-import { reittierSystem } from "./reittiere.js?v=86";
-import { setSystem } from "./sets.js?v=86";
-import { permaSystem } from "./perma.js?v=86";
-import { puppeSystem } from "./puppe.js?v=86";
+import { zahl, btc, dauer } from "./format.js?v=87";
+import * as speicher from "./speicher.js?v=87";
+import { kampfSystem } from "./kampf.js?v=87";
+import { waffenSystem } from "./waffen.js?v=87";
+import { tierSystem } from "./tiere.js?v=87";
+import { dungeonSystem } from "./dungeons.js?v=87";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=87";
+import { bitcoinSystem } from "./bitcoin.js?v=87";
+import { techSystem } from "./tech.js?v=87";
+import * as grafik from "./grafik.js?v=87";
+import { haushaltSystem } from "./haushalt.js?v=87";
+import { farmSystem } from "./farm.js?v=87";
+import { reittierSystem } from "./reittiere.js?v=87";
+import { setSystem } from "./sets.js?v=87";
+import { permaSystem } from "./perma.js?v=87";
+import { puppeSystem } from "./puppe.js?v=87";
 
 const $ = (id) => document.getElementById(id);
 
@@ -422,6 +422,7 @@ function anzeigeAktualisieren() {
   }
   kampfZeichnen();
   ambossZeichnen();
+  zieleKnopfZeichnen();
   if (!$("tiere-fenster").hidden) brutZeichnen();
 }
 
@@ -812,8 +813,8 @@ function rasterZeichnen() {
   const raster = $("ausruestung-raster");
   raster.replaceChildren();
   for (const [art, name] of PLAETZE) raster.append(platzKachel(art, name, () => stueckInfo(art)));
-  // Zehnter Platz: das gesattelte Reittier (sobald es Reittiere gibt).
-  if (frei("reittiere")) {
+  // Platz für das gesattelte Reittier (nur, wenn Reittiere sichtbar sind; seit V47 aus).
+  if (REITTIER_SICHTBAR && frei("reittiere")) {
     const a = reittiere.aktiv();
     raster.append(
       bildKachel({
@@ -980,7 +981,7 @@ const GRUPPEN = [
     name: "Kampf",
     reiter: [
       ["arena", "Kampf", () => {}],
-      ["waffen-fenster", "Schmiede", () => waffenZeichnen()],
+      ["waffen-fenster", "Lager", () => waffenZeichnen()],
       ["upgrades-fenster", "Upgrades", () => (($("faehigkeit-ergebnis").textContent = ""), upgradesZeichnen())],
     ],
   },
@@ -2140,6 +2141,64 @@ function seiteWechseln() {
   setTimeout(() => (anim.hidden = true), 1100);
 }
 
+// ---------- Aufgaben-Liste (Harry 25.11.2026: zeigt nächste Ziele, blockiert nichts) ----------
+// Nur Punkte, die schon beschlossen sind: Zeitalter-Boss, Set-Dungeon des Zeitalters, Ausrüstung, Weg durch die 12 Zeitalter.
+// Kosmos-Modus, Neustart-Zeitpunkt und Bitcoin-Meilensteine kommen dazu, sobald sie gebaut sind.
+function aufgaben() {
+  const liste = [];
+  const s = seite();
+  const nr = zeitalter().nummer;
+  const maxStufe = daten.einstellungen.kampf.wellen.maxStufe || 100;
+  // 1. Zeitalter-Boss
+  const fehlt = aufstiegFehlt();
+  if (fehlt === null) liste.push({ kopf: "Zeitalter-Boss", text: "Letztes Zeitalter erreicht." + (s.endbossBesiegt ? " Endboss besiegt." : " Der Endboss wartet auf Stufe " + maxStufe + "."), fertig: !!s.endbossBesiegt });
+  else if (s.kampf.stufe < maxStufe) liste.push({ kopf: "Zeitalter-Boss", text: "Kampfstufe " + s.kampf.stufe + " von " + maxStufe + ". Auf Stufe " + maxStufe + " wartet der Boss von Zeitalter " + nr + "." });
+  else liste.push({ kopf: "Zeitalter-Boss", text: fehlt.length ? "Boss wartet. Dafür fehlt noch: " + fehlt.join(", ") + "." : "Boss bereit: tippe auf den Boss-Knopf.", neu: !fehlt.length });
+  // 2. Set-Dungeon des Zeitalters
+  if (frei("dungeons")) {
+    const d = offeneDungeons().find((x) => x.zeitalter === zeitalter().id);
+    if (d) {
+      const st = dungeons.stufe(d.zeitalter);
+      liste.push(st > 1 ? { kopf: "Set-Dungeon", text: d.name + " geschafft (jetzt Stufe " + st + "). Weiter Set-Teile farmen.", fertig: true } : { kopf: "Set-Dungeon", text: "Den Dungeon-Wächter von " + d.name + " noch besiegen (Dungeons, 1 Schlüssel)." });
+    }
+  }
+  // 3. Ausrüstung: welche Plätze haben noch nicht die beste Qualität des Zeitalters?
+  const beste = waffen.maxSelten();
+  const schwach = PLAETZE.filter(([p]) => {
+    const w = waffen.werte(waffen.hole(p), p);
+    return !w || daten.waffen.seltenheiten.indexOf(w.seltenheit) < beste;
+  });
+  const mergbar = waffen.lagerListe().some((e) => e.mergbar);
+  if (mergbar) liste.push({ kopf: "Ausrüstung", text: "Im Lager liegen 3 gleiche Stücke: mergen gibt die nächste Qualität.", neu: true });
+  liste.push(
+    schwach.length
+      ? { kopf: "Ausrüstung", text: schwach.length + " von 12 Plätzen unter " + daten.waffen.seltenheiten[beste].name + " (beste Qualität in Zeitalter " + nr + "). Gegner und Bosse lassen Items fallen." }
+      : { kopf: "Ausrüstung", text: "Alle 12 Plätze haben die beste Qualität dieses Zeitalters.", fertig: true }
+  );
+  // 4. Begleitung durch die 12 Zeitalter
+  const naechstes = daten.zeitalter.find((z) => z.nummer === nr + 1);
+  liste.push({ kopf: "Weg durch die Zeitalter", text: "Zeitalter " + nr + " von 12: " + zeitalter().name + "." + (naechstes ? " Als Nächstes: " + naechstes.name + " (Währung " + naechstes.waehrung.name + ", Höchststufe " + 10 * naechstes.nummer + ")." : " Das ist das letzte Zeitalter.") });
+  return liste;
+}
+
+function aufgabenZeigen() {
+  infoZeigen(() => {
+    const box = el("div", "ziel-liste");
+    for (const a of aufgaben()) {
+      const z = el("div", "ziel" + (a.fertig ? " fertig" : ""));
+      z.append(el("b", null, (a.fertig ? "✓ " : "") + a.kopf), document.createTextNode(a.text));
+      box.append(z);
+    }
+    return { titel: "Aufgaben-Liste", bild: grafik.symbolBild("stern"), zeilen: [el("div", "hinweis", "Deine nächsten Ziele. Nichts davon ist Pflicht."), box], knoepfe: [{ text: "Weiter", zu: true, aktion: () => {} }] };
+  });
+}
+
+let zieleTakt = 0;
+function zieleKnopfZeichnen() {
+  if (++zieleTakt % 8 !== 1) return; // nicht bei jedem Tick neu rechnen
+  $("ziele-knopf").classList.toggle("neu", aufgaben().some((a) => a.neu));
+}
+
 // ---------- Kampf: Boss und Aufstieg ----------
 
 // Beute in der freien Welt (Harry 16.11.2026): Fähigkeitspunkte, Tech-Punkte (seltener) und Dungeon-Schlüssel.
@@ -2370,6 +2429,19 @@ function offlineBeute(sekunden) {
     dungeons.schluesselGeben(ganz(erwartet(b.schluessel.chance, tech.wert("tickets") + reittierBonus("schluessel"))));
     ergebnis.schluessel = dungeons.schluessel() - vorher;
   }
+  // Version 51: Ausrüstung fällt auch offline (wie im Kampf, höchstens 30 Stück je Abwesenheit).
+  {
+    const wb = daten.waffen.beute;
+    const n = Math.min(30, ganz(erwartet({ schwach: wb.chance.normal, normal: wb.chance.normal, elite: wb.chance.elite }, setExtra("drop"))));
+    ergebnis.items = 0;
+    ergebnis.itemsAn = 0;
+    for (let i = 0; i < n; i++) {
+      const r = waffen.schmiedenGratis();
+      if (!r) break;
+      ergebnis.items += 1;
+      if (r.besser) ergebnis.itemsAn += 1;
+    }
+  }
   if (frei("reittiere") && b.reittier) {
     ergebnis.reittiere = Math.min(20, ganz(erwartet(b.reittier.chance, perma.wert("reittierChance"))));
     for (let i = 0; i < ergebnis.reittiere; i++) reittiere.geben(zeitalter().id);
@@ -2397,6 +2469,7 @@ function offlineMeldung(wegSekunden, gezaehlt, menge, beute) {
     if (beute.eier > 0) eintrag(grafik.symbolBild("ei"), "+" + beute.eier + (beute.eier === 1 ? " Ei" : " Eier"));
     if (beute.fpunkte > 0) eintrag(grafik.symbolBild("stern"), "+" + beute.fpunkte + " Fähigkeitspunkte");
     if (beute.techpunkte > 0) eintrag(grafik.symbolBild("tech"), "+" + beute.techpunkte + " Tech-Punkte");
+    if (beute.items > 0) eintrag(grafik.stueckBild("helm", zeitalter(), "", false), "+" + beute.items + " Ausrüstung" + (beute.itemsAn > 0 ? " (" + beute.itemsAn + " angelegt)" : ""));
     if (beute.schluessel > 0) eintrag(grafik.symbolBild("schluessel"), "+" + beute.schluessel + " Schlüssel");
     if (beute.reittiere > 0) eintrag(grafik.symbolBild("tiere"), "+" + beute.reittiere + (beute.reittiere === 1 ? " Reittier" : " Reittiere"));
     if (beute.energie > 0) eintrag(grafik.symbolBild("blitz"), "+" + beute.energie + " Energie");
@@ -2550,7 +2623,7 @@ function energieInfo() {
       zeilen: [
         "Alle " + Math.round(e.alleSekunden / 60) + " Minuten kommt 1 Energie dazu, höchstens " + e.max + ".",
         marken([["1 Energie = " + energieMinuten() + " Min."], [naechste === null ? "voll" : "nächste in " + dauer(naechste)]]),
-        "Damit verkürzt du Wartezeiten: Schmiede-Ausbau, Forschung und Brüten (dort antippen). Im Perma-Baum wird 1 Energie bis zu 1 Stunde wert.",
+        "Damit verkürzt du Wartezeiten: Forschung und Brüten (dort antippen). Im Perma-Baum wird 1 Energie bis zu 1 Stunde wert.",
       ],
     };
   });
@@ -2930,6 +3003,7 @@ function knoepfeVerbinden() {
     faehigkeitGeaendert();
   });
   $("schmiede-stufe-knopf").addEventListener("click", () => fensterZeigen("waffen-fenster"));
+  $("ziele-knopf").addEventListener("click", aufgabenZeigen);
   $("alles-mergen").addEventListener("click", allesMergen);
   $("export-datei").addEventListener("click", exportDatei);
   $("export-text").addEventListener("click", exportText);

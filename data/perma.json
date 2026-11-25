@@ -105,16 +105,16 @@
     },
     {
       "id": "schmiede",
-      "name": "Schmiede",
+      "name": "Beute und Händler",
       "bild": "amboss",
       "knoten": [
         {
           "id": "p-selten",
-          "name": "Meisterhand",
+          "name": "Glückshand",
           "wirkung": "schmiedeSelten",
           "wert": 0.02,
           "max": 20,
-          "text": "Seltene Stücke 2 % häufiger"
+          "text": "Bessere Qualität bei Beute 2 % häufiger"
         },
         {
           "id": "p-auto",
@@ -122,7 +122,7 @@
           "wirkung": "autoSchmiede",
           "wert": 0.05,
           "max": 20,
-          "text": "Auto-Schmiede 5 % schneller"
+          "text": "Ohne Wirkung seit Version 51 (Schmiede entfällt)"
         },
         {
           "id": "p-rabatt",

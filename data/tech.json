@@ -221,7 +221,7 @@
         {
           "id": "traenkePlatz",
           "name": "Trankgürtel",
-          "text": "+1 Platz für Heiltränke",
+          "text": "Ohne Wirkung seit Version 51 (Heiltränke entfallen)",
           "wert": 1
         },
         {
