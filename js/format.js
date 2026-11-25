@@ -1,18 +1,21 @@
-// Zahlen lesbar machen (deutsche Schreibweise, Kurzformen ab 1.000: 1,5 k, 2 Mio.).
+// Zahlen lesbar machen (deutsche Schreibweise, Kurzformen ab 1.000: 1,5k, 2M, 3a …).
 
-// Harry 16.11.2026: ab 1.000 als k, dann die deutschen Namen bis Quadrillion, danach Buchstaben wie im Idle-Spiel
-// (aa, ab … az, ba …), damit es nie aufhört. Gilt für alle großen Werte (Schaden, Leben, Währung …), nicht für Prozent.
-const KURZ = ["k", "Mio.", "Mrd.", "Bio.", "Brd.", "Trill.", "Trd.", "Quadr."]; // 10^3 … 10^24
-
+// Harry 25.11.2026 (Arbeitsanweisung Umbau): 1 bis 999 direkt, dann 1k/10k/100k, ab 1 Million sofort M (1M/10M/100M),
+// danach Buchstaben: 1a bis 100z (je Buchstabe ×1000), dann 1aa, 1ab … Nie „1000k“: wer auf 1000 rundet, rutscht eine Einheit hoch.
+// Bitcoin bleibt bei der eigenen Schreibweise (21-Mio.-Grenze, siehe btc()).
 function einheit(stufe) {
-  // stufe 1 = Tausend, 2 = Million … ab 9 (10^27) Buchstaben: 9 → aa, 10 → ab …
-  if (stufe <= KURZ.length) return KURZ[stufe - 1];
-  const i = stufe - KURZ.length - 1;
-  return String.fromCharCode(97 + (Math.floor(i / 26) % 26)) + String.fromCharCode(97 + (i % 26));
+  // stufe 1 = k (10^3), 2 = M (10^6), 3 = a (10^9) … 28 = z, 29 = aa, 30 = ab …
+  if (stufe === 1) return "k";
+  if (stufe === 2) return "M";
+  const i = stufe - 3;
+  if (i < 26) return String.fromCharCode(97 + i);
+  const j = i - 26;
+  return String.fromCharCode(97 + (Math.floor(j / 26) % 26)) + String.fromCharCode(97 + (j % 26));
 }
 
 export function zahl(wert) {
   const n = Number.isFinite(wert) ? wert : 0;
+  if (n < 0) return "-" + zahl(-n);
   if (n >= 1000) {
     let stufe = Math.floor(Math.log10(n) / 3);
     let v = n / Math.pow(1000, stufe);
@@ -21,12 +24,14 @@ export function zahl(wert) {
       stufe -= 1;
       v = n / Math.pow(1000, stufe);
     }
-    // Rundet die Zahl auf 1000 (z. B. 999,999 k), dann lieber die nächste Einheit: 1 Mio. statt 1.000 k.
-    if (Math.round(v * 100) >= 100000) {
+    // Stellen: unter 10 zwei Nachkommastellen, unter 100 eine, sonst keine (1,25k · 12,5k · 125k).
+    const stellen = v < 10 ? 2 : v < 100 ? 1 : 0;
+    // Rundet die Zahl auf 1000 (z. B. 999,99k), dann die nächste Einheit: 1M statt 1000k.
+    if (Math.round(v * Math.pow(10, stellen)) >= 1000 * Math.pow(10, stellen)) {
       stufe += 1;
       v = n / Math.pow(1000, stufe);
     }
-    return v.toLocaleString("de-DE", { maximumFractionDigits: 2 }) + " " + einheit(stufe);
+    return v.toLocaleString("de-DE", { maximumFractionDigits: v < 10 ? 2 : v < 100 ? 1 : 0 }) + einheit(stufe);
   }
   if (n >= 100) return Math.floor(n).toLocaleString("de-DE");
   return n.toLocaleString("de-DE", { maximumFractionDigits: 1 });

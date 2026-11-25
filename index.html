@@ -69,12 +69,7 @@
     <section id="ausruestung-bereich" aria-label="Ausrüstung">
       <div id="ausruestung-raster"></div>
       <div id="amboss-reihe">
-        <button id="auto-knopf" type="button" aria-pressed="false">Auto<br><span id="auto-zustand">aus</span></button>
-        <button id="amboss-knopf" type="button" aria-label="Schmieden">
-          <span class="amboss-bild" aria-hidden="true"></span>
-          <span id="amboss-text"></span>
-        </button>
-        <button id="schmiede-stufe-knopf" type="button" aria-label="Schmiede">
+        <button id="schmiede-stufe-knopf" type="button" aria-label="Lager und Mergen">
           <span id="schmiede-stufe-zahl"></span>
           <span id="schmiede-zeit"></span>
         </button>
@@ -139,7 +134,7 @@
     <div class="karte">
       <div id="lager-teil">
         <div class="titel-zeile"><h2 id="lager-titel"></h2><button id="alles-mergen" class="knopf klein" type="button">Alles mergen</button></div>
-        <p class="hinweis">3 gleiche Stücke werden zu einem Stück der nächsten Seltenheit.</p>
+        <p class="hinweis">3 gleiche Stücke werden zu einem Stück der nächsten Qualität. Sterne gibt es nur für Genesis in Zeitalter 12.</p>
         <div id="stueck-info" class="info-box"></div>
         <div id="lager" class="kachel-raster"></div>
       </div>
@@ -268,8 +263,8 @@
         <p id="hh-firma" class="hinweis"></p>
         <button id="hh-firma-knopf" class="knopf" type="button"></button>
       </div>
-      <h3>Aussehen (nur Optik)</h3>
-      <div id="hh-aussehen" class="btc-kauf"></div>
+      <!-- Skins entfallen (Harry 25.11.2026): Feld bleibt für den Code, wird nicht gezeigt. -->
+      <div hidden><h3>Aussehen (nur Optik)</h3><div id="hh-aussehen" class="btc-kauf"></div></div>
       <button class="knopf rot" type="button" data-schliessen="haushalt-fenster">Zurück</button>
     </div>
   </div>

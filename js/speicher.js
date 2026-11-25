@@ -3,7 +3,15 @@
 
 const SCHLUESSEL = "the-game-spielstand";
 const SCHLUESSEL_SICHERUNG = "the-game-spielstand-sicherung";
-export const VERSION = 20;
+// Version 51 (Umbau 25.11.2026): Vor dem ersten Laden mit dem neuen Ausrüstungs-System wird der alte Spielstand
+// unverändert unter diesem Schlüssel abgelegt und nie wieder überschrieben (Export unter Sicherung möglich).
+const SCHLUESSEL_VOR_UMBAU = "the-game-spielstand-vor-v51";
+export const VERSION = 21;
+
+// Die 12 Set-Plätze (Harry 25.11.2026): gleich wie die 12 Ausrüstungs-Plätze.
+export const SET_TEILE = ["helm", "ruestung", "handschuhe", "hose", "stiefel", "waffe", "schild", "guertel", "amulett", "ring1", "ring2", "ohrringe"];
+// Alte Set-Plätze (bis V50) auf die neuen: ein Ring wird Ring rechts, Schulter und Umhang gibt es nicht mehr.
+const SET_ALT = { ring: "ring1", schulter: "ohrringe", umhang: "schild" };
 
 export function neueSeite(startZeitalter) {
   return {
@@ -16,8 +24,8 @@ export function neueSeite(startZeitalter) {
     kampf: { index: 0, rate: 0, raten: {}, stufe: 1, welle: 1 },
     schmiede: { stufe: 0, geschmiedet: 0, geschmiedetZA: 0, ausbauBis: null },
     waffen: { waffe: null, stil: null },
-    ruestung: { helm: null, handschuhe: null, ruestung: null, stiefel: null },
-    schmuck: { ring1: null, ring2: null, amulett: null, guertel: null },
+    ruestung: { helm: null, handschuhe: null, ruestung: null, hose: null, stiefel: null, schild: null },
+    schmuck: { ring1: null, ring2: null, amulett: null, guertel: null, ohrringe: null },
     lager: [],
     traenke: 0,
     trading: { kurse: {}, positionen: [], letzter: 0, dividendeLetzter: 0 },
@@ -27,7 +35,7 @@ export function neueSeite(startZeitalter) {
     btc: { menge: 0, kasse: 0, upgrades: {}, letzterRueckfluss: 0 },
     faehigkeiten: { punkte: 0, sammlung: [], ausgeruestet: [] },
     dungeons: { schluessel: 0, stufe: {} },
-    sets: { sammlung: [], an: { helm: null, ruestung: null, handschuhe: null, waffe: null, stiefel: null, amulett: null, ring: null, guertel: null, schulter: null, umhang: null } },
+    sets: { sammlung: [], an: Object.fromEntries(SET_TEILE.map((k) => [k, null])) },
     tiere: { eier: [], brueten: [], sammlung: [], naechsteNr: 1, kaempfer: null, supporter: [] },
     reittiere: { sammlung: [], naechsteNr: 1, aktiv: null },
   };
@@ -98,9 +106,9 @@ export function pruefen(stand) {
     const uebrig = waffe(w.waffe) ? alteWaffen : alteWaffen.slice(1);
     seite.waffen = { waffe: waffe(w.waffe) || alteWaffen[0] || null, stil: w.stil === "nah" || w.stil === "fern" ? w.stil : null };
     const r = seite.ruestung || {};
-    seite.ruestung = { helm: waffe(r.helm), handschuhe: waffe(r.handschuhe), ruestung: waffe(r.ruestung), stiefel: waffe(r.stiefel) };
+    seite.ruestung = { helm: waffe(r.helm), handschuhe: waffe(r.handschuhe), ruestung: waffe(r.ruestung), hose: waffe(r.hose), stiefel: waffe(r.stiefel), schild: waffe(r.schild) };
     const sm = seite.schmuck || {};
-    seite.schmuck = { ring1: waffe(sm.ring1), ring2: waffe(sm.ring2), amulett: waffe(sm.amulett), guertel: waffe(sm.guertel) };
+    seite.schmuck = { ring1: waffe(sm.ring1), ring2: waffe(sm.ring2), amulett: waffe(sm.amulett), guertel: waffe(sm.guertel), ohrringe: waffe(sm.ohrringe) };
     seite.lager = (Array.isArray(seite.lager) ? seite.lager : [])
       .map((x) => {
         const stueck = waffe(x);
@@ -119,7 +127,7 @@ export function pruefen(stand) {
       naechsteNr: Math.max(1, Math.floor(Number(rt.naechsteNr)) || 1, ...rtListe.map((x) => x.nr + 1)),
       aktiv: rtListe.some((x) => x.nr === rt.aktiv) ? rt.aktiv : null,
     };
-    seite.traenke = Math.max(0, Math.floor(Number(seite.traenke)) || 0);
+    seite.traenke = 0; // Heiltränke entfallen (Harry 25.11.2026)
     const zahl = (x, std) => (Number.isFinite(Number(x)) ? Number(x) : std);
     const zaehlen = (o) => {
       const aus = {};
@@ -167,6 +175,12 @@ export function pruefen(stand) {
     if (ups.nah || ups.fern) ups.waffe = Math.max(ups.waffe || 0, ups.nah || 0, ups.fern || 0);
     delete ups.nah;
     delete ups.fern;
+    // Version 51: alte Set-Plätze auf die neuen 12 (Ring → Ring rechts, Schulter → Ohrringe, Umhang → Schild).
+    for (const [alt, neu] of Object.entries(SET_ALT))
+      if (ups["set-" + alt]) {
+        ups["set-" + neu] = Math.max(ups["set-" + neu] || 0, ups["set-" + alt]);
+        delete ups["set-" + alt];
+      }
     seite.btc = {
       menge: Math.max(0, Number(bt.menge) || 0),
       kasse: Math.max(0, Number(bt.kasse) || 0),
@@ -205,7 +219,10 @@ export function pruefen(stand) {
     const se = seite.sets || {};
     const teil = (x) =>
       x && typeof x.z === "string" && typeof x.teil === "string" ? { z: x.z, teil: x.teil, thema: typeof x.thema === "string" ? x.thema : "berserker", seltenheit: Math.max(0, Math.floor(Number(x.seltenheit)) || 0) } : null;
-    const an = se.an || {};
+    const an = { ...(se.an || {}) };
+    for (const [alt, neu] of Object.entries(SET_ALT)) if (an[alt] && !an[neu]) an[neu] = { ...an[alt], teil: neu };
+    const umbenennen = (x) => (x && SET_ALT[x.teil] ? { ...x, teil: SET_ALT[x.teil] } : x);
+    se.sammlung = (Array.isArray(se.sammlung) ? se.sammlung : []).map(umbenennen);
     seite.sets = {
       sammlung: (Array.isArray(se.sammlung) ? se.sammlung : [])
         .map((x) => {
@@ -214,7 +231,7 @@ export function pruefen(stand) {
           return t && n > 0 ? { ...t, anzahl: n } : null;
         })
         .filter(Boolean),
-      an: Object.fromEntries(["helm", "ruestung", "handschuhe", "waffe", "stiefel", "amulett", "ring", "guertel", "schulter", "umhang"].map((k) => [k, teil(an[k])])),
+      an: Object.fromEntries(SET_TEILE.map((k) => [k, teil(an[k])])),
     };
     for (const k of Object.keys(seite.waehrungen)) {
       const n = Number(seite.waehrungen[k]);
@@ -295,6 +312,8 @@ export function laden() {
     const text = localStorage.getItem(SCHLUESSEL);
     if (!text) return null;
     const stand = JSON.parse(text);
+    // Alter Stand (vor V51): einmalig unverändert sichern, bevor irgendetwas umgebaut oder gespeichert wird.
+    if (stand && Number(stand.version) < 21 && !localStorage.getItem(SCHLUESSEL_VOR_UMBAU)) localStorage.setItem(SCHLUESSEL_VOR_UMBAU, text);
     return pruefen(stand) ? null : stand;
   } catch {
     return null;
@@ -326,6 +345,15 @@ export function sicherungLaden() {
     if (!text) return null;
     const stand = JSON.parse(text);
     return pruefen(stand) ? null : stand;
+  } catch {
+    return null;
+  }
+}
+
+// Der unveränderte Stand von vor dem Umbau (Version 51) als Text, oder null.
+export function vorUmbauText() {
+  try {
+    return localStorage.getItem(SCHLUESSEL_VOR_UMBAU);
   } catch {
     return null;
   }

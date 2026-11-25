@@ -326,6 +326,13 @@ function stueck(art, variante, m) {
       return `<ellipse cx="16" cy="34" rx="13" ry="11" fill="${m.metall}" ${S3}/><ellipse cx="48" cy="34" rx="13" ry="11" fill="${m.metall}" ${S3}/><path d="M9,30 h13 M42,30 h13" stroke="${m.akzent}" stroke-width="3" stroke-linecap="round"/><path d="M16,23 l-3,-9 l7,5 M48,23 l3,-9 l-7,5" fill="${m.akzent}" ${S3}/>`;
     case "umhang":
       return `<path d="M16,8 H48 L57,58 Q32,50 7,58 Z" fill="${m.metall}" ${S3}/><path d="M16,8 Q32,19 48,8" fill="none" stroke="${m.akzent}" stroke-width="4"/><circle cx="32" cy="16" r="4.5" fill="${m.akzent}" ${S3}/>`;
+    // Version 51 (Harry 25.11.2026): neue Plätze Schild, Hose, Ohrringe.
+    case "schild":
+      return `<path d="M32,4 L54,11 V30 Q54,50 32,60 Q10,50 10,30 V11 Z" fill="${m.metall}" ${S3}/>${SCH("M32,5 L53,11.5 V30 Q53,49 32,59 Z", 0.16)}${GL("M16,16 V30 Q16,40 24,47", 2.6, 0.6)}<path d="M32,12 L46,16.5 V30 Q46,43 32,51 Q18,43 18,30 V16.5 Z" fill="none" stroke="${m.akzent}" stroke-width="4"/><circle cx="32" cy="30" r="6.5" fill="${m.gold}" ${S3}/>${GL("M29.5,27.5 L31,26", 1.8, 0.85)}`;
+    case "hose":
+      return `<path d="M15,6 H49 L54,56 H37 L32,24 L27,56 H10 Z" fill="${m.metall}" ${S3}/>${SCH("M32,24 L37,56 H54 L50,30 Q42,28 32,24 Z", 0.15)}${GL("M18,14 L14.5,50", 2.6, 0.55)}<path d="M32,10 V24" stroke="${U}" stroke-width="2" opacity="0.4"/><rect x="13" y="4" width="38" height="8" rx="3" fill="${m.akzent}" ${S3}/><path d="M11,49 H26 M38,49 H53" stroke="${m.akzent}" stroke-width="3.5" stroke-linecap="round"/>`;
+    case "ohrringe":
+      return `<g><path d="M18,6 Q12,6 12,13" fill="none" stroke="${U}" stroke-width="6" stroke-linecap="round"/><path d="M18,6 Q12,6 12,13" fill="none" stroke="${m.gold}" stroke-width="2.6" stroke-linecap="round"/><circle cx="16" cy="30" r="12" fill="none" stroke="${U}" stroke-width="8.5"/><circle cx="16" cy="30" r="12" fill="none" stroke="${m.gold}" stroke-width="4.5"/><path d="M16,40 L22,50 L16,60 L10,50 Z" fill="${m.akzent}" ${S3}/></g><g><path d="M48,6 Q42,6 42,13" fill="none" stroke="${U}" stroke-width="6" stroke-linecap="round"/><path d="M48,6 Q42,6 42,13" fill="none" stroke="${m.gold}" stroke-width="2.6" stroke-linecap="round"/><circle cx="46" cy="30" r="12" fill="none" stroke="${U}" stroke-width="8.5"/><circle cx="46" cy="30" r="12" fill="none" stroke="${m.gold}" stroke-width="4.5"/><path d="M46,40 L52,50 L46,60 L40,50 Z" fill="${m.akzent}" ${S3}/></g>${GL("M8,26 Q8,21 12,19", 2, 0.7)}${GL("M38,26 Q38,21 42,19", 2, 0.7)}`;
     case "nah":
       // Keule (frühe Zeitalter)
       if (m.frueh && !variante)
@@ -378,7 +385,7 @@ export function stueckeMelden(liste) {
 // platz: nah, fern, helm, handschuhe, ruestung, stiefel, ring1, ring2, amulett, guertel. id = Stück (für die Variante).
 // Set-Teile aus den Dungeons: dieselben Formen, aber in den Farben des Sets (set = null: leerer Platz).
 export function setTeilBild(teil, set, q = 0) {
-  const art = teil === "waffe" ? "nah" : teil;
+  const art = teil === "waffe" ? "nah" : teil.startsWith("ring") ? "ring" : teil;
   return alsBild(["setteil", art, set ? set.zeitalter : "-", set ? q : 0].join("|"), () => {
     const m = set ? { frueh: false, metall: set.farbe, akzent: set.rand, gold: set.rand } : { frueh: false, metall: "#b9bec7", akzent: "#a3a8b2", gold: "#b9bec7" };
     const kraft = set ? Math.max(0, q) : 0;

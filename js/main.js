@@ -197,7 +197,7 @@ const REITTIER_BONUS = {
   eier: (w) => "Eier-Chance +" + prozent(w),
   fpunkte: (w) => "★-Chance +" + prozent(w),
 };
-const traenkeMax = () => daten.dungeons.heiltrank.max + tech.wert("traenkePlatz");
+const traenkeMax = () => 0; // Heiltränke entfallen (Harry 25.11.2026)
 // Die eine Waffe bestimmt den Kampfstil; die Zusatzwerte (Block, Tempo …) kommen von der ganzen Ausrüstung.
 function kampfWerte() {
   const b = waffen.bonus();
@@ -207,7 +207,7 @@ function kampfWerte() {
   const wert = (id) => Math.min(deckel(id), (z[id] || 0) + summe(id) + setExtra(id));
   return {
     art: b.kampfArt,
-    kombi: !waffen.stil(),
+    kombi: false,
     hand: b.hand,
     block: wert("block"),
     krit: wert("krit"),
@@ -296,12 +296,6 @@ function tick() {
   if (!$("tech-fenster").hidden) techZeiten();
   const zurueck = bitcoin.schritt(jetzt);
   if (zurueck > 0 && !$("btc-fenster").hidden) btcZeichnen();
-  if (waffen.schritt(jetzt)) {
-    kurzMeldung("Schmiede ist jetzt Stufe " + seite().schmiede.stufe + "!");
-    if (!$("waffen-fenster").hidden) waffenZeichnen();
-    sichern();
-  }
-  autoSchritt(jetzt);
   for (const tier of tiere.schritt(jetzt)) {
     kurzMeldung((tier.reittier ? "Neues Reittier: " : "Geschlüpft: ") + tier.seltenheit.name + " – " + tier.name);
     if (tier.reittier) reittierAnzeigen();
@@ -428,7 +422,6 @@ function anzeigeAktualisieren() {
   }
   kampfZeichnen();
   ambossZeichnen();
-  if (!$("waffen-fenster").hidden) waffenKnoepfe();
   if (!$("tiere-fenster").hidden) brutZeichnen();
 }
 
@@ -591,7 +584,7 @@ function kampfZeichnen() {
   const trank = daten.dungeons.heiltrank;
   // Harry 16.11.2026: Stufe und Ebene wie „46-3“ (10 Ebenen je Stufe).
   $("stufe-text").textContent = z.boss
-    ? "Boss · Phase " + z.bossPhase + " · Tränke " + s.traenke + "/" + traenkeMax()
+    ? "Boss · Phase " + z.bossPhase
     : "Stufe " + z.stufe + "-" + z.welle + (z.besondere === "zwischen" ? " · Anführer" : z.besondere === "elite" ? " · Elite" : "");
   // Punkte für die Wellen der Stufe: geschaffte sind gefüllt, die laufende ist größer.
   const punkte = $("wellen-punkte");
@@ -733,7 +726,7 @@ function bossTippen() {
   }));
 }
 
-// Bedingungen für den Boss (Harry): Level ≥ 10 × Zeitalter, Schmiede ≥ 3 × Zeitalter.
+// Bedingungen für den Boss: Level (Schmied-Hürde entfällt, Harry 25.11.2026).
 // null = es gibt noch kein nächstes Zeitalter; [] = alles erfüllt.
 function aufstiegFehlt() {
   const boss = gegnerDaten().boss;
@@ -744,8 +737,6 @@ function aufstiegFehlt() {
   const fehlt = [];
   if (s.level < a.levelJeZeitalter * nr) fehlt.push("Level " + a.levelJeZeitalter * nr + " (du: " + s.level + ")");
   if (a.stufe && s.kampf.stufe < a.stufe) fehlt.push("Kampfstufe " + a.stufe + " (du: " + s.kampf.stufe + ")");
-  if (s.schmiede.stufe < a.schmiedeJeZeitalter * nr)
-    fehlt.push("Schmiede " + a.schmiedeJeZeitalter * nr + " (du: " + s.schmiede.stufe + ")");
   if (a.alleUpgradesMax) {
     const f = upgradeFortschritt();
     if (f.voll < f.anzahl) fehlt.push("Alle Upgrades auf Höchststufe (fertig: " + f.voll + " von " + f.anzahl + ")");
@@ -755,16 +746,20 @@ function aufstiegFehlt() {
 
 // ---------- Ausrüstungs-Raster (wie Forge Master) ----------
 
+// Harry 25.11.2026: 12 Plätze, 7 sichtbar am Helden, 5 unsichtbar (nur Werte und Set).
 const PLAETZE = [
-  ["waffe", "Waffe", "🗡"],
   ["helm", "Helm", "⛑"],
-  ["handschuhe", "Handschuhe", "🧤"],
   ["ruestung", "Rüstung", "🦺"],
+  ["handschuhe", "Handschuhe", "🧤"],
+  ["hose", "Hose", "👖"],
   ["stiefel", "Stiefel", "🥾"],
-  ["ring1", "Ring", "💍"],
-  ["ring2", "Ring", "💍"],
-  ["amulett", "Amulett", "📿"],
+  ["waffe", "Schwert", "🗡"],
+  ["schild", "Schild", "🛡"],
   ["guertel", "Gürtel", "🎗"],
+  ["amulett", "Amulett", "📿"],
+  ["ring1", "Ring rechts", "💍"],
+  ["ring2", "Ring links", "💍"],
+  ["ohrringe", "Ohrringe", "✦"],
 ];
 
 // Eine Kachel mit Bild statt Text: Farbe = Seltenheit, unten Sterne, oben links Level, oben rechts Anzahl.
@@ -840,7 +835,7 @@ function stueckInfo(art) {
     const zeilen = [];
     const knoepfe = [];
     if (w) zeilen.push(el("div", "hinweis", w.seltenheit.name), werteListe(w));
-    else zeilen.push("Noch leer. Schmiede, bis ein Stück dafür fällt.");
+    else zeilen.push("Noch leer. Gegner und Bosse lassen Ausrüstung fallen.");
     if (bitcoin.haendler().some((h) => h.offen && h.plaetze.includes(art))) {
       const voll = bitcoin.voll(art);
       const preis = frei("bitcoin") ? btc(bitcoin.preis(art)) + " ₿" : zahl(bitcoin.preisGeld(art)) + " " + waehrung().name;
@@ -854,20 +849,6 @@ function stueckInfo(art) {
         },
       });
     }
-    if (art === "waffe") {
-      const reihe = el("div", "stil-reihe");
-      for (const [stil, text] of [["", "Egal"], ["nah", "Nahkampf"], ["fern", "Fernkampf"]]) {
-        const k = el("button", "knopf klein" + ((waffen.stil() || "") === stil ? "" : " matt"), text);
-        k.type = "button";
-        k.addEventListener("click", () => {
-          waffen.stilSetzen(stil);
-          sichern();
-          infoZeichnen();
-        });
-        reihe.append(k);
-      }
-      zeilen.push(el("div", "hinweis", "Welche Waffen soll die Schmiede anlegen?"), reihe);
-    }
     return {
       titel: w ? w.name + " " + "★".repeat(w.sterne) : PLATZ_NAMEN[art],
       titelFarbe: w ? w.seltenheit.farbe : "",
@@ -879,40 +860,12 @@ function stueckInfo(art) {
   });
 }
 
-// Info zur Schmiede: Chancen je Seltenheit und der Ausbau.
-function schmiedeInfo() {
-  infoZeigen(() => {
-    const rest = waffen.ausbauRest(Date.now());
-    const voll = waffen.stufeVoll();
-    // Noch gesperrte Qualitäten (kommen mit späteren Zeitaltern) zeigen ein Schloss und ihr Zeitalter.
-    const chancen = waffen.chancen().map((c, i) => [daten.waffen.seltenheiten[i].name + (i <= waffen.maxSelten() ? " " + prozent(c) : " 🔒 ZA " + (i + 1)), daten.waffen.seltenheiten[i].farbe]);
-    return {
-      titel: "Schmiede Stufe " + seite().schmiede.stufe,
-      bild: grafik.symbolBild("amboss"),
-      zeilen: [
-        "Höhere Stufe = bessere Chancen auf seltene Stücke. Jedes Zeitalter schaltet eine neue Qualität frei.",
-        marken(chancen),
-        rest !== null ? "Ausbau läuft: noch " + dauer(Math.ceil(rest)) + "." : voll ? "" : "Ausbau dauert " + dauer(waffen.stufeDauer()) + ".",
-      ],
-      knoepfe: [
-        { text: voll ? "Maximum" : rest !== null ? "Ausbau läuft …" : "Ausbauen · " + zahl(waffen.stufeKosten()) + " " + waehrung().name, aus: voll || rest !== null, aktion: schmiedeVerbessern },
-        ...(rest !== null ? [energieKnopf(rest, (sek) => (seite().schmiede.ausbauBis -= sek * 1000))] : []),
-        { text: "Lager und Mergen", zu: true, aktion: () => fensterZeigen("waffen-fenster") },
-      ],
-    };
-  });
-}
-
+// Statt Amboss (Schmiede entfällt, Harry 25.11.2026): ein Knopf für Lager und Mergen, mit Punkt, wenn etwas mergbar ist.
 function ambossZeichnen() {
-  const ambossBild = document.querySelector(".amboss-bild");
-  if (!ambossBild.style.backgroundImage) ambossBild.style.backgroundImage = grafik.symbolBild("amboss");
-  autoZeichnen();
-  $("amboss-text").textContent = zahl(waffen.schmiedeKosten());
-  $("amboss-knopf").classList.toggle("matt", guthaben() < waffen.schmiedeKosten());
-  const rest = waffen.ausbauRest(Date.now());
-  $("schmiede-stufe-zahl").textContent = "Stufe " + seite().schmiede.stufe;
-  $("schmiede-stufe-knopf").classList.toggle("mergbar", waffen.lagerListe().some((e) => e.mergbar));
-  $("schmiede-zeit").textContent = rest !== null ? dauer(Math.ceil(rest)) : waffen.stufeVoll() ? "Max" : "▲ " + zahl(waffen.stufeKosten());
+  const liste = waffen.lagerListe();
+  $("schmiede-stufe-zahl").textContent = "Lager";
+  $("schmiede-stufe-knopf").classList.toggle("mergbar", liste.some((e) => e.mergbar));
+  $("schmiede-zeit").textContent = liste.reduce((n, e) => n + e.anzahl, 0) + " Stück";
 }
 
 // Harry 17.11.2026: Im Upgrade-Bereich stehen alle Dinge, die man aufwerten kann, nach Kategorien getrennt und
@@ -928,7 +881,7 @@ function upgradeKategorienZeichnen() {
     .sort(sortieren);
   const aus = $("up-ausruestung");
   aus.replaceChildren();
-  if (!stuecke.length) aus.append(el("p", "hinweis", "Noch nichts angelegt. In der Schmiede gibt es Ausrüstung."));
+  if (!stuecke.length) aus.append(el("p", "hinweis", "Noch nichts angelegt. Gegner und Bosse lassen Ausrüstung fallen."));
   for (const x of stuecke) aus.append(platzKachel(x.p, x.name, () => stueckInfo(x.p)));
   // Haustiere: Kämpfer und Helfer
   const tbox = $("up-tiere-box");
@@ -1133,6 +1086,7 @@ function leisteZeichnen() {
 }
 
 function allesZeichnen() {
+  if (waffen.startAusruestung() > 0) sichern(); // kein Nackt-Start: leere Plätze bekommen ein Primitiv-Stück
   farbenSetzen();
   $("zeitalter-name").textContent = "Zeitalter " + zeitalter().nummer;
   $("seite-knopf").textContent = stand.aktiveSeite === "boese" ? "Zur Beschützer-Seite wechseln 🛡" : "Zur Dieb-Seite wechseln 🦹";
@@ -1250,7 +1204,6 @@ function lagerZeichnen() {
     );
 }
 
-const WAFFEN_ART = { schild: "Einhand mit Schild", zweihand: "Zweihänder: trifft mehrere Gegner", bogen: "Fernkampf", wurf: "Fernkampf" };
 
 // Die Werte eines Stücks als kleine Marken: Schaden, Leben und (in späteren Zeitaltern) Zusatzwerte.
 function werteListe(w) {
@@ -1266,7 +1219,6 @@ function werteListe(w) {
   if (w.schaden > 0) marke("schwert", "+" + zahl(w.schaden));
   if (w.leben > 0) marke("herz", "+" + zahl(w.leben));
   for (const z of w.zusatz) reihe.append(el("span", "wert-marke", z.name + " +" + prozent(z.wert)));
-  if (w.hand) reihe.append(el("span", "wert-marke", WAFFEN_ART[w.hand]));
   return reihe;
 }
 
@@ -1317,19 +1269,6 @@ function allesMergen() {
   waffenGeaendert();
 }
 
-function waffenKnoepfe() {
-  const voll = waffen.stufeVoll();
-  $("schmieden-knopf").textContent = "Schmieden (" + zahl(waffen.schmiedeKosten()) + " " + waehrung().name + ")";
-  $("schmieden-knopf").disabled = guthaben() < waffen.schmiedeKosten();
-  const rest = waffen.ausbauRest(Date.now());
-  $("schmiede-knopf").textContent = voll
-    ? "Schmiede ist auf Maximum"
-    : rest !== null
-      ? "Ausbau läuft: noch " + dauer(Math.ceil(rest))
-      : "Schmiede verbessern (" + zahl(waffen.stufeKosten()) + " " + waehrung().name + ", " + dauer(waffen.stufeDauer()) + ")";
-  $("schmiede-knopf").disabled = voll || rest !== null || guthaben() < waffen.stufeKosten();
-}
-
 function waffenZeichnen() {
   const raster = $("schmiede-raster");
   raster.replaceChildren();
@@ -1351,79 +1290,12 @@ function waffenZeichnen() {
   const sm = Math.round(daten.waffen.schmuckSet * 100);
   const zw = daten.waffen.zusatzWerte.filter((z) => b.zusatz[z.id] > 0).map((z) => z.name + " " + prozent(b.zusatz[z.id]));
   $("waffen-set").textContent = zw.length ? "Deine Zusatzwerte: " + zw.join(" · ") + "." : "";
-  for (const k of document.querySelectorAll("[data-stil]")) k.classList.toggle("matt", (waffen.stil() || "") !== k.dataset.stil);
   $("ruestung-set").textContent =
     "Rüstungs-Set: " + b.ruestungTeile + " von 4 Teilen aus einem Zeitalter (2 Teile +5 % Leben, 4 Teile +15 % Leben)" +
     (b.lebenProzent > 0 ? " – aktiv: +" + prozent(b.lebenProzent) + " Leben." : ".");
   $("schmuck-set").textContent =
     (b.schmuckSet > 0 ? "Schmuck-Set aktiv: +" : "Schmuck-Set: 2 Ringe + Amulett aus einem Zeitalter geben +") + sm + " % auf alle Werte.";
   rasterZeichnen();
-  $("schmiede-stufe").textContent = "Schmiede Stufe " + seite().schmiede.stufe;
-  const liste = $("schmiede-chancen");
-  liste.replaceChildren();
-  waffen.chancen().forEach((chance, i) => {
-    const s = daten.waffen.seltenheiten[i];
-    const zeile = el("div", "chance");
-    const name = el("span", null, s.name);
-    name.style.color = s.farbe;
-    zeile.append(name, el("span", null, prozent(chance)));
-    liste.append(zeile);
-  });
-  waffenKnoepfe();
-}
-
-let autoAn = false;
-let autoLetzter = 0;
-
-function autoSetzen(an) {
-  autoAn = an;
-  autoLetzter = 0;
-  autoZeichnen();
-}
-
-function autoZeichnen() {
-  const k = $("auto-knopf");
-  const wartet = autoAn && guthaben() < waffen.schmiedeKosten();
-  k.classList.toggle("an", autoAn);
-  k.classList.toggle("wartet", wartet);
-  k.setAttribute("aria-pressed", String(autoAn));
-  $("auto-zustand").textContent = !autoAn ? "aus" : wartet ? "wartet" : "an";
-}
-
-function autoSchritt(jetzt) {
-  if (!autoAn) return;
-  if (kampf.istBoss()) return;
-  if (jetzt - autoLetzter < (waffen.autoSekunden() * 1000) / (1 + perma.wert("autoSchmiede"))) return;
-  if (guthaben() < waffen.schmiedeKosten()) return;
-  autoLetzter = jetzt;
-  schmieden(true);
-}
-
-function schmieden(auto) {
-  const r = waffen.schmieden();
-  if (!r) return;
-  const text = $("schmiede-ergebnis");
-  text.textContent =
-    r.neu.seltenheit.name + ": " + r.neu.name +
-    (r.besser ? " – ausgerüstet!" : " – ins Lager gelegt.");
-  text.style.color = r.neu.seltenheit.farbe;
-  wackeln(document.querySelector(".amboss-bild"), "haemmern");
-  // Beim Auto-Schmieden nur melden, wenn etwas Besseres angelegt wurde.
-  if ($("waffen-fenster").hidden && (!auto || r.besser)) kurzMeldung(text.textContent);
-  waffenZeichnen();
-  anzeigeAktualisieren();
-  sichern();
-}
-
-function schmiedeVerbessern() {
-  if (seite().schmiede.ausbauBis) return kurzMeldung("Der Ausbau läuft schon.");
-  if (!waffen.stufeVoll() && guthaben() < waffen.stufeKosten())
-    return kurzMeldung("Zu wenig " + waehrung().name + ". Ausbau kostet " + zahl(waffen.stufeKosten()) + ".");
-  if (!waffen.stufeKaufen()) return;
-  kurzMeldung("Ausbau gestartet, fertig in " + dauer(waffen.stufeDauer()));
-  waffenZeichnen();
-  anzeigeAktualisieren();
-  sichern();
 }
 
 // ---------- Tiere und Eier ----------
@@ -1555,7 +1427,7 @@ function dungeonErgebnis(r) {
   sichern();
 }
 
-const SET_TEIL_NAMEN = { helm: "Helm", ruestung: "Rüstung", handschuhe: "Handschuhe", waffe: "Waffe", stiefel: "Stiefel", amulett: "Amulett", ring: "Ring", guertel: "Gürtel", schulter: "Schulter", umhang: "Umhang" };
+const SET_TEIL_NAMEN = { helm: "Helm", ruestung: "Rüstung", handschuhe: "Handschuhe", hose: "Hose", stiefel: "Stiefel", waffe: "Schwert", schild: "Schild", guertel: "Gürtel", amulett: "Amulett", ring1: "Ring rechts", ring2: "Ring links", ohrringe: "Ohrringe" };
 const offeneDungeons = () => daten.dungeons.sets.filter((x) => zeitalterVon(x.zeitalter).nummer <= zeitalter().nummer && daten.zeitalter.some((z) => z.id === x.zeitalter));
 
 // Ein Dungeon je Zeitalter (bis zum aktuellen), darunter das getragene Set und die Sammlung.
@@ -1687,7 +1559,7 @@ function setTeilInfo(e) {
 }
 
 // ---------- Händler für Plätze ohne Schmiede-Stück (Kämpfer-Tier, Reittier, Set-Teile) ----------
-const HAENDLER_NAMEN = { tier: "Kämpfer-Tier", reittier: "Reittier", "set-helm": "Set-Helm", "set-ruestung": "Set-Rüstung", "set-handschuhe": "Set-Handschuhe", "set-waffe": "Set-Waffe", "set-stiefel": "Set-Stiefel", "set-amulett": "Set-Amulett", "set-ring": "Set-Ring", "set-guertel": "Set-Gürtel", "set-schulter": "Set-Schulter", "set-umhang": "Set-Umhang" };
+const HAENDLER_NAMEN = { tier: "Kämpfer-Tier", reittier: "Reittier", ...Object.fromEntries(Object.entries(SET_TEIL_NAMEN).map(([k, v]) => ["set-" + k, "Set-" + v])) };
 
 function haendlerZeile(platz) {
   return el("div", "hinweis", "Händler Lv. " + bitcoin.stufe(platz) + "/" + bitcoin.maxStufe() + " · +" + Math.round((bitcoin.faktor(platz) - 1) * 100) + " % Werte, bleibt für immer");
@@ -1738,7 +1610,7 @@ function dungeonInfo(s) {
       bild: grafik.setTeilBild("helm", s),
       farbe: s.farbe,
       zeilen: [
-        "Dungeon aus Zeitalter " + zeitalterVon(s.zeitalter).nummer + ". Jeder Sieg bringt ein Teil des Sets " + s.name + " und einen Heiltrank.",
+        "Dungeon aus Zeitalter " + zeitalterVon(s.zeitalter).nummer + ". Jeder Sieg bringt ein Teil des Sets " + s.name + ".",
         marken([["Stufe " + st], ["🗝 " + k]]),
       ],
       // Harry 17.11.2026: Das Fenster bleibt nach einem Kampf offen. Es schließt nur, wenn keine Schlüssel mehr da sind
@@ -2253,7 +2125,6 @@ function seiteWechseln() {
     stand.seiten[ziel] = speicher.neueSeite(daten.einstellungen.startZeitalter);
     speicher.pruefen(stand);
   }
-  autoSetzen(false);
   stand.aktiveSeite = ziel;
   letzterTick = Date.now();
   kampf.neuStarten();
@@ -2344,6 +2215,7 @@ function sprungBeute(n, stufe) {
 
 function kampfEreignis(name, gegner) {
   if (name === "sprung") return sprungBeute(gegner.n, gegner.stufe);
+  if (name === "sieg" || name === "bossSieg") itemBeute(gegner);
   if (name === "sieg") {
     weltBeute(gegner);
     if (gegner.boss && frei("tiere") && Math.random() < tech.wert("bossEi")) {
@@ -2363,6 +2235,17 @@ function kampfEreignis(name, gegner) {
   } else if (name === "bossSieg") {
     aufsteigen(gegner);
   }
+}
+
+// Harry 25.11.2026: Items gibt es nur als Beute von Gegnern und Bossen (alle 12 Plätze).
+function itemBeute(gegner) {
+  const art = gegner.boss ? "boss" : gegner.zwischen ? "anfuehrer" : gegner.typ === "elite" ? "elite" : "normal";
+  const r = waffen.beute(art);
+  if (!r) return;
+  beuteZeigen(gegner, grafik.stueckBild(r.neu.art, zeitalterVon(r.neu.zeitalter), r.neu.id, false));
+  if (r.besser || r.neu.seltenheit !== daten.waffen.seltenheiten[0]) kurzMeldung(r.neu.seltenheit.name + ": " + r.neu.name + (r.besser ? " – angelegt!" : " – ins Lager."));
+  if (r.besser) rasterZeichnen();
+  if (!$("waffen-fenster").hidden) waffenZeichnen();
 }
 
 // Ein Ei fällt sichtbar beim besiegten Gegner auf den Weg und hüpft dann nach unten zum Helden-Knopf.
@@ -2404,7 +2287,6 @@ function aufsteigen(boss) {
   s.zeitalter = neu.id;
   s.kampf = { index: 0, rate: 0, stufe: 1, welle: 1 };
   // Harry 17.11.2026: Die Upgrade-Stufen bleiben, jedes Zeitalter erweitert sie um 100 Stufen.
-  s.schmiede.geschmiedetZA = 0; // der Schmiede-Preis beginnt im neuen Zeitalter wieder bei 20
   const dazu = freiListe().filter((n) => !vorher.includes(n));
   freiBelohnen(dazu);
   const f = daten.einstellungen.freischalten;
@@ -2919,7 +2801,6 @@ function testAktion(was) {
     for (const u of upgradesHier()) s.upgrades[u.id] = capOf(u);
     kurzMeldung("Alle Upgrades auf der Höchststufe.");
   } else if (was === "zeit") {
-    if (s.schmiede.ausbauBis) s.schmiede.ausbauBis = Date.now();
     for (const l of Object.values(stand.gemeinsam.tech.laeuft || {})) if (l) l.bis = Date.now();
     for (const b of s.tiere.brueten) b.fertigUm = Date.now();
     kurzMeldung("Alle Wartezeiten sind gleich fertig.");
@@ -2940,7 +2821,6 @@ function testAktion(was) {
     const a = daten.einstellungen.aufstieg;
     const nr = zeitalter().nummer;
     s.level = Math.max(s.level, a.levelJeZeitalter * nr);
-    s.schmiede.stufe = Math.max(s.schmiede.stufe, a.schmiedeJeZeitalter * nr);
     s.kampf.stufe = Math.max(s.kampf.stufe, a.stufe || 100);
     for (const u of upgradesHier()) s.upgrades[u.id] = capOf(u);
     kampf.neuStarten();
@@ -3049,24 +2929,8 @@ function knoepfeVerbinden() {
     e.style.color = "";
     faehigkeitGeaendert();
   });
-  $("schmieden-knopf").addEventListener("click", () => schmieden(false));
-  for (const k of document.querySelectorAll("[data-stil]"))
-    k.addEventListener("click", () => {
-      waffen.stilSetzen(k.dataset.stil);
-      waffenZeichnen();
-      sichern();
-    });
-  $("amboss-knopf").addEventListener("click", () => {
-    if (guthaben() < waffen.schmiedeKosten()) return kurzMeldung("Zu wenig " + waehrung().name + " zum Schmieden.");
-    schmieden();
-  });
-  $("auto-knopf").addEventListener("click", () => {
-    autoSetzen(!autoAn);
-    kurzMeldung(autoAn ? "Auto-Schmieden an: alle " + zahl(waffen.autoSekunden()) + " Sek., solange das Spiel offen ist." : "Auto-Schmieden aus.");
-  });
-  $("schmiede-stufe-knopf").addEventListener("click", schmiedeInfo);
+  $("schmiede-stufe-knopf").addEventListener("click", () => fensterZeigen("waffen-fenster"));
   $("alles-mergen").addEventListener("click", allesMergen);
-  $("schmiede-knopf").addEventListener("click", schmiedeVerbessern);
   $("export-datei").addEventListener("click", exportDatei);
   $("export-text").addEventListener("click", exportText);
   $("import-knopf").addEventListener("click", () => importieren($("import-text").value));
@@ -3225,7 +3089,8 @@ async function start() {
   });
   waffen = waffenSystem({
     platzFaktor: (art) => bitcoin.faktor(art),
-    seltenBonus: () => (perma ? perma.wert("schmiedeSelten") : 0),
+    seltenBonus: () => (perma ? perma.wert("schmiedeSelten") : 0), // Perma-Knoten „Qualitäts-Glück“ (alter Name schmiedeSelten)
+    dropBonus: () => setExtra("drop"),
     daten: () => daten.waffen,
     seite,
     seitenName: () => stand.aktiveSeite,
@@ -3234,7 +3099,7 @@ async function start() {
     zeitalterNummerVon: (id) => (daten.zeitalter.find((z) => z.id === id) || { nummer: 1 }).nummer,
     bezahlen,
     gutschreiben,
-    sterneOffen: () => frei("sterne"),
+    sterneOffen: () => zeitalter().nummer >= 12, // Harry 25.11.2026: Sterne nur Genesis in Zeitalter 12
   });
   tiere = tierSystem({
     daten: () => daten.tiere,

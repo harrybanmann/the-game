@@ -20,19 +20,22 @@
         "gut": "Schmied",
         "boese": "Hehler"
       },
-      "text": "Verbessert Waffe und Set-Teile dauerhaft. Haustiere und Reittiere verbesserst du in ihrem eigenen Fenster.",
+      "text": "Verbessert Schwert, Schild und Set-Teile dauerhaft (bis Stufe 10 × Zeitalter).",
       "plaetze": [
         "waffe",
+        "schild",
         "set-helm",
         "set-ruestung",
         "set-handschuhe",
-        "set-waffe",
+        "set-hose",
         "set-stiefel",
-        "set-amulett",
-        "set-ring",
+        "set-waffe",
+        "set-schild",
         "set-guertel",
-        "set-schulter",
-        "set-umhang"
+        "set-amulett",
+        "set-ring1",
+        "set-ring2",
+        "set-ohrringe"
       ]
     },
     {
@@ -45,8 +48,9 @@
       "text": "Verbessert deine Rüstung dauerhaft.",
       "plaetze": [
         "helm",
-        "handschuhe",
         "ruestung",
+        "handschuhe",
+        "hose",
         "stiefel"
       ]
     },
@@ -57,12 +61,13 @@
         "gut": "Goldschmied",
         "boese": "Juwelendieb"
       },
-      "text": "Verbessert Ringe, Amulett und Gürtel dauerhaft.",
+      "text": "Verbessert Gürtel, Amulett, Ringe und Ohrringe dauerhaft.",
       "plaetze": [
+        "guertel",
+        "amulett",
         "ring1",
         "ring2",
-        "amulett",
-        "guertel"
+        "ohrringe"
       ]
     }
   ]

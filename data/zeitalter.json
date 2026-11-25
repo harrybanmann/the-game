@@ -31,11 +31,11 @@
     },
     "waehrung": {
       "id": "muschel",
-      "name": "Muscheln",
+      "name": "Kaurimuscheln",
       "btcProStueck": 1e-07
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Muscheln sammeln",
+    "verdienKnopf": "Kaurimuscheln sammeln",
     "klickGrundwert": 1
   },
   {
@@ -51,11 +51,11 @@
     },
     "waehrung": {
       "id": "schekel",
-      "name": "Schekel",
+      "name": "Bronzebarren",
       "btcProStueck": 1e-06
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Schekel verdienen",
+    "verdienKnopf": "Bronzebarren verdienen",
     "klickGrundwert": 1
   },
   {
@@ -71,11 +71,11 @@
     },
     "waehrung": {
       "id": "stater",
-      "name": "Stater",
+      "name": "Silbermünzen",
       "btcProStueck": 1e-05
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Stater prägen",
+    "verdienKnopf": "Silbermünzen prägen",
     "klickGrundwert": 1
   },
   {
@@ -111,7 +111,7 @@
     },
     "waehrung": {
       "id": "mittelalter-geld",
-      "name": "Silberpfennig",
+      "name": "Pfennig",
       "btcProStueck": 0.001
     },
     "umtauschVonVorher": 0.1,
@@ -131,11 +131,11 @@
     },
     "waehrung": {
       "id": "banken-geld",
-      "name": "Florin",
+      "name": "Banknoten",
       "btcProStueck": 0.01
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Florin verdienen",
+    "verdienKnopf": "Banknoten verdienen",
     "klickGrundwert": 1
   },
   {
@@ -151,11 +151,11 @@
     },
     "waehrung": {
       "id": "entdeckungen-geld",
-      "name": "Silberdollar",
+      "name": "Spanischer Dollar",
       "btcProStueck": 0.1
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Silberdollar verdienen",
+    "verdienKnopf": "Spanische Dollar verdienen",
     "klickGrundwert": 1
   },
   {
@@ -171,11 +171,11 @@
     },
     "waehrung": {
       "id": "aktien-geld",
-      "name": "Banknote",
+      "name": "Aktienanteile",
       "btcProStueck": 1.0
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Banknoten verdienen",
+    "verdienKnopf": "Aktienanteile verdienen",
     "klickGrundwert": 1
   },
   {
@@ -191,11 +191,11 @@
     },
     "waehrung": {
       "id": "industrie-geld",
-      "name": "Goldmark",
+      "name": "Goldmünzen",
       "btcProStueck": 10.0
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Goldmark verdienen",
+    "verdienKnopf": "Goldmünzen verdienen",
     "klickGrundwert": 1
   },
   {
@@ -211,11 +211,11 @@
     },
     "waehrung": {
       "id": "fiat-geld",
-      "name": "Dollar",
+      "name": "US-Dollar",
       "btcProStueck": 100.0
     },
     "umtauschVonVorher": 0.1,
-    "verdienKnopf": "Dollar verdienen",
+    "verdienKnopf": "US-Dollar verdienen",
     "klickGrundwert": 1
   },
   {
