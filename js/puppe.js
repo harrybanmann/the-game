@@ -1,6 +1,6 @@
 // Der Held als Puppe (Harry 18.11.2026): Körper aus starren Bildteilen (Oberkörper mit Kopf, Arme, Beine, Schwert, Schild),
 // der Code dreht die Teile an den Gelenken. Ein Charakter für Gut und Böse, nur die Rüstung (Zeitalter) ändert sich.
-// Bilder: bilder/puppe/z1 … z6 (Steinzeit bis Mittelalter). Ab Zeitalter 7 und im Sattel bleibt das alte Bild aus grafik.js.
+// Bilder: bilder/puppe/z1 … z12 (alle Zeitalter, V51). Im Sattel bliebe das alte Bild aus grafik.js (Reittiere sind aus).
 // Die Zahlen für Lage und Gelenke stammen aus dem Brain (Held-Puppe-Paket/V2-Teile, Vorschau Version 27).
 
 const TEILE = ["torso", "uarm", "farm", "larm", "thigh", "shin", "shield", "sword"];
@@ -28,6 +28,24 @@ const ZEITALTER = {
   6: { // Mittelalter
     torso: [9.78125, 7.451171875], uarm: [-45.48046875, -33.45703125], farm: [-45.48046875, -20.546875], larm: [-56.98875, -26.0675],
     thigh: [-51.6328125, -21.77734375], shin: [-47.482421875, -15.60546875], shield: [-25.2378125, -121.7575], sword: [-48.5875, -224.4375],
+  },
+  7: { // Banken (Papiergeld)
+    torso: [9.78125, 19.90234375], uarm: [-46.310546875, -33.45703125], farm: [-46.310546875, -20.546875], larm: [-56.98875, -26.0675], thigh: [-51.6328125, -21.77734375], shin: [-47.482421875, -15.60546875], shield: [-40.179218750000004, -119.267265625], sword: [-58.5484375, -222.77734375],
+  },
+  8: { // Entdeckungen
+    torso: [9.78125, 10.771484375], uarm: [-46.310546875, -32.626953125], farm: [-46.310546875, -20.546875], larm: [-56.98875, -25.237421875], thigh: [-51.6328125, -21.77734375], shin: [-47.482421875, -15.60546875], shield: [-40.179218750000004, -119.267265625], sword: [-52.737890625, -221.947265625],
+  },
+  9: { // Aktien
+    torso: [9.78125, 11.6015625], uarm: [-46.310546875, -35.947265625], farm: [-46.310546875, -20.546875], larm: [-56.98875, -25.237421875], thigh: [-59.103515625, -21.77734375], shin: [-53.29296875, -15.60546875], shield: [-40.179218750000004, -119.267265625], sword: [-46.097265625, -221.947265625],
+  },
+  10: { // Industrie
+    torso: [8.951171875, 12.431640625], uarm: [-47.970703125, -36.77734375], farm: [-47.970703125, -20.546875], larm: [-56.98875, -25.237421875], thigh: [-59.103515625, -20.947265625], shin: [-56.61328125, -15.60546875], shield: [-40.179218750000004, -119.267265625], sword: [-62.698828125, -222.77734375],
+  },
+  11: { // Fiat-Zeit
+    torso: [8.951171875, 25.712890625], uarm: [-46.310546875, -35.947265625], farm: [-46.310546875, -20.546875], larm: [-56.98875, -25.237421875], thigh: [-59.103515625, -21.77734375], shin: [-51.6328125, -15.60546875], shield: [-44.329609375000004, -120.09734375], sword: [-38.6265625, -222.77734375],
+  },
+  12: { // Digital
+    torso: [8.951171875, 25.712890625], uarm: [-46.310546875, -33.45703125], farm: [-46.310546875, -20.546875], larm: [-56.98875, -25.237421875], thigh: [-59.103515625, -21.77734375], shin: [-51.6328125, -15.60546875], shield: [-46.819843750000004, -120.09734375], sword: [-63.52890625, -222.77734375],
   },
 };
 const S = 0.830078125; // Maßstab aller Teile
