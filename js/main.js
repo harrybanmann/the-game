@@ -1,19 +1,20 @@
-import { zahl, btc, dauer } from "./format.js?v=90";
-import * as speicher from "./speicher.js?v=90";
-import { kampfSystem } from "./kampf.js?v=90";
-import { waffenSystem } from "./waffen.js?v=90";
-import { tierSystem } from "./tiere.js?v=90";
-import { dungeonSystem } from "./dungeons.js?v=90";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=90";
-import { bitcoinSystem } from "./bitcoin.js?v=90";
-import { techSystem } from "./tech.js?v=90";
-import * as grafik from "./grafik.js?v=90";
-import { haushaltSystem } from "./haushalt.js?v=90";
-import { farmSystem } from "./farm.js?v=90";
-import { reittierSystem } from "./reittiere.js?v=90";
-import { setSystem } from "./sets.js?v=90";
-import { permaSystem } from "./perma.js?v=90";
-import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=90";
+import { zahl, btc, dauer } from "./format.js?v=91";
+import * as speicher from "./speicher.js?v=91";
+import { kampfSystem } from "./kampf.js?v=91";
+import { waffenSystem } from "./waffen.js?v=91";
+import { tierSystem } from "./tiere.js?v=91";
+import { dungeonSystem } from "./dungeons.js?v=91";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=91";
+import { bitcoinSystem } from "./bitcoin.js?v=91";
+import { techSystem } from "./tech.js?v=91";
+import * as grafik from "./grafik.js?v=91";
+import { haushaltSystem } from "./haushalt.js?v=91";
+import { farmSystem } from "./farm.js?v=91";
+import { reittierSystem } from "./reittiere.js?v=91";
+import { setSystem } from "./sets.js?v=91";
+import { permaSystem } from "./perma.js?v=91";
+import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=91";
+import { weltZeigen, weltLaufen, weltVersion } from "./welt.js?v=91";
 
 const $ = (id) => document.getElementById(id);
 
@@ -349,6 +350,7 @@ function farbenSetzen() {
   const spielerFarbe = umhang ? umhang.farbe : "#3c8fe0";
   stil.setProperty("--spieler", spielerFarbe);
   $("szene").style.backgroundImage = grafik.szeneBild(zeitalter(), stand.aktiveSeite);
+  weltZeigen($("szene"), zeitalter().nummer, boese);
   $("weg").style.backgroundImage = grafik.wegBild(zeitalter(), stand.aktiveSeite);
   spielerBildSetzen();
   stil.setProperty("--geld-bild", grafik.waehrungBild(zeitalter()));
@@ -654,6 +656,7 @@ function kampfZeichnen() {
   spielerBox.style.left = heldOrt + "%";
   spielerBox.classList.toggle("laeuft", z.heldLaeuft);
   puppe.laufen(z.heldLaeuft);
+  weltLaufen(z.heldLaeuft);
   const fae = faehigkeiten.aktiv();
   spielerBox.classList.toggle("staerke", fae.staerke);
   spielerBox.classList.toggle("schutz", fae.schutz);
@@ -3120,7 +3123,8 @@ async function start() {
     return;
   }
   try {
-    await blattDatenLaden("90");
+    weltVersion("91");
+    await blattDatenLaden("91");
   } catch {
     /* ohne Blatt-Daten bleiben die alten Bilder */
   }
