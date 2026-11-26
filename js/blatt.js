@@ -193,4 +193,5 @@ export function heldBlatt() {
 }
 
 // CSS-Pixel je Original-Pixel (Vorschlag; der Held ist dann etwa 120 px groß wie vorher die Puppe).
-export const MASS = { held: 0.2, gegner: 0.17, anfuehrer: 0.2, boss: 0.235 };
+// Harry 26.11.2026: Figuren viel zu groß, auf etwa 60 % verkleinert.
+export const MASS = { held: 0.12, gegner: 0.1, anfuehrer: 0.12, boss: 0.145 };

@@ -1,20 +1,20 @@
-import { zahl, btc, dauer } from "./format.js?v=91";
-import * as speicher from "./speicher.js?v=91";
-import { kampfSystem } from "./kampf.js?v=91";
-import { waffenSystem } from "./waffen.js?v=91";
-import { tierSystem } from "./tiere.js?v=91";
-import { dungeonSystem } from "./dungeons.js?v=91";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=91";
-import { bitcoinSystem } from "./bitcoin.js?v=91";
-import { techSystem } from "./tech.js?v=91";
-import * as grafik from "./grafik.js?v=91";
-import { haushaltSystem } from "./haushalt.js?v=91";
-import { farmSystem } from "./farm.js?v=91";
-import { reittierSystem } from "./reittiere.js?v=91";
-import { setSystem } from "./sets.js?v=91";
-import { permaSystem } from "./perma.js?v=91";
-import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=91";
-import { weltZeigen, weltLaufen, weltVersion } from "./welt.js?v=91";
+import { zahl, btc, dauer } from "./format.js?v=92";
+import * as speicher from "./speicher.js?v=92";
+import { kampfSystem } from "./kampf.js?v=92";
+import { waffenSystem } from "./waffen.js?v=92";
+import { tierSystem } from "./tiere.js?v=92";
+import { dungeonSystem } from "./dungeons.js?v=92";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=92";
+import { bitcoinSystem } from "./bitcoin.js?v=92";
+import { techSystem } from "./tech.js?v=92";
+import * as grafik from "./grafik.js?v=92";
+import { haushaltSystem } from "./haushalt.js?v=92";
+import { farmSystem } from "./farm.js?v=92";
+import { reittierSystem } from "./reittiere.js?v=92";
+import { setSystem } from "./sets.js?v=92";
+import { permaSystem } from "./perma.js?v=92";
+import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=92";
+import { weltZeigen, weltLaufen, weltVersion } from "./welt.js?v=92";
 
 const $ = (id) => document.getElementById(id);
 
@@ -3123,8 +3123,8 @@ async function start() {
     return;
   }
   try {
-    weltVersion("91");
-    await blattDatenLaden("91");
+    weltVersion("92");
+    await blattDatenLaden("92");
   } catch {
     /* ohne Blatt-Daten bleiben die alten Bilder */
   }

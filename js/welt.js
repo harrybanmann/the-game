@@ -15,6 +15,8 @@ let zuletzt = 0;
 let schleife = false;
 let version = "";
 const cache = {};
+// Harry 26.11.2026: Welt wirkte rangezoomt. Kleiner = weiter weg, man sieht mehr von der Welt.
+const WELT_ZOOM = 0.55;
 
 function laden(src) {
   return new Promise((ok) => {
@@ -53,6 +55,14 @@ function band(img) {
     y--;
   }
   return { y: y < h - 4 ? y : Math.round(h * 0.93), farbe: `rgb(${unten.r | 0},${unten.gg | 0},${unten.b | 0})` };
+}
+// Farbe der obersten Bildzeile (füllt den Himmel über dem Berg-Bild).
+function himmelFarbe(img) {
+  const k = kopie(img, 0, 0, img.width, 3);
+  const d = k.getContext("2d").getImageData(0, 1, img.width, 1).data;
+  let r = 0, gg = 0, b = 0, n = 0;
+  for (let x = 0; x < img.width; x += 4) { r += d[x * 4]; gg += d[x * 4 + 1]; b += d[x * 4 + 2]; n++; }
+  return `rgb(${(r / n) | 0},${(gg / n) | 0},${(b / n) | 0})`;
 }
 // Wolken: dunkler Hintergrund wird durchsichtig.
 function dunkelWeg(img, lo, span) {
@@ -110,7 +120,7 @@ async function aufbereiten(nr, t) {
     const [far, mid, wolken, weg] = await Promise.all(["far", "mid", "clouds", "road"].map((n) => laden(p + n + ".jpg?v=" + version)));
     if (!far && !mid && !weg) return null;
     const w = { far, weg };
-    if (far) w.farBand = band(far);
+    if (far) { w.farBand = band(far); w.himmel = himmelFarbe(far); }
     if (mid) { w.midBand = band(mid); w.mid = magentaWeg(mid, nr === 1 && t === "t"); }
     if (wolken) w.wolken = t === "t" ? dunkelWeg(wolken, 46, 46) : dunkelWeg(wolken, 36, 26);
     return w;
@@ -122,6 +132,12 @@ function kacheln(img, x0, y, b, h, breite) {
   if (b < 2 || h < 1) return;
   const o = ((x0 % b) + b) % b;
   for (let x = -o; x < breite; x += b) g.drawImage(img, x, y, b, h);
+}
+
+function kachelnTeil(img, sx, sy, sw, sh, x0, y, b, h, breite) {
+  if (b < 2 || h < 1) return;
+  const o = ((x0 % b) + b) % b;
+  for (let x = -o; x < breite; x += b) g.drawImage(img, sx, sy, sw, sh, x, y, b, h);
 }
 
 // Bodenlinie: Unterkante der Arena (dort stehen die Füße), gemessen in CSS-Pixeln der Szene.
@@ -147,19 +163,34 @@ function zeichnen() {
   g.imageSmoothingEnabled = true;
   const boden = bodenY(H);
   // Maßstab wie in der Vorschau (dort Straße bei y=725): alles skaliert mit der Höhe bis zum Boden.
-  const k = boden / 725;
-  g.fillStyle = welt.nacht ? "#0c0f24" : "#cfe3f0";
+  const k = (boden / 725) * WELT_ZOOM;
+  g.fillStyle = (welt.w.farBand && welt.w.himmel) || (welt.nacht ? "#0c0f24" : "#cfe3f0");
   g.fillRect(0, 0, B, H);
   const w = welt.w;
   if (w.far) {
     const fb = w.farBand.y;
-    const farH = 538 * k;
+    // Berg-Bild füllt die Höhe von oben bis zur Häuser-Linie (kein leerer Himmel).
+    const farH = Math.max(538 * k, boden - 187 * k);
     const fw = (w.far.width * farH) / fb;
     // Berge sitzen unten an der Häuser-Linie, oben bleibt notfalls Himmel.
     const y0 = Math.max(0, boden - 187 * k - farH);
     g.fillStyle = w.farBand.farbe;
     g.fillRect(0, y0 + farH - 1, B, boden - (y0 + farH) + 2);
     kacheln(kopieOhneBand(w), versatz * 0.1 * k, y0, fw, farH, B);
+    // Darüber den Himmel aus der obersten Bildzeile verlängern (keine harte Kante).
+    if (y0 > 0) {
+      if (!w.himmelStreifen) {
+        // Oberste Zeile auf 12 Punkte zusammengerechnet: weicher Verlauf ohne Turm-Streifen.
+        const st = document.createElement("canvas");
+        st.width = 12;
+        st.height = 1;
+        const sg = st.getContext("2d");
+        sg.imageSmoothingQuality = "high";
+        sg.drawImage(w.far, 0, 0, w.far.width, 2, 0, 0, 12, 1);
+        w.himmelStreifen = st;
+      }
+      g.drawImage(w.himmelStreifen, 0, 0, B, y0 + 1);
+    }
   }
   if (w.wolken) {
     const cw = 1260 * k;
