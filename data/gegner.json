@@ -42,8 +42,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Prometheus",
-        "boese": "Prometheus"
+        "gut": "Alpha-Schamane",
+        "boese": "Alpha-Schamane"
       },
       "leben": 100,
       "schaden": 4,
@@ -104,8 +104,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Hermes",
-        "boese": "Hermes"
+        "gut": "Muschel-König",
+        "boese": "Muschel-König"
       },
       "leben": 667,
       "schaden": 27,
@@ -166,8 +166,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Hammurabi",
-        "boese": "Hammurabi"
+        "gut": "Bronze-Pharao",
+        "boese": "Bronze-Pharao"
       },
       "leben": 7778,
       "schaden": 244,
@@ -228,8 +228,8 @@
     },
     "boss": {
       "name": {
-        "gut": "König Krösus",
-        "boese": "König Krösus"
+        "gut": "Münz-Tyrann",
+        "boese": "Münz-Tyrann"
       },
       "leben": 77778,
       "schaden": 2222,
@@ -290,8 +290,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Julius Caesar",
-        "boese": "Julius Caesar"
+        "gut": "Imperator",
+        "boese": "Imperator"
       },
       "leben": 777778,
       "schaden": 20741,
@@ -360,8 +360,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Dschingis Khan",
-        "boese": "Dschingis Khan"
+        "gut": "Raubritter-Fürst",
+        "boese": "Raubritter-Fürst"
       },
       "leben": 7777778,
       "schaden": 193416,
@@ -430,8 +430,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Cosimo de' Medici",
-        "boese": "Cosimo de' Medici"
+        "gut": "Großbankier",
+        "boese": "Großbankier"
       },
       "leben": 77777778,
       "schaden": 1805213,
@@ -500,8 +500,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Pirat Blackbeard",
-        "boese": "Pirat Blackbeard"
+        "gut": "Piraten-Admiral",
+        "boese": "Piraten-Admiral"
       },
       "leben": 777777778,
       "schaden": 16849566,
@@ -570,8 +570,8 @@
     },
     "boss": {
       "name": {
-        "gut": "John Law",
-        "boese": "John Law"
+        "gut": "Börsen-Baron",
+        "boese": "Börsen-Baron"
       },
       "leben": 7777777778,
       "schaden": 157262612,
@@ -640,8 +640,8 @@
     },
     "boss": {
       "name": {
-        "gut": "John D. Rockefeller",
-        "boese": "John D. Rockefeller"
+        "gut": "Stahl-Magnat",
+        "boese": "Stahl-Magnat"
       },
       "leben": 77777777778,
       "schaden": 1467764060,
@@ -710,8 +710,8 @@
     },
     "boss": {
       "name": {
-        "gut": "Richard Nixon",
-        "boese": "Richard Nixon"
+        "gut": "Zentralbank-Chef",
+        "boese": "Zentralbank-Chef"
       },
       "leben": 777777777778,
       "schaden": 13699131230,
@@ -780,8 +780,8 @@
     },
     "boss": {
       "name": {
-        "gut": "der Satoshi-Schatten",
-        "boese": "der Satoshi-Schatten"
+        "gut": "Krypto-Overlord",
+        "boese": "Krypto-Overlord"
       },
       "leben": 7777777777778,
       "schaden": 127858783948,

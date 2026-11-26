@@ -993,3 +993,14 @@ h3 { font-size: 15px; margin-top: 2px; }
 .ziel { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 7px 10px; font-size: 14px; line-height: 1.3; }
 .ziel b { display: block; font-size: 12px; opacity: 0.75; font-weight: 600; }
 .ziel.fertig { opacity: 0.55; }
+
+/* Version 51: Bilder-Blätter für Held, Gegner und Bosse. Ein .blatt zeigt ein Bild aus 4 × 2. */
+.blatt { position: absolute; background-repeat: no-repeat; background-size: 400% 200%; pointer-events: none; image-rendering: auto; }
+.figur.blatt-figur { background: none !important; border-radius: 0; width: 62px; animation: atmen 2.4s ease-in-out infinite; }
+.figur.blatt-figur::after { content: none; }
+.gegner:nth-child(2n) .figur.blatt-figur { animation-delay: -0.8s; }
+.gegner:nth-child(3n) .figur.blatt-figur { animation-delay: -1.5s; }
+.figur.blatt-figur.getroffen { animation: atmen 2.4s ease-in-out infinite, getroffen 0.25s ease-out; }
+.gegner.weg .figur.blatt-figur { animation: none; }
+.gegner.boss .figur.blatt-figur { width: 104px; }
+@keyframes atmen { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.014); } }

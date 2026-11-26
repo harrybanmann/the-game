@@ -1,19 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=87";
-import * as speicher from "./speicher.js?v=87";
-import { kampfSystem } from "./kampf.js?v=87";
-import { waffenSystem } from "./waffen.js?v=87";
-import { tierSystem } from "./tiere.js?v=87";
-import { dungeonSystem } from "./dungeons.js?v=87";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=87";
-import { bitcoinSystem } from "./bitcoin.js?v=87";
-import { techSystem } from "./tech.js?v=87";
-import * as grafik from "./grafik.js?v=87";
-import { haushaltSystem } from "./haushalt.js?v=87";
-import { farmSystem } from "./farm.js?v=87";
-import { reittierSystem } from "./reittiere.js?v=87";
-import { setSystem } from "./sets.js?v=87";
-import { permaSystem } from "./perma.js?v=87";
-import { puppeSystem } from "./puppe.js?v=87";
+import { zahl, btc, dauer } from "./format.js?v=88";
+import * as speicher from "./speicher.js?v=88";
+import { kampfSystem } from "./kampf.js?v=88";
+import { waffenSystem } from "./waffen.js?v=88";
+import { tierSystem } from "./tiere.js?v=88";
+import { dungeonSystem } from "./dungeons.js?v=88";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=88";
+import { bitcoinSystem } from "./bitcoin.js?v=88";
+import { techSystem } from "./tech.js?v=88";
+import * as grafik from "./grafik.js?v=88";
+import { haushaltSystem } from "./haushalt.js?v=88";
+import { farmSystem } from "./farm.js?v=88";
+import { reittierSystem } from "./reittiere.js?v=88";
+import { setSystem } from "./sets.js?v=88";
+import { permaSystem } from "./perma.js?v=88";
+import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=88";
 
 const $ = (id) => document.getElementById(id);
 
@@ -32,7 +32,7 @@ let reittiere; // Reittiere (Angriffstempo)
 let sets; // Set-Teile aus den Dungeons
 // Harry 18.11.2026: Reittiere sind im Kampf nicht zu sehen (Held als Puppe); ihre Boni gelten weiter.
 const REITTIER_SICHTBAR = false;
-const puppe = puppeSystem(); // Held als Puppe aus Bildteilen (Zeitalter 1 bis 6)
+const puppe = heldBlatt(); // Held aus den 12 Bilder-Blättern (Version 51, Harry 25.11.2026)
 let perma; // Perma-Baum (Punkte nur durch Neustart)
 let sammelTakt = 0;
 let farmReiter = "trading";
@@ -387,7 +387,7 @@ function spielerBildSetzen() {
   }
   const farbe = getComputedStyle(document.documentElement).getPropertyValue("--spieler").trim() || "#3c8fe0";
   const figurEl = document.querySelector(".figur.spieler");
-  // Zeitalter 1 bis 6: der Held ist eine Puppe aus Bildteilen. Im Sattel und ab Zeitalter 7 bleibt das alte Bild.
+  // Version 51: der Held kommt aus dem Bilder-Blatt seines Zeitalters (1 bis 12). Im Sattel bliebe das alte Bild.
   const nr = zeitalter().nummer;
   const alsPuppe = puppe.verfuegbar(nr) && !tragen.sitzt;
   const stehend = alsPuppe ? puppe.standbild(nr) : null;
@@ -601,21 +601,28 @@ function kampfZeichnen() {
   // Figuren bleiben bestehen und werden nur verschoben, damit Laufen und Treffer-Effekte flüssig sind.
   const gruppe = $("gegner-gruppe");
   gruppe.dataset.phase = z.boss ? z.bossPhase : ""; // Boss-Phase färbt den Boss (CSS)
-  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + "/" + g.art + (g.boss ? "/B" : "") + (g.zwischen ? "/Z" : "")).join("|");
+  const schluessel = z.gegner.map((g) => g.name + "/" + g.typ + "/" + g.art + "/" + (g.sorte || 0) + (g.boss ? "/B" : "") + (g.zwischen ? "/Z" : "")).join("|");
   if (gruppe.dataset.k !== schluessel) {
     gruppe.dataset.k = schluessel;
     gruppe.replaceChildren();
     z.gegner.forEach((g, i) => {
       const box = el("div", "gegner" + (g.boss ? " boss" : "") + (g.zwischen ? " boss zwischen" : ""));
       const figur = el("div", "figur gegner-figur" + (g.typ === "elite" ? " elite" : "") + (g.boss ? " boss" : ""));
-      figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss, g.art, true);
+      // Version 51: Bilder-Blatt (stehend, atmet, schlägt mit 4 Bildern), sonst das alte Bild.
+      const blatt = gegnerBlatt(zeitalter().nummer, g.boss, g.zwischen ? 3 : g.sorte);
+      if (blatt) {
+        const m = g.boss ? MASS.boss : g.zwischen ? MASS.anfuehrer : MASS.gegner;
+        figur.classList.add("blatt-figur");
+        figur.style.height = Math.round(blatt.info.AY * m * 0.88) + "px";
+        box._blatt = blattFigur(figur, blatt.info, blatt.src, m, true, "gegner");
+      } else figur.style.backgroundImage = grafik.gegnerBild(stand.aktiveSeite, zeitalter(), g.typ, g.boss, g.art, true);
       const balken = el("div", "balken klein");
       balken.append(el("div", "fuellung rot"));
       if (g.boss || g.zwischen) box.append(el("div", "gegner-name", g.name));
       // Die Waffe ist ein eigenes Bild über der Figur: so wird sie nie abgeschnitten und kann sich bewegen.
       const stapel = el("div", "gegner-stapel");
       stapel.append(figur);
-      const gw = grafik.gegnerWaffe(stand.aktiveSeite, zeitalter(), g.boss, g.art);
+      const gw = blatt ? null : grafik.gegnerWaffe(stand.aktiveSeite, zeitalter(), g.boss, g.art); // Blatt-Gegner kämpfen mit Fäusten
       if (gw) {
         const waffe = el("div", "gegner-waffe " + gw.art);
         waffe.style.backgroundImage = gw.bild;
@@ -677,7 +684,8 @@ function kampfZeichnen() {
       } else if (e.art === "gegnerSchlag" && ziel) {
         const gw = zielBox.querySelector(".gegner-waffe");
         if (gw) wackeln(gw, "los");
-        wackeln(zielBox.querySelector(".figur"), "hieb");
+        if (zielBox._blatt) zielBox._blatt.schlag();
+        else wackeln(zielBox.querySelector(".figur"), "hieb");
       }
       else if (e.art === "block") {
         wortZeigen(spielerBox, "Block!", "#9fd0ff");
@@ -3074,6 +3082,11 @@ async function start() {
     $("lade-fehler").textContent = "Das Spiel konnte nicht geladen werden: " + fehler.message;
     $("lade-fehler").hidden = false;
     return;
+  }
+  try {
+    await blattDatenLaden("88");
+  } catch {
+    /* ohne Blatt-Daten bleiben die alten Bilder */
   }
   puppe.start();
   puppe.bereit(() => spielerBildSetzen());

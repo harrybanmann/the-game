@@ -86,9 +86,13 @@ export function kampfSystem(api) {
       let typ = s < 3 ? "schwach" : i % 2 ? "normal" : "schwach";
       if (art0) typ = "elite";
       // Jeder dritte Gegner ist ein Fernkämpfer; Elite kämpft immer nah.
-      const art = typ !== "elite" && i % 3 === 2 ? "fern" : "nah";
+      // Harry 25.11.2026 (FINAL Nr. 10): Gegner und Bosse stehen auf ihrem Platz, nur der Held läuft. Kein Fernkampf mehr.
+      const stehen = Number.isFinite(l.stehenAb);
+      const art = stehen ? "nah" : typ !== "elite" && i % 3 === 2 ? "fern" : "nah";
       const halt = art0 === "zwischen" ? l.bossHalt : art === "fern" ? l.fernHalt + l.fernAbstand * ferne++ : l.nahHalt + l.nahAbstand * nahe++;
-      const g = machGegner(d.typen[typ], typ, faktor, beuteFaktor, false, art, 1 + l.startAbstand * i, halt);
+      const startX = stehen ? l.stehenAb + (art0 === "zwischen" ? l.bossExtra || 0 : l.stehenAbstand * i) : 1 + l.startAbstand * i;
+      const g = machGegner(d.typen[typ], typ, faktor, beuteFaktor, false, art, startX, halt);
+      g.sorte = i; // welches Gegner-Bild (Version 51: 5 Bilder je Zeitalter)
       if (art0 === "zwischen") {
         // Zwischen-Boss: ein Anführer, viel mehr Leben und Schaden, mehr Beute.
         const z = c.zwischenBoss || { leben: 6, schaden: 1.5, beute: 10 };
@@ -271,7 +275,8 @@ export function kampfSystem(api) {
     // Harry 18.11.2026: der Held kämpft immer im Nahkampf, er läuft zum Gegner vor (kein Fernkampf mehr).
     heldArtJetzt = "nah";
     let zielX = 0;
-    if (heldArtJetzt === "nah" && sichtbar) zielX = Math.min(l.heldMax, Math.max(0, vorn.x - l.nahReichweite));
+    const reichweite = (g) => (g && (g.boss || g.zwischen) && l.bossReichweite ? l.bossReichweite : l.nahReichweite);
+    if (heldArtJetzt === "nah" && sichtbar) zielX = Math.min(l.heldMax, Math.max(0, vorn.x - reichweite(vorn)));
     const altX = heldX;
     if (heldX < zielX) heldX = Math.min(zielX, heldX + l.heldTempo * dt);
     else if (heldX > zielX && !sichtbar) heldX = Math.max(zielX, heldX - l.heldZurueck * dt);
@@ -286,7 +291,7 @@ export function kampfSystem(api) {
         g.art === "fern"
           ? l.fernHalt + l.fernAbstand * ferneReihe.indexOf(g)
           : heldX + (g.boss || g.zwischen ? g.halt : l.nahHalt + l.nahAbstand * platz);
-      g.laeuft = g.x > halt + 1e-6;
+      g.laeuft = !Number.isFinite(l.stehenAb) && g.x > halt + 1e-6;
       if (g.laeuft) g.x = Math.max(halt, g.x - l.tempo * dt);
     }
     if (bossKampf && gegner[0] && gegner[0].leben > 0) bossZug(dt);
@@ -314,7 +319,7 @@ export function kampfSystem(api) {
     // Held: Reittier und Ausrüstung machen ihn schneller. Die Uhr läuft immer, zugeschlagen wird nur in Reichweite.
     const abstand = schlag / (1 + api.tempo());
     const ziel = naechster();
-    const inReichweite = heldArtJetzt === "nah" ? ziel.x - heldX <= l.nahReichweite + 0.005 : ziel.x <= 1.02;
+    const inReichweite = heldArtJetzt === "nah" ? ziel.x - heldX <= reichweite(ziel) + 0.005 : ziel.x <= 1.02;
     spielerUhr = Math.min(abstand, spielerUhr + dt);
     if (spielerUhr >= abstand && inReichweite) {
       spielerUhr = 0;
@@ -370,7 +375,8 @@ export function kampfSystem(api) {
       const c = w();
       const bs = Math.max(1, r.stufe || 100);
       const faktor = Math.pow(c.staerkeFaktor, bs - 1);
-      const g = machGegner(boss, "boss", faktor, Math.pow(c.beuteFaktor, bs - 1), true, "nah", 1, api.lauf().bossHalt);
+      const lb = api.lauf();
+      const g = machGegner(boss, "boss", faktor, Math.pow(c.beuteFaktor, bs - 1), true, "nah", Number.isFinite(lb.stehenAb) ? lb.stehenAb + (lb.bossExtra || 0) : 1, lb.bossHalt);
       g.leben *= r.lebenFaktor;
       g.maxLeben *= r.lebenFaktor;
       g.schaden *= r.schadenFaktor;
