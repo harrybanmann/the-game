@@ -86,12 +86,13 @@
     "faktor": 1.15
   },
   "aufstieg": {
-    "levelJeZeitalter": 8,
+    "levelJeZeitalter": 0,
     "schmiedeJeZeitalter": 2,
     "_hinweis": "Harry 16.11.2026: Aufsteigen erst, wenn alle Upgrades des Zeitalters auf Lv 100 sind. Beim Aufstieg beginnen die Upgrades wieder bei 0 (neue Währung, 10× mehr wert); Schaden und Leben bringen je Zeitalter 10× mehr.",
     "alleUpgradesMax": true,
     "stufe": 100,
-    "_hinweis2": "Version 38 (17.11.2026, Bau-Chat-Vorschlag aus Balancing-Zahlenpruefung-V37): Level 8 × Zeitalter, Schmiede 2 × Zeitalter, sonst ab Zeitalter 5 bis 8 nicht mehr erreichbar."
+    "_hinweis2": "Version 38 (17.11.2026, Bau-Chat-Vorschlag aus Balancing-Zahlenpruefung-V37): Level 8 × Zeitalter, Schmiede 2 × Zeitalter, sonst ab Zeitalter 5 bis 8 nicht mehr erreichbar.",
+    "_hinweisV51": "Harry 25.11.2026 (FINAL Nr. 13): Aufstieg direkt nach dem Sieg über den Zeitalter-Boss, ohne Level-Hürde (Boss auf Kampfstufe 100). Umtausch 5:1 (Nr. 1/2)."
   },
   "freischalten": {
     "_hinweis": "Harry 16.11.2026: Inhalte kommen nach und nach, historisch passend. Zeitalter und Level sind Vorschläge des Bau-Chats.",

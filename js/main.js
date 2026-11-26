@@ -1,19 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=89";
-import * as speicher from "./speicher.js?v=89";
-import { kampfSystem } from "./kampf.js?v=89";
-import { waffenSystem } from "./waffen.js?v=89";
-import { tierSystem } from "./tiere.js?v=89";
-import { dungeonSystem } from "./dungeons.js?v=89";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=89";
-import { bitcoinSystem } from "./bitcoin.js?v=89";
-import { techSystem } from "./tech.js?v=89";
-import * as grafik from "./grafik.js?v=89";
-import { haushaltSystem } from "./haushalt.js?v=89";
-import { farmSystem } from "./farm.js?v=89";
-import { reittierSystem } from "./reittiere.js?v=89";
-import { setSystem } from "./sets.js?v=89";
-import { permaSystem } from "./perma.js?v=89";
-import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=89";
+import { zahl, btc, dauer } from "./format.js?v=90";
+import * as speicher from "./speicher.js?v=90";
+import { kampfSystem } from "./kampf.js?v=90";
+import { waffenSystem } from "./waffen.js?v=90";
+import { tierSystem } from "./tiere.js?v=90";
+import { dungeonSystem } from "./dungeons.js?v=90";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=90";
+import { bitcoinSystem } from "./bitcoin.js?v=90";
+import { techSystem } from "./tech.js?v=90";
+import * as grafik from "./grafik.js?v=90";
+import { haushaltSystem } from "./haushalt.js?v=90";
+import { farmSystem } from "./farm.js?v=90";
+import { reittierSystem } from "./reittiere.js?v=90";
+import { setSystem } from "./sets.js?v=90";
+import { permaSystem } from "./perma.js?v=90";
+import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=90";
 
 const $ = (id) => document.getElementById(id);
 
@@ -744,7 +744,7 @@ function aufstiegFehlt() {
   const nr = zeitalter().nummer;
   const s = seite();
   const fehlt = [];
-  if (s.level < a.levelJeZeitalter * nr) fehlt.push("Level " + a.levelJeZeitalter * nr + " (du: " + s.level + ")");
+  if (a.levelJeZeitalter && s.level < a.levelJeZeitalter * nr) fehlt.push("Level " + a.levelJeZeitalter * nr + " (du: " + s.level + ")");
   if (a.stufe && s.kampf.stufe < a.stufe) fehlt.push("Kampfstufe " + a.stufe + " (du: " + s.kampf.stufe + ")");
   if (a.alleUpgradesMax) {
     const f = upgradeFortschritt();
@@ -2350,6 +2350,8 @@ function aufsteigen(boss) {
   const getauscht = menge * (neu.umtauschVonVorher || 1);
   s.waehrungen[alt.id] = 0;
   s.waehrungen[neu.waehrung.id] = (s.waehrungen[neu.waehrung.id] || 0) + getauscht;
+  // Arbeitsanweisung FINAL (Nr. 2): Schulden werden beim Aufstieg wie die Währung durch 5 geteilt.
+  if (s.haushalt) s.haushalt.schulden = (s.haushalt.schulden || 0) * (neu.umtauschVonVorher || 1);
   const vorher = freiListe();
   s.zeitalter = neu.id;
   s.kampf = { index: 0, rate: 0, stufe: 1, welle: 1 };
@@ -3118,7 +3120,7 @@ async function start() {
     return;
   }
   try {
-    await blattDatenLaden("89");
+    await blattDatenLaden("90");
   } catch {
     /* ohne Blatt-Daten bleiben die alten Bilder */
   }
