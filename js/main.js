@@ -1,19 +1,19 @@
-import { zahl, btc, dauer } from "./format.js?v=88";
-import * as speicher from "./speicher.js?v=88";
-import { kampfSystem } from "./kampf.js?v=88";
-import { waffenSystem } from "./waffen.js?v=88";
-import { tierSystem } from "./tiere.js?v=88";
-import { dungeonSystem } from "./dungeons.js?v=88";
-import { faehigkeitenSystem } from "./faehigkeiten.js?v=88";
-import { bitcoinSystem } from "./bitcoin.js?v=88";
-import { techSystem } from "./tech.js?v=88";
-import * as grafik from "./grafik.js?v=88";
-import { haushaltSystem } from "./haushalt.js?v=88";
-import { farmSystem } from "./farm.js?v=88";
-import { reittierSystem } from "./reittiere.js?v=88";
-import { setSystem } from "./sets.js?v=88";
-import { permaSystem } from "./perma.js?v=88";
-import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=88";
+import { zahl, btc, dauer } from "./format.js?v=89";
+import * as speicher from "./speicher.js?v=89";
+import { kampfSystem } from "./kampf.js?v=89";
+import { waffenSystem } from "./waffen.js?v=89";
+import { tierSystem } from "./tiere.js?v=89";
+import { dungeonSystem } from "./dungeons.js?v=89";
+import { faehigkeitenSystem } from "./faehigkeiten.js?v=89";
+import { bitcoinSystem } from "./bitcoin.js?v=89";
+import { techSystem } from "./tech.js?v=89";
+import * as grafik from "./grafik.js?v=89";
+import { haushaltSystem } from "./haushalt.js?v=89";
+import { farmSystem } from "./farm.js?v=89";
+import { reittierSystem } from "./reittiere.js?v=89";
+import { setSystem } from "./sets.js?v=89";
+import { permaSystem } from "./perma.js?v=89";
+import { heldBlatt, blattDatenLaden, gegnerBlatt, blattFigur, MASS } from "./blatt.js?v=89";
 
 const $ = (id) => document.getElementById(id);
 
@@ -2542,7 +2542,8 @@ function importieren(text) {
 function sicherungInfo() {
   const alt = speicher.sicherungLaden();
   infoZeigen(() => {
-    if (!alt) return { titel: "Keine Sicherung", bild: grafik.symbolBild("schloss"), zeilen: ["Es gibt noch keine Sicherung. Sie entsteht beim Löschen und bei jedem Neustart."] };
+    const vorUmbau = speicher.vorUmbauText() ? [{ text: "Stand vor Version 51 als Datei", aktion: altStandHerunterladen }] : [];
+    if (!alt) return { titel: "Keine Sicherung", bild: grafik.symbolBild("schloss"), zeilen: ["Es gibt noch keine Sicherung. Sie entsteht beim Löschen und bei jedem Neustart."], knoepfe: vorUmbau };
     const s = alt.seiten[alt.aktiveSeite];
     const z = daten.zeitalter.find((x) => x.id === s.zeitalter) || daten.zeitalter[0];
     const wann = new Date(alt.zuletztGespeichert || Date.now()).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" });
@@ -2565,9 +2566,38 @@ function sicherungInfo() {
             location.reload();
           },
         },
+        ...vorUmbau,
       ],
     };
   });
+}
+
+// Version 51: der unveränderte Stand von vor dem Umbau als Datei (für Harry zum Aufheben).
+function altStandHerunterladen() {
+  const text = speicher.vorUmbauText();
+  if (!text) return kurzMeldung("Es gibt keinen alten Spielstand von vor Version 51.");
+  const link = el("a");
+  link.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  link.download = "the-game-spielstand-vor-version-51.json";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+function umbauHinweis() {
+  infoZeigen(() => ({
+    titel: "Neues Spiel: Version 51",
+    bild: grafik.symbolBild("stern"),
+    zeilen: [
+      "Das Spiel ist umgebaut (12 Ausrüstungs-Plätze, Beute statt Schmiede, neue Helden, Gegner und Bosse). Darum startest du neu.",
+      "Dein alter Spielstand ist im Browser gesichert. Tippe auf den Knopf, um ihn zusätzlich als Datei zu speichern.",
+    ],
+    knoepfe: [
+      { text: "Alten Stand als Datei speichern", aktion: altStandHerunterladen },
+      { text: "Los geht's", zu: true, aktion: () => {} },
+    ],
+  }));
 }
 
 function neuAnfangen() {
@@ -2677,7 +2707,11 @@ function neustartMachen() {
   speicher.sichern(stand); // Sicherung des alten Stands
   sammelbuchPruefen();
   perma.gutschreiben(p);
+  // Arbeitsanweisung FINAL (25.11.2026): Perma-Baum und Tech-Bäume (Fach „gemeinsam“ = „bleibt“) bleiben ohnehin;
+  // die Tier-Sammlung bleibt jetzt auch. Alles andere (Zeitalter, Währung, Ausrüstung, Kampfstufe, Upgrades) ist der Run.
+  const tiereVorher = seite().tiere;
   stand.seiten[stand.aktiveSeite] = speicher.neueSeite(daten.einstellungen.startZeitalter);
+  seite().tiere = { ...seite().tiere, sammlung: tiereVorher.sammlung, naechsteNr: tiereVorher.naechsteNr, kaempfer: tiereVorher.kaempfer, supporter: tiereVorher.supporter };
   letzterTick = Date.now();
   kampf.neuStarten();
   sichern();
@@ -3084,13 +3118,14 @@ async function start() {
     return;
   }
   try {
-    await blattDatenLaden("88");
+    await blattDatenLaden("89");
   } catch {
     /* ohne Blatt-Daten bleiben die alten Bilder */
   }
   puppe.start();
   puppe.bereit(() => spielerBildSetzen());
   stand = speicher.laden() || speicher.neuerStand(daten.einstellungen.startZeitalter);
+  const altErsetzt = speicher.altWurdeGesichert();
   upgradeBaenderUebernehmen();
   letzterTick = stand.zuletztGespeichert; // so rechnet der erste Tick die Offline-Zeit aus
   kampf = kampfSystem({
@@ -3250,6 +3285,10 @@ async function start() {
   allesZeichnen();
   tick();
   setInterval(tick, 150);
+  if (altErsetzt) {
+    sichern();
+    umbauHinweis();
+  }
 }
 
 start();

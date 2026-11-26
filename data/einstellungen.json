@@ -46,7 +46,7 @@
       "heldTempo": 0.3,
       "heldZurueck": 0.7,
       "heldMax": 1.0,
-      "nahReichweite": 0.08,
+      "nahReichweite": 0.12,
       "nahWechsel": 0.5,
       "stehenAb": 0.42,
       "stehenAbstand": 0.06,

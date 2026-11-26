@@ -307,13 +307,22 @@ function tierePruefen(roh) {
   };
 }
 
+// true, wenn beim Laden ein alter Stand (vor V51) gesichert und durch einen Neustart ersetzt wurde.
+let altGesichert = false;
+export const altWurdeGesichert = () => altGesichert;
+
 export function laden() {
   try {
     const text = localStorage.getItem(SCHLUESSEL);
     if (!text) return null;
     const stand = JSON.parse(text);
-    // Alter Stand (vor V51): einmalig unverändert sichern, bevor irgendetwas umgebaut oder gespeichert wird.
-    if (stand && Number(stand.version) < 21 && !localStorage.getItem(SCHLUESSEL_VOR_UMBAU)) localStorage.setItem(SCHLUESSEL_VOR_UMBAU, text);
+    // Version 51 (Arbeitsanweisung FINAL 25.11.2026): Ein alter Stand (vor V51) wird unverändert gesichert
+    // (im Browser und als Download-Datei, siehe main.js) und das Spiel startet sauber neu.
+    if (stand && Number(stand.version) < 21) {
+      if (!localStorage.getItem(SCHLUESSEL_VOR_UMBAU)) localStorage.setItem(SCHLUESSEL_VOR_UMBAU, text);
+      altGesichert = true;
+      return null;
+    }
     return pruefen(stand) ? null : stand;
   } catch {
     return null;
